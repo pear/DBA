@@ -164,7 +164,6 @@ class DBA_Relational extends PEAR
         }
         return $buffer;
     }
-    
 
     /**
      * Creates a new table
@@ -226,13 +225,13 @@ class DBA_Relational extends PEAR
      * @param   array  $data assoc array or ordered list of data to insert
      * @returns mixed  PEAR_Error on failure, the row index on success
      */
-    function insertRow($tableName, $data)
+    function insert($tableName, $data)
     {
         $result = $this->_openTable($tableName, 'w');
         if (PEAR::isError($result)) {
             return $result;
         } else {
-            return $this->_tables[$tableName]->insertRow($data);
+            return $this->_tables[$tableName]->insert($data);
         }
     }
 
@@ -245,13 +244,13 @@ class DBA_Relational extends PEAR
      * @param   array  $data assoc array or ordered list of data to insert
      * @returns mixed  PEAR_Error on failure, the row index on success
      */
-    function replaceRow($tableName, $key, $data)
+    function replace($tableName, $key, $data)
     {
         $result = $this->_openTable($tableName, 'w');
         if (PEAR::isError($result)) {
             return $result;
         } else {
-            return $this->_tables[$tableName]->replaceRow($key, $data);
+            return $this->_tables[$tableName]->replace($key, $data);
         } 
     }
 
@@ -263,13 +262,13 @@ class DBA_Relational extends PEAR
      * @param   string $key row id to delete
      * @returns object PEAR_Error on failure
      */
-    function deleteRow($tableName, $key)
+    function delete($tableName, $key)
     {
         $result = $this->_openTable($tableName, 'w');
         if (PEAR::isError($result)) {
             return $result;
         } else {
-            return $this->_tables[$tableName]->deleteRow($key);
+            return $this->_tables[$tableName]->delete($key);
         }
     }
 
@@ -281,13 +280,13 @@ class DBA_Relational extends PEAR
      * @param   string $key row id to fetch
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function fetchRow($tableName, $key)
+    function fetch($tableName, $key)
     {
         $result = $this->_openTable($tableName, 'r');
         if (PEAR::isError($result)) {
             return $result;
         } else {
-            return $this->_tables[$tableName]->fetchRow($key);
+            return $this->_tables[$tableName]->fetch($key);
         }
     }
 
@@ -376,13 +375,13 @@ class DBA_Relational extends PEAR
      *                      the whole table
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function finalizeRows($tableName, $rows=null)
+    function finalize($tableName, $rows=null)
     {
         $result = $this->_openTable($tableName, 'r');
         if (PEAR::isError($result)) {
             return $result;
         } else {
-            return $this->_tables[$tableName]->finalizeRows($rows);
+            return $this->_tables[$tableName]->finalize($rows);
         }
     }
 

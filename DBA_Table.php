@@ -626,7 +626,7 @@ class DBA_Table extends PEAR
      * @param   array  $data assoc array or ordered list of data to insert
      * @returns mixed  PEAR_Error on failure, the row index on success
      */
-    function insertRow($data)
+    function insert($data)
     {
         if ($this->isWritable()) {
             $key = $this->_getUniqueKey();
@@ -649,7 +649,7 @@ class DBA_Table extends PEAR
      * @param   array  $data assoc array or ordered list of data to insert
      * @returns mixed  PEAR_Error on failure, the row index on success
      */
-    function replaceRow($key, $data)
+    function replace($key, $data)
     {
         if ($this->isOpen()) {
             return $this->_dba->replace($key, $this->_packRow($data));
@@ -665,7 +665,7 @@ class DBA_Table extends PEAR
      * @param   string $key row id to delete
      * @returns object PEAR_Error on failure
      */
-    function deleteRow($key)
+    function delete($key)
     {
         return $this->_dba->delete($key);
     }
@@ -677,7 +677,7 @@ class DBA_Table extends PEAR
      * @param   string $key row id to fetch
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function fetchRow($key)
+    function fetch($key)
     {
         $result = $this->_dba->fetch($key);
         if (!PEAR::isError($result)) {
@@ -699,7 +699,7 @@ class DBA_Table extends PEAR
      *                      the whole table
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function finalizeRows($rows=null)
+    function finalize($rows=null)
     {
         if (is_null($rows)) {
             if ($this->_dba->isOpen()) {

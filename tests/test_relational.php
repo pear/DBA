@@ -41,7 +41,7 @@ foreach ($empSchema as $tableName=>$tableSchema) {
         echo $result->getMessage()."\n";
     } else {
         foreach ($empData[$tableName] as $row) {
-            $result = $db->insertRow($tableName, $row);
+            $result = $db->insert($tableName, $row);
             if (PEAR::isError($result)) {
             echo $result->getMessage()."\n";
             }
@@ -50,10 +50,9 @@ foreach ($empSchema as $tableName=>$tableSchema) {
         $results = $db->select($tableName, '*');
 
         echo "Query: \$db->select($tableName, '*');\n";
-        echo $db->formatResults($db->finalizeRows($tableName, $results));
+        echo $db->formatResults($db->finalize($tableName, $results));
         echo "------------------------------------------------\n\n";
     }
-    print_r($db->getSchema($tableName));
 }
 
 // closes all open tables - testing auto-open feature

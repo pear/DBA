@@ -79,7 +79,7 @@ if (PEAR::isError($result)) {
 for ($i=0; $i < 2; ++$i) {
     $table->open ('hats', 'w');
     foreach ($new_hats as $hat) {
-        $table->insertRow($hat);
+        $table->insert($hat);
     }
     $table->close();
 }
