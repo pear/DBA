@@ -32,6 +32,8 @@ $queries = array(
 "CREATE TABLE albums (
   name varchar(60),
   directory varchar(60),
+  rating enum (1,2,3,4,5,6,7,8,9,10) NOT NULL,
+  category set(sexy,family,outdoors,generic),
   description text NULL,
   id int auto_increment default 200
 )",
@@ -43,10 +45,16 @@ $queries = array(
   description text,
   id int
 )"
+
 );
 
 foreach ($queries as $query) {
-    print_r(DBA_Sql::parseCreate($query));
+    $results = DBA_Sql::parseCreate($query);
+    if (PEAR::isError($results)) {
+        echo $results->getMessage()."\n";
+    } else {
+        print_r($results);
+    }
 }
 
 ?>

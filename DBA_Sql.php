@@ -59,49 +59,62 @@ class DBA_Sql
                 while ($token && ($token != ')')) {
                     $fieldName = DBA_Sql::getToken();
                     $fieldType = DBA_Sql::getToken();
-                    $tables[$tableName][$fieldName]['type'] = 
-                                                            $fieldType;
+                    $tables[$tableName][$fieldName]['type'] = $fieldType;
                     $token = strtolower(DBA_Sql::getToken());
                     while (!(($token == ',') || ($token == ')'))) {
-                        switch ($token) {
-                            case '(':
-                                $size = DBA_Sql::getToken();
-                                $tables[$tableName][$fieldName]
-                                                    ['size'] = $size;
-                                $token = DBA_Sql::getToken();
-                                if ($token != ')') {
-                                    return PEAR::raiseError(
-                                    "Parse error at $token on $rawquery");
-                                }
-                                $token = DBA_Sql::getToken();
-                                break;
-                            case 'default':
-                                $default = DBA_Sql::getToken();
-                                $tables[$tableName][$fieldName]
-                                                    ['default'] = $default;
-                                $token = DBA_Sql::getToken();
-                                break;
-                            case 'auto_increment':
-                                $tables[$tableName][$fieldName]
-                                                    ['autoincrement']=$token;
-                                $token = DBA_Sql::getToken();
-                                break;
-                            case 'not':
-                                $token = strtolower(DBA_Sql::getToken());
-                                if ($token != 'null') {
-                                    return PEAR::raiseError(
-                                    "Parse error at $token on $rawquery");
-                                } else {
+                        switch ($fieldType) {
+                            case 'int':
+                            case 'integer':
+                            case 'float':
+                            case 'numeric':
+                            case 'varchar':
+                            switch ($token) {
+                                case '(':
+                                    $size = DBA_Sql::getToken();
                                     $tables[$tableName][$fieldName]
-                                                        ['notnull']=true;
-                                }
+                                                        ['size'] = $size;
+                                    $token = DBA_Sql::getToken();
+                                    if ($token != ')') {
+                                        return PEAR::raiseError(
+                                        "Parse error at $token on $rawquery");
+                                    }
+                                    $token = DBA_Sql::getToken();
+                                    break;
+                                case 'default':
+                                    $default = DBA_Sql::getToken();
+                                    $tables[$tableName][$fieldName]
+                                                        ['default'] = $default;
+                                    $token = DBA_Sql::getToken();
+                                    break;
+                                case 'auto_increment':
+                                    $tables[$tableName][$fieldName]
+                                                      ['autoincrement']=$token;
+                                    $token = DBA_Sql::getToken();
+                                    break;
+                                case 'not':
+                                    $token = strtolower(DBA_Sql::getToken());
+                                    if ($token != 'null') {
+                                        return PEAR::raiseError(
+                                        "Parse error at $token on $rawquery");
+                                    } else {
+                                        $tables[$tableName][$fieldName]
+                                                            ['notnull']=true;
+                                    }
+                                    $token = DBA_Sql::getToken();
+                                    break;
+                                case 'null':
+                                    $tables[$tableName][$fieldName]
+                                                        ['null']=true;
                                 $token = DBA_Sql::getToken();
                                 break;
-                            case 'null':
-                                $tables[$tableName][$fieldName]
-                                                    ['null']=true;
-                            $token = DBA_Sql::getToken();
+                            }
                             break;
+                            case 'set':
+                            case 'enum':
+                                while ($token != ')') {
+                                    $token = DBA_Sql::getToken();
+                                }
+                            default:
                         }
                     }
                 }
