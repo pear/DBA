@@ -103,6 +103,8 @@ class DBA_Table extends PEAR
      */
     function DBA_Table($driver = 'simple')
     {
+        // call the base constructor
+        $this->PEAR();
         // initialize the internal dba object
         $this->_dba =& DBA::create($driver);
     }
@@ -113,7 +115,6 @@ class DBA_Table extends PEAR
      */
     function _DBA_Table()
     {
-//        echo "DBA_Table {$this->_dba->_dbName} is melting!\n";
         $this->close();
     }
 

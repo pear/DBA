@@ -254,7 +254,6 @@ class DBA_Simple extends PEAR
      */
     function _DBA_Simple()
     {
-        //echo "DBA_Simple {$this->_dbName} melting!\n";
         $this->close();
     }
 

@@ -72,7 +72,10 @@ class DBA_Relational extends PEAR
      */
     function DBA_Relational($home = '', $driver = 'simple')
     {
-        // add trailing slash if not present
+        // call the base constructor
+        $this->PEAR();
+
+        // add trailing slash to home if not present
         if (substr($home, -1) != '/') {
             $home = $home.'/';
         }
@@ -106,7 +109,6 @@ class DBA_Relational extends PEAR
      */
     function _DBA_Relational()
     {
-//        echo "I'm Melting!\n";
         $this->close();
     }
 
