@@ -53,8 +53,13 @@ function dbaToQuickform(&$form, $schema, $auxMeta)
                     }
                     break;
                 case DBA_VARCHAR:
-                    $form->addElement('text', $name, $desc,
-                                      array('size'=>$meta['size']));
+                    if ($meta[DBA_SIZE] <= 60) {
+                        $form->addElement('text', $name, $desc,
+                                        array('size'=>$meta[DBA_SIZE]));
+                    } else {
+                        $form->addElement('textarea', $name, $desc,
+                                array('rows'=>4, 'wrap'=>'soft', 'cols'=>45));
+                    }
                     break;
                 case DBA_BOOLEAN:
                     $form->addElement('select', $name, $desc,
@@ -73,7 +78,7 @@ function dbaToQuickform(&$form, $schema, $auxMeta)
  * Postprocess $_POST variables that were left by a form using addQuickformDBA
  * @return array DBA row suitable for inserting into a DBA table
  */
-function quickformToDBA(&$form, $schema, $auxMeta)
+function quickformToDBA($schema, $auxMeta)
 {
     foreach ($schema as $name=>$meta) {
         if (isset($auxMeta[$name]) && isset($_POST[$name])) {
