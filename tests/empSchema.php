@@ -1,47 +1,47 @@
 <?php
 
 $empSchema = array (
-'emp'      => array('id'       => array(DBA_TYPE => DBA_INTEGER,
-                                        DBA_AUTOINCREMENT => True,
-                                        DBA_DEFAULT => 0),
-                    'empname'  => array(DBA_TYPE => DBA_VARCHAR,
-                                        DBA_DEFAULT => 'No Name',
-                                        DBA_SIZE => 45),
-                    'job'      => array(DBA_TYPE => DBA_ENUM,
-                                        DBA_DOMAIN => array('intern',
+'emp'      => array('id'       => array('type' => 'integer',
+                                        'auto_increment' => True,
+                                        'default' => 0),
+                    'empname'  => array('type' => 'varchar',
+                                        'default' => 'No Name',
+                                        'size' => 45),
+                    'job'      => array('type' => 'enum',
+                                        'domain' => array('intern',
                                                           'clerk',
                                                           'salesman',
                                                           'manager',
                                                           'analyst'),
-                                        DBA_DEFAULT => 'intern'),
-                    'manager'  => array(DBA_TYPE => DBA_INTEGER,
-                                        DBA_DEFAULT => 0),
-                    'hiredate' => array(DBA_TYPE => DBA_TIMESTAMP),
-                    'salary'   => array(DBA_TYPE => DBA_INTEGER,
-                                        DBA_PRIMARYKEY => True),
-                    'comm'     => array(DBA_TYPE => DBA_INTEGER),
-                    'deptno'   => array(DBA_TYPE => DBA_INTEGER)
+                                        'default' => 'intern'),
+                    'manager'  => array('type' => 'integer',
+                                        'default' => 0),
+                    'hiredate' => array('type' => 'timestamp'),
+                    'salary'   => array('type' => 'integer',
+                                        'primary_key' => True),
+                    'comm'     => array('type' => 'integer'),
+                    'deptno'   => array('type' => 'integer')
              ),
 
-'dept'     => array('deptno'   => array(DBA_TYPE => DBA_INTEGER),
-                    'deptname' => array(DBA_TYPE => DBA_VARCHAR),
-                    'manager'  => array(DBA_TYPE => DBA_INTEGER)
+'dept'     => array('deptno'   => array('type' => 'integer'),
+                    'deptname' => array('type' => 'varchar'),
+                    'manager'  => array('type' => 'integer')
              ),
 
-'location' => array('locno'    => array(DBA_TYPE => DBA_INTEGER),
-                    'locname'  => array(DBA_TYPE => DBA_VARCHAR)
+'location' => array('locno'    => array('type' => 'integer'),
+                    'locname'  => array('type' => 'varchar')
              ),
 
-'deptloc'  => array('deptno'   => array(DBA_TYPE => DBA_INTEGER),
-                    'locno'    => array(DBA_TYPE => DBA_INTEGER)
+'deptloc'  => array('deptno'   => array('type' => 'integer'),
+                    'locno'    => array('type' => 'integer')
              ),
-'account'  => array('id'       => array(DBA_TYPE => DBA_INTEGER,
-                                        DBA_AUTOINCREMENT => True,
-                                        DBA_DEFAULT => 0),
-                    'name'     => array(DBA_TYPE => DBA_VARCHAR,
-                                        DBA_SIZE => 45),
-                    'notes'    => array(DBA_TYPE => DBA_TEXT),
-                    'active'   => array(DBA_TYPE => DBA_BOOLEAN)
+'account'  => array('id'       => array('type' => 'integer',
+                                        'auto_increment' => True,
+                                        'default' => 0),
+                    'name'     => array('type' => 'varchar',
+                                        'size' => 45),
+                    'notes'    => array('type' => 'text'),
+                    'active'   => array('type' => 'boolean')
              ),
 );
 

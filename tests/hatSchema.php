@@ -1,33 +1,33 @@
 <?php
 	$hatTableStruct = array (
-	                   'type' => array (DBA_TYPE => DBA_ENUM,
-	                                    DBA_DOMAIN => array ('fedora',
+	                   'type' => array ('type' => 'enum',
+	                                    'domain' => array ('fedora',
 	                                                       'stocking cap',
 	                                                       'top hat',
 	                                                       'bowler',
 														   'beanie'),
-	                                    DBA_PRIMARYKEY => True,
-	                                    DBA_DEFAULT => 'fedora'),
+	                                    'primary_key' => True,
+	                                    'default' => 'fedora'),
 
-	                   'quantity' => array (DBA_TYPE => DBA_INTEGER,
-	                                        DBA_DEFAULT => 0),
+	                   'quantity' => array ('type' => 'integer',
+	                                        'default' => 0),
 
-	                   'brand' => array (DBA_TYPE => DBA_VARCHAR,
-	                                     DBA_DEFAULT => 'No Name',
-	                                     DBA_SIZE => 45),
+	                   'brand' => array ('type' => 'varchar',
+	                                     'default' => 'No Name',
+	                                     'size' => 45),
 
-	                   'sizes' => array (DBA_TYPE => DBA_SET,
-	                                     DBA_DOMAIN => array ('small',
+	                   'sizes' => array ('type' => 'set',
+	                                     'domain' => array ('small',
 	                                                        'medium',
 	                                                        'large',
 	                                                        'xlarge'),
-	                                     DBA_NOTNULL => true),
+	                                     'not_null' => true),
 
-	                   'lastshipment' => array (DBA_TYPE => DBA_TIMESTAMP),
-	                   'hat_id' => array (DBA_TYPE => DBA_INTEGER,
-	                                      DBA_AUTOINCREMENT => True,
-	                                      DBA_PRIMARYKEY => True,
-                                          DBA_DEFAULT => 100)
+	                   'lastshipment' => array ('type' => 'timestamp'),
+	                   'hat_id' => array ('type' => 'integer',
+	                                      'auto_increment' => True,
+	                                      'primary_key' => True,
+                                          'default' => 100)
 	                  );
 
 	$hats = array(

@@ -49,7 +49,7 @@ define('DBA_SIMPLE_KEY',3);
  * It uses two files, and index and a data file to manage key/value pairs.
  * These two files use the suffixes '.dat' and '.idx'. When a database is
  * opened, only the index file is read. The index file contains pointers
- * to locations within the data file, which are used to retreive values.
+ * to locations within the data file, which are used to retrieve values.
  *
  * The class uses a concept of blocks for data storage. When the first value
  * is inserted, a new block is created by appending to the data file. If that

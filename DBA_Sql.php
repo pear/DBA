@@ -36,66 +36,63 @@ function executeSql(&$db, $sqlText) {
     $parser = new Sql_Parser($sqlText);
 
     $typeMap = array(
-        'int'=>DBA_INTEGER,
-        'integer'=>DBA_INTEGER,
-        'numeric'=>DBA_FIXED,
-        'float'=>DBA_FLOAT,
-        'real'=>DBA_FLOAT,
-        'char'=>DBA_CHAR,
-        'varchar'=>DBA_VARCHAR,
-        'text'=>DBA_TEXT,
-        'bool'=>DBA_BOOLEAN,
-        'boolean'=>DBA_BOOLEAN,
-        'enum'=>DBA_ENUM,
-        'set'=>DBA_SET,
-        'timestamp'=>DBA_TIMESTAMP,
+        'int'=>'integer',
+        'integer'=>'integer',
+        'numeric'=>'fixed',
+        'float'=>'float',
+        'real'=>'float',
+        'char'=>'char',
+        'varchar'=>'varchar',
+        'text'=>'text',
+        'bool'=>'boolean',
+        'boolean'=>'boolean',
+        'enum'=>'enum',
+        'set'=>'set',
+        'timestamp'=>'timestamp',
     );
 
     $constraintMap = array(
-        'length'=>DBA_SIZE,
-        'type'=>DBA_DEFAULT,
-        'not_null'=>DBA_NOTNULL,
-        'domain'=>DBA_DOMAIN,
-        'auto_increment'=>DBA_AUTOINCREMENT,
+        'length'=>'size',
+        'type'=>'type',
+        'not_null'=>'not_null',
+        'domain'=>'domain',
+        'primary_key'=>'primary_key',
     );
 
-    while ($parser->token != TOK_END_OF_INPUT) {
-        $tree = $parser->parse();
-        if (is_null($tree)) {
-            return;
-        } elseif (PEAR::isError($tree)) {
-            return $tree;
-        } else {
-            switch ($tree['command']) {
-                case 'create':
-                    $name = $tree[SQL_NAME];
-                    $schema = array();
-                    foreach ($tree[SQL_FIELDS] as $field) {
-                        $fieldName = $field[SQL_NAME];
-                        $schema[$fieldName][DBA_TYPE] = $typeMap[$field[SQL_TYPE]];
-                        
-                        foreach ($constraintMap as $sql=>$dba) {
-                            if (isset($field[$sql]))
-                                $schema[$fieldName][$dba] = $field[$sql];
-                        }
+    $tree = $parser->parse();
+    if (is_null($tree)) {
+        return;
+    } elseif (PEAR::isError($tree)) {
+        return $tree;
+    } else {
+        switch ($tree['command']) {
+            case 'create':
+                $name = $tree['table_name'];
+                $schema = array();
+                foreach ($tree['col_defs'] as $colName=>$col) {
+                    $schema[$colName][DBA_TYPE] = $typeMap[$col['type']];
+                    
+                    foreach ($col['constraints'] as $name=>$constraint) {
+                        $schema[$colName][$contraintMap[$contraint['type']]]
+                            = $constraint['value'];
                     }
-                    if (!$db->tableExists($name)) {
-                        $result = $db->createTable($name, $schema);
-                        if (PEAR::isError($result)) {
-                            return $result;
-                        }
-                    }
-                break;
-                case 'insert':
-                    foreach ($tree['field_names'] as $key=>$field) {
-                        $row[$field] = $tree[SQL_VALUES][$key];
-                    }
-                    $db->insert($name, $row);
+                }
+                if (!$db->tableExists($name)) {
+                    $result = $db->createTable($name, $schema);
                     if (PEAR::isError($result)) {
                         return $result;
                     }
-                break;
-            }
+                }
+            break;
+            case 'insert':
+                foreach ($tree['col_names'] as $key=>$col) {
+                    $row[$col] = $tree['col_values'][$key];
+                }
+                $db->insert($name, $row);
+                if (PEAR::isError($result)) {
+                    return $result;
+                }
+            break;
         }
     }
 }
