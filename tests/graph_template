@@ -1,5 +1,0 @@
-set size 1.0, 1.0
-set terminal postscript portrait "Helvetica" 12
-set title "Comparison of Various DBA libraries"
-set xlabel "# of transactions"
-set ylabel "time in seconds"
