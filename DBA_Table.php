@@ -21,8 +21,16 @@
 require_once 'PEAR.php';
 require_once 'DB/DBA/DBA.php';
 
+/**
+ * Reserved key used to store the schema record
+ * @const DBA_SCHEMA_KEY
+ */
 define('DBA_SCHEMA_KEY', '__schema__');
 
+/**
+ * Reserved character used to separate fields in a row
+ * @const DBA_FIELD_SEPARATOR
+ */
 define('DBA_FIELD_SEPARATOR', '|');
 
 /**
@@ -131,8 +139,8 @@ class DBA_Table extends PEAR
             }
 
         } else {
-            return $this->raiseError('DBA: Table is missing field descriptor at key, '.
-                               DBA_SCHEMA_KEY);
+            return $this->raiseError('DBA: Table is missing field descriptor.'.
+                                     'at key, '. DBA_SCHEMA_KEY);
         }
         return $this->_schema;
     }
@@ -324,6 +332,7 @@ class DBA_Table extends PEAR
      */
     function _packField($field, $value)
     {
+        $c_value = null;
         switch ($this->_schema[$field]['type'])
         {
             case 'set':
@@ -380,18 +389,17 @@ class DBA_Table extends PEAR
                 }
                 break;
             case 'text':
-                if (is_string ($value)) {
-                    $c_value = strval ($value);
+                if (!(is_array($value) || is_object($value))) {
+                    $c_value = str_replace(DBA_FIELD_SEPARATOR,'', $value);
                 }
                 break;
             case 'varchar':
-                if (is_string ($value)) {
-                    if ($this->_schema[$field]['size']>0) {
+                if (!(is_array($value) || is_object($value))) {
+                    if ($this->_schema[$field]['size']) {
                         $c_value = rtrim(substr($value, 0,
-                                        $this->_schema[$field]['size']));
-                    } else {
-                        $c_value = rtrim ($value);
+                                         $this->_schema[$field]['size']));
                     }
+                    $c_value = str_replace(DBA_FIELD_SEPARATOR,'', $value);
                 }
                 break;
             case 'integer':
@@ -483,7 +491,6 @@ class DBA_Table extends PEAR
                             return $this->raiseError("DBA: $value is not a valid type");
                         }
                         $buffer .= $value;
-                        break;
                         break;
                     case 'autoincrement':
                         $buffer .= $value;
