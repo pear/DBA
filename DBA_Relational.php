@@ -258,7 +258,27 @@ class DBA_Relational extends PEAR
     }
     // }}}
 
-    // {{{ replace($tableName, $key, $data)
+    // {{{ replace($rawQuery, $data, $rows=null)
+    /**
+     * Replaces rows that match $rawQuery with $
+     *
+     * @access  public
+     * @param   string $rawQuery query expression for performing the remove
+     * @param   array  $rows rows to select on
+     * @return  object PEAR_Error on failure
+     */
+    function replace($tableName, $rawQuery, $data, $rows=null)
+    {
+        $result = $this->_openTable($tableName, 'w');
+        if (PEAR::isError($result)) {
+            return $result;
+        } else {
+            return $this->_tables[$tableName]->replace($rawQuery, $data, $rows);
+        } 
+    }
+    // }}}
+
+    // {{{ replaceKey($tableName, $key, $data)
     /**
      * Replaces an existing row in a table, inserts if the row does not exist
      *
@@ -268,13 +288,13 @@ class DBA_Relational extends PEAR
      * @param   array  $data assoc array or ordered list of data to insert
      * @return  mixed  PEAR_Error on failure, the row index on success
      */
-    function replace($tableName, $key, $data)
+    function replaceKey($tableName, $key, $data)
     {
         $result = $this->_openTable($tableName, 'w');
         if (PEAR::isError($result)) {
             return $result;
         } else {
-            return $this->_tables[$tableName]->replace($key, $data);
+            return $this->_tables[$tableName]->replaceKey($key, $data);
         } 
     }
     // }}}
@@ -472,14 +492,15 @@ class DBA_Relational extends PEAR
             if ($i = strpos($token, '.')) {
                 // trim everything after the '.'
                 $table = substr($token, 0, $i);
+                if (($table != $tableA) && ($table != $tableB)) {
+                    return $this->raiseError("$table is not a table in join");
+                }
 
                 // trim everything before the '.'
                 $field = substr($token, $i+1);
-                if (($table == $tableA) &&
-                in_array($field, $fieldsA)) {
+                if (($table == $tableA) && in_array($field, $fieldsA)) {
                     $phpQuery .= "\$rowA['$field']";
-                } else
-                if (($table == $tableB) && in_array($field, $fieldsB)) {
+                } elseif (($table == $tableB) && in_array($field, $fieldsB)) {
                     $phpQuery .= "\$rowB['$field']";
                 }
             } else {
@@ -524,6 +545,13 @@ class DBA_Relational extends PEAR
         
         // TODO Implement merge join, needs secondary indexes on tables
         // build the join operation with nested loops
+        $query = $this->_parsePHPQuery($rawQuery, $fieldsA, $fieldsB,
+                                       $tableA, $tableB);
+        if (PEAR::isError($query)) {
+            return $query;
+        }
+
+        $results = array();
         $PHPJoin = 'foreach ($rowsA as $rowA) foreach ($rowsB as $rowB) if ('.
           $this->_parsePHPQuery($rawQuery, $fieldsA, $fieldsB, $tableA, $tableB)
           .') $results[] = array_merge($rowA, $rowB);';
