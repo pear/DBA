@@ -1,4 +1,9 @@
 <?php
+/**
+ * A Sql lexigraphical analyser
+ * Inspired by the msql lexer
+ */
+
 include 'phptype.php';
 
 // {{{ token definitions
@@ -164,9 +169,7 @@ class Lexer
 
     var $tokPtr = 0;
     var $tokStart = 0;
-    var $prev = null;
-    var $rep = null;
-    var $text = null;
+    var $text = '';
     var $tokLen = 0;
     var $lineno = 0;
     var $string;
@@ -198,20 +201,18 @@ class Lexer
 // {{{ lex($this->string)
 function lex()
 {
-    $this->prev = $this->rep;
     if ($state == 1000) {
-        $this->prev = null;
         return 0;
     }
 
     $state = 0;
     while (1) {
-        //echo 'State '.$state.', '.$this->string[$this->tokPtr]."\n";
+        //echo 'State '.$state;
         switch($state) {
             // {{{ State 0 : Start of token
             CASE(0):
                 $this->tokPtr = $this->tokStart;
-                $this->text = NULL;
+                $this->text = '';
                 $this->tokLen = 0;
                 $c = $this->get();
                 while ($c == ' ' || $c == '\t' || $c == '\n') {
@@ -221,6 +222,7 @@ function lex()
                     $c = $this->skip();
                     $this->tokLen = 1;
                 }
+                //echo ", $c\n";
                 if ($c == '\'') {
                     $state = 12;
                     break;
@@ -259,7 +261,7 @@ function lex()
                     $state = 14;
                     break;
                 }
-                if ($c == 0) {
+                if ($c == false) {
                     $state = 1000;
                     break;
                 }
@@ -295,7 +297,6 @@ function lex()
                     return ($tokval);
                 } else {
                     $this->text = substr($this->string, $this->tokStart, $this->tokLen);
-                    $lval = $this->text;
                     $this->tokStart = $this->tokPtr;
                     return (SQL_IDENT);
                 }
@@ -318,7 +319,6 @@ function lex()
             CASE(4):
                 $this->unget();
                 $this->text = substr($this->string, $this->tokStart, $this->tokLen);
-                $lval = $this->text;
                 $this->tokStart = $this->tokPtr;
                 return (SQL_IDENT);
             // }}}
@@ -342,7 +342,6 @@ function lex()
             CASE(6):
                 $this->unget();
                 $this->text = substr($this->string,$this->tokStart,$this->tokLen);
-                $lval = $this->text;
                 $this->tokStart = $this->tokPtr;
                 return (SQL_NUM);
                 break;
@@ -371,7 +370,6 @@ function lex()
             CASE(8):
                 $this->unget();
                 $this->text = substr($this->string, $this->tokStart, $this->tokLen);
-                $lval = $this->text;
                 $this->tokStart = $this->tokPtr;
                 return (SQL_REAL_NUM);
             // }}}
@@ -424,12 +422,12 @@ function lex()
                 while (!$bail) {
                     switch ($this->get()) {
                         case null:
-                            $this->text = false;
+                            $this->text = '';
                             $bail = true;
                             break;
                         case '\\':
                             if ($this->get()) {
-                                $this->text = false;
+                                $this->text = '';
                                 $bail = true;
                             }
                             break;
@@ -440,7 +438,6 @@ function lex()
                     }
                 }
 //                $this->text = _readTextLiteral($this->tokStart);
-                $lval = $this->text;
                 if ($this->text) {
                     $state = 13;
                     break;
@@ -517,7 +514,6 @@ function lex()
             CASE(19):
                 $this->unget();
                 $this->text = substr($this->tokStart,$this->tokLen);
-                $lval = $this->text;
                 $this->tokStart = $this->tokPtr;
                 return (SQL_SYS_VAR);
             // }}}
@@ -527,14 +523,13 @@ function lex()
                 $this->revert();
                 $c = $this->get();
                 $this->text = $c;
-                $lval = $this->text;
                 $this->tokStart = $this->tokPtr;
                 return ($this->text[0]);
             // }}}
 
             // {{{ State 1000 : End Of Input
             CASE(1000):
-                $this->text = $lval = '*end of input*';
+                $this->text = '*end of input*';
                 $this->tokStart = $this->tokPtr;
                 return (SQL_END_OF_INPUT);
             // }}}
@@ -544,13 +539,5 @@ function lex()
 // }}}
 
 }
-}
-
-$lexer = new Lexer();
-$lexer->string = "create table dogfood int 23.4 99";
-$token = $lexer->lex();
-while ($token != SQL_END_OF_INPUT) {
-    echo $token."\n";
-    $token = $lexer->lex();
 }
 ?>
