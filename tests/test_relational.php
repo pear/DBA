@@ -22,6 +22,7 @@
 // test functionality of the dba table layer
 
 ini_set('include_path',ini_get('include_path').':../../');
+require_once 'PEAR.php';
 require_once 'DB_DBA/DBA_Relational.php';
 require_once 'empSchema.php';
 
@@ -33,21 +34,25 @@ foreach ($empSchema as $tableName=>$tableSchema) {
     $data = "{$tableName}_data";
 
     echo "Creating table: $tableName\n";
-    if (!$db->createTable($tableName, $tableSchema)) {
-        echo "Could not create the table\n";
-    }
 
-    foreach ($$data as $row) {
-        if (!$db->insertRow($tableName, $row)) {
-            echo "Could not insert a row\n";
+    $result = $db->createTable($tableName, $tableSchema);
+
+    if (PEAR::isError($result)) {
+        echo $result->getMessage()."\n";
+    } else {
+        foreach ($$data as $row) {
+            $result = $db->insertRow($tableName, $row);
+            if (PEAR::isError($result)) {
+            echo $result->getMessage()."\n";
+            }
         }
+
+        $results = $db->select($tableName, '*');
+
+        echo "Query: \$db->select($tableName, '*');\n";
+        echo $db->formatResults($db->finalizeRows($tableName, $results));
+        echo "------------------------------------------------\n\n";
     }
-
-    $results = $db->select($tableName, '*');
-
-    echo "Query: \$db->select($tableName, '*');\n";
-    echo $db->formatResults($db->finalizeRows($tableName, $results));
-    echo "------------------------------------------------\n\n";
 }
 
 // closes all open tables - testing auto-open feature
@@ -67,10 +72,11 @@ foreach ($queries as $query) {
     echo "Query: $query\n";
     eval ('$results = '.$query.';');
 
-    if ($results === False) 
+    if (PEAR::isError($results)) { 
         echo " Query failed.\n";
-    else
+    } else {
         echo $db->formatResults ($results);
+    }
 
     echo "------------------------------------------------\n\n";
 }

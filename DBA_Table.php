@@ -77,7 +77,6 @@ class DBA_Table extends PEAR
      * @access public
      * @param string $tableName name of the table to open
      * @param char   $mode      mode to open the table; one of r,w,c,n
-     * @param object $dba       dba object to use for storage, you need this
      * @returns object PEAR_Error on failure
      */
     function open($tableName, $mode = 'r')
@@ -120,7 +119,6 @@ class DBA_Table extends PEAR
      *
      * @param string $tableName   name of the table to create
      * @param array  $schema field schema for the table
-     * @param object $dba         dba object to use
      */
     function create ($tableName, $schema)
     {
@@ -575,8 +573,9 @@ class DBA_Table extends PEAR
     }
 
     /**
-     * Inserts a new row in a database
+     * Inserts a new row in a table
      * 
+     * @param   array $data assoc array or ordered list of data to insert
      * @returns mixed PEAR_Error on failure, the row index on success
      */
     function insertRow ($data)
@@ -627,19 +626,21 @@ class DBA_Table extends PEAR
      */
     function finalizeRows ($rows=null)
     {
-        if ($this->_dba->isOpen()) {
-            if (is_null($rows)) {
+        if (is_null($rows)) {
+            if ($this->_dba->isOpen()) {
                 $rows = $this->getRows();
+            } else {
+                return $this->raiseError('DBA: table not open and no rows');
             }
-
-            foreach ($rows as $key=>$row) {
-                foreach ($row as $field=>$data) {
-                    $row[$field] = $this->_finalizeField($field, $row[$field]);
-                }
-                $rows[$key] = $row;
-            }
-            return $rows;
         }
+
+        foreach ($rows as $key=>$row) {
+            foreach ($row as $field=>$data) {
+                $row[$field] = $this->_finalizeField($field, $row[$field]);
+            }
+            $rows[$key] = $row;
+        }
+        return $rows;
     }
 
     /**

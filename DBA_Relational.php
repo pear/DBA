@@ -27,7 +27,7 @@ require_once 'DB_DBA/DBA_Table.php';
  * @author Brent Cook <busterb@mail.utexas.edu>
  * @version 0.0.1
  */
-class DBA_Relational
+class DBA_Relational extends PEAR
 {
     // table handles
     var $_tables=array();
@@ -40,7 +40,10 @@ class DBA_Relational
 
     /**
      * Constructor
-     * @param $_home
+     *
+     * @param string  $home path where data files are stored
+     * @param string  $driver DBA driver to use
+     *
      */
     function DBA_Relational ($home = '', $driver = 'simple')
     {
@@ -53,6 +56,11 @@ class DBA_Relational
         $this->_driver = $driver;
     }
 
+    /**
+     * Closes all open tables
+     *
+     * @access public
+     */
     function close ()
     {
         foreach ($this->_tables as $table) {
@@ -61,11 +69,15 @@ class DBA_Relational
     }
     
     /**
-     * Opens a table
-     * @param $tableName
-     * @param $mode
+     * Opens a table, keeps it in the list of tables. Can also reopen tables
+     * to different file modes
+     *
+     * @access private
+     * @param string $tableName name of the table to open
+     * @param char   $mode      mode to open the table; one of r,w,c,n
+     * @returns object PEAR_Error on failure
      */
-    function openTable ($tableName, $mode = 'r')
+    function _openTable ($tableName, $mode = 'r')
     {
         if (!isset($this->_tables[$tableName])) {
 
@@ -73,22 +85,28 @@ class DBA_Relational
 
             if (!$this->_tables[$tableName]->tableExists($tableName)) {
                 unset($this->_tables[$tableName]);
-                return PEAR::raiseError("Table: '$tableName' does not exist");
+                return $this->raiseError("Table: '$tableName' does not exist");
             }
         }
 
         if ($this->_tables[$tableName]->isOpen()) {
 
-            if ((($mode == 'r') && $this->_tables[$tableName]->isReadable())
-               || (($mode == 'w') && $this->_tables[$tableName]->isWritable())){
-                return true;
-            } else {
+            if (!((($mode == 'r') && $this->_tables[$tableName]->isReadable())
+               || (($mode == 'w') && $this->_tables[$tableName]->isWritable())))
+            {
                 $this->_tables[$tableName]->close();
             }
         }
         return $this->_tables[$tableName]->open($this->_home.$tableName, $mode);
     }
 
+    /**
+     * Generates a nice, ASCII table from a results set, a-la MySQL
+     *
+     * @param array $results
+     * @param array $fields  list of fields to cull from results and display
+     * @returns string
+     */
     function formatResults($results, $fields = null)
     {
         if (is_array($results) && sizeof($results)) {
@@ -128,35 +146,35 @@ class DBA_Relational
         return $buffer;
     }
     
-    /**
-     *
-     */
-    function closeTable ($tableName)
-    {
-        if (isset($this->_tables[$tableName]))
-            return $this->_tables[$tableName]->close();
-        else
-            return false;
-    }
 
+    /**
+     * Creates a new table
+     *
+     * @access public
+     * @param   string $tableName   name of the table to create
+     * @param   array  $schema field schema for the table
+     * @returns object PEAR_Error on failure
+     */
     function createTable ($tableName, $schema)
     {
         // check if this table object exists
         if (!isset($this->_tables[$tableName])) {
             $this->_tables[$tableName] = new DBA_Table();
         } else {
-            return false;  // the table object exists, so the table must exist
+            // the table object exists, so the table must exist
+            return $this->raiseError("DBA: cannot create table: $tableName,".
+                                     " it already exists");
         }
 
-        // ask if the table really exists
-        if (!$this->_tables[$tableName]->tableExists($this->_home.$tableName)) {
-            return $this->_tables[$tableName]->create($this->_home.$tableName,
-                                                      $schema);
-        } else {
-            return false;
-        }
+        return $this->_tables[$tableName]->create($this->_home.$tableName,
+                                                  $schema);
     }
 
+    /**
+     * Returns the current read status for the database
+     *
+     * @returns boolean
+     */
     function isOpen ($tableName)
     {
         if (isset($this->_tables[$tableName])) {
@@ -166,102 +184,134 @@ class DBA_Relational
         }
     }
 
-    function dropTable ($tableName)
-    {
-        if ($this->openTable($tableName, 'w'))
-        {
-            unset($this->_tables[$tableName]);
-            return $this->_tables[$tableName]->dropTable($tableName);
-        } else {
-            return false;
-        }
-    }
-
+    /**
+     * Inserts a new row in a table
+     *
+     * @param   string $tableName table to insert on
+     * @param   array  $data assoc array or ordered list of data to insert
+     * @returns mixed  PEAR_Error on failure, the row index on success
+     */
     function insertRow ($tableName, $data)
     {
-        if ($this->openTable($tableName, 'w')) {
-            return $this->_tables[$tableName]->insertRow($data);
+        $result = $this->_openTable($tableName, 'w');
+        if (PEAR::isError($result)) {
+            return $result;
         } else {
-            return false;
+            return $this->_tables[$tableName]->insertRow($data);
         }
     }
 
+    /**
+     * @access public
+     */
     function replaceRow ($tableName, $key, $data)
     {
-        if ($this->openTable($tableName, 'w')) {
-            return $this->_tables[$tableName]->replaceRow($key, $data);
+        $result = $this->_openTable($tableName, 'w');
+        if (PEAR::isError($result)) {
+            return $result;
         } else {
-            return false;
-        }
+            return $this->_tables[$tableName]->replaceRow($key, $data);
+        } 
     }
 
+    /**
+     * @access public
+     */
     function deleteRow ($tableName, $key)
     {
-        if ($this->openTable($tableName, 'w')) {
-            return $this->_tables[$tableName]->deleteRow($key);
+        $result = $this->_openTable($tableName, 'w');
+        if (PEAR::isError($result)) {
+            return $result;
         } else {
-            return false;
+            return $this->_tables[$tableName]->deleteRow($key);
         }
     }
 
+    /**
+     * @access public
+     */
     function fetchRow ($tableName, $key)
     {
-        if ($this->openTable($tableName, 'r')) {
-            return $this->_tables[$tableName]->fetchRow($key);
+        $result = $this->_openTable($tableName, 'r');
+        if (PEAR::isError($result)) {
+            return $result;
         } else {
-            return false;
+            return $this->_tables[$tableName]->fetchRow($key);
         }
     }
 
+    /**
+     * @access public
+     */
     function select ($tableName, $query, $rows=null)
     {
-        if ($this->openTable($tableName, 'r')) {
-            return $this->_tables[$tableName]->select($query, $rows);
+        $result = $this->_openTable($tableName, 'r');
+        if (PEAR::isError($result)) {
+            return $result;
         } else {
-            return false;
+            return $this->_tables[$tableName]->select($query, $rows);
         }
     }
 
+    /**
+     * @access public
+     */
     function sort ($tableName, $fields, $order='a', $rows=null)
     {
-        if ($this->openTable($tableName, 'r')) {
-            return $this->_tables[$tableName]->sort($fields, $order, $rows);
+        $result = $this->_openTable($tableName, 'r');
+        if (PEAR::isError($result)) {
+            return $result;
         } else {
-            return false;
+            return $this->_tables[$tableName]->sort($fields, $order, $rows);
         }
     }
 
+    /**
+     * @access public
+     */
     function project ($tableName, $fields, $rows=null)
     {
-        if ($this->openTable($tableName, 'r')) {
-            return $this->_tables[$tableName]->project($fields, $rows);
+        $result = $this->_openTable($tableName, 'r');
+        if (PEAR::isError($result)) {
+            return $result;
         } else {
-            return false;
+            return $this->_tables[$tableName]->project($fields, $rows);
         }
     }
 
+    /**
+     * @access public
+     */
     function unique ($tableName, $rows=null)
     {
-        if ($this->openTable($tableName, 'r')) {
-            return $this->_tables[$tableName]->unique($rows);
+        $result = $this->_openTable($tableName, 'r');
+        if (PEAR::isError($result)) {
+            return $result;
         } else {
-            return false;
+            return $this->_tables[$tableName]->unique($rows);
         }
     }
 
+    /**
+     * @access public
+     */
     function finalizeRows($tableName, $rows=null)
     {
-        if ($this->openTable($tableName, 'r')) {
-            return $this->_tables[$tableName]->finalizeRows($rows);
+        $result = $this->_openTable($tableName, 'r');
+        if (PEAR::isError($result)) {
+            return $result;
         } else {
-            return false;
+            return $this->_tables[$tableName]->finalizeRows($rows);
         }
     }
 
-    function _validateTable (&$table, &$rows, &$fields, $altName)
+    /**
+     * @access private
+     */
+    function _validateTable(&$table, &$rows, &$fields, $altName)
     {
         // validate query by checking for existence of fields
-        if (is_string($table) && ($this->openTable($table, 'r'))) {
+        if (is_string($table) && ($this->_openTable($table, 'r'))) {
 
             $rows = $this->_tables[$table]->getRows();
             $fields = $this->_tables[$table]->getFieldNames();
@@ -279,7 +329,10 @@ class DBA_Relational
         return false;
     }
 
-    function _parsePHPQuery ($rawQuery, $fieldsA, $fieldsB, $tableA, $tableB)
+    /**
+     * @access private
+     */
+    function _parsePHPQuery($rawQuery, $fieldsA, $fieldsB, $tableA, $tableB)
     {
         // add spaces around symbols for strtok to work properly
         $rawQuery = DBA_Table::_addSpaces($rawQuery);
@@ -313,12 +366,22 @@ class DBA_Relational
         return $phpQuery;
     }
     
+    /**
+     * Joins rows between two tables based on a query. It is faster to
+     * use the smaller table of two tables as tableB
+     *
+     * @access public
+     * @param  string $tableA   name of table to join
+     * @param  string $tableB   name of table to join
+     * @param  string $rawQuery expression of how to join tableA and tableB
+     */
     function join ($tableA, $tableB, $rawQuery)
     {
         // validate tables
         if (!$this->_validateTable($tableA, $rowsA, $fieldsA, 'A')) {
             return false;
         }
+        echo "Got here\n";
         if (!$this->_validateTable($tableB, $rowsB, $fieldsB, 'B')) {
             return false;
         }
@@ -334,11 +397,13 @@ class DBA_Relational
             return array();
         }
         
+        // TODO Implement merge join, needs secondary indexes on tables
         // build the join operation with nested loops
         $PHPJoin = 'foreach ($rowsA as $rowA) foreach ($rowsB as $rowB) if ('.
           $this->_parsePHPQuery($rawQuery, $fieldsA, $fieldsB, $tableA, $tableB)
           .') $results[] = array_merge($rowA, $rowB);';
 
+        echo $PHPJoin;
         // evaluate the join
         eval ($PHPJoin);
 
