@@ -52,13 +52,13 @@ define('DBA_TIMESTAMP', 19);
 /**
  * Key tokens
  */
-define('DBA_TYPE', 0);
-define('DBA_DOMAIN', 1);
-define('DBA_SIZE', 2);
-define('DBA_PRIMARYKEY', 3);
-define('DBA_AUTOINCREMENT', 4);
-define('DBA_DEFAULT', 5);
-define('DBA_NOTNULL', 6);
+define('DBA_TYPE', 1);
+define('DBA_DOMAIN', 2);
+define('DBA_SIZE', 3);
+define('DBA_PRIMARYKEY', 4);
+define('DBA_AUTOINCREMENT', 5);
+define('DBA_DEFAULT', 6);
+define('DBA_NOTNULL', 7);
 
 /**
  * DBA Table
