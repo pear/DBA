@@ -100,7 +100,7 @@ define('SQL_CONSTRAINT',158);
 define('SQL_DEFAULT',159);
 define('SQL_NOTNULL',160);
 // types
-define('SQL_NUM',170);
+//define('SQL_NUM',170);
 define('SQL_FLOAT',171);
 define('SQL_FIXED',172);
 define('SQL_INT',173);
@@ -277,7 +277,7 @@ class Sql_Parser
 
     // {{{ isType()
     function isType() {
-        return (($this->token >= SQL_NUM) && ($this->token <= SQL_ENUM));
+        return (($this->token >= SQL_FLOAT) && ($this->token <= SQL_ENUM));
     }
     // }}}
 
