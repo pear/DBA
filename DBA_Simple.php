@@ -449,7 +449,8 @@ class DBA_Simple extends PEAR {
                 // is the value smaller or equal in size to its block size
                 if ($size >= $vsize) {
                     // move to the block's location in the data file
-                    fseek($this->_datFP, $this->_usedBlocks[$key][DBA_LOC]);
+                    $loc = $this->_usedBlocks[$key][DBA_LOC];
+                    fseek($this->_datFP, $loc);
 
                     // write to the data file
                     fwrite($this->_datFP, str_pad($value, $size), $size);
