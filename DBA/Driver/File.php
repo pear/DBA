@@ -639,6 +639,40 @@ class DBA_Driver_File extends DBA
     }
     // }}}
 
+    // {{{ db_drop($dbName)
+    /**
+     * Removes a database from existence
+     *
+     * @access  public
+     * @param   string  $dbName the database name to drop
+     * @return  object  PEAR_Error on failure
+     */
+    function db_drop($dbName)
+    {
+        if (DBA_Driver_File::db_exists($dbName)) {
+            if (!unlink($dbName.'.dat') || !unlink($dbName.'.idx')) {
+                return $this->raiseError('Could not unlink '.$dbName);
+            }
+        } else {
+            return $this->raiseError($dbName.' does not exist');
+        }
+    }
+    // }}}
+
+    // {{{ drop($dbName)
+    /**
+     * Removes the last open database from existence
+     *
+     * @access  public
+     * @return  object  PEAR_Error on failure
+     */
+    function drop()
+    {
+        $this->close();
+        return $this->db_drop($this->_dbName);
+    }
+    // }}}
+
     // {{{ exists($key)
     /**
      * Check whether key exists
