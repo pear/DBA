@@ -23,6 +23,8 @@
  * This works in reverse of the rest of the DBA classes. If you have code
  * that requires the PHP dba functions, but are using a system where they
  * are not available, including this file will define a set for you.
+ * See the PHP documentation on dba for explanation of how these functions
+ * work.
  *
  * @author Brent Cook <busterb@mail.utexas.edu>
  * @version 0.0.11

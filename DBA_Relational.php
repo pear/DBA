@@ -25,7 +25,7 @@ require_once 'DB_DBA/DBA_Table.php';
  * a relational database manager for DBM-style databases
  *
  * @author Brent Cook <busterb@mail.utexas.edu>
- * @version 0.0.1
+ * @version 0.0.11
  */
 class DBA_Relational extends PEAR
 {

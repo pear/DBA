@@ -29,7 +29,7 @@ define ('DBA_SCHEMA_KEY', '__schema__');
  * It uses a DBA class as the storage driver.
  *
  * @author Brent Cook <busterb@mail.utexas.edu>
- * @version 0.0.10
+ * @version 0.0.11
  */
 class DBA_Table extends PEAR
 {
@@ -503,7 +503,13 @@ class DBA_Table extends PEAR
     }
 
     /**
-     * @access private
+     * Packs a fields from a raw row into an internal representation suitable
+     * for storing in the table. Think of this as a cross-language version of
+     * serialize.
+     *
+     * @access  private
+     * @param   array $data row data to pack, key=>field pairs
+     * @returns string
      */
     function _packRow ($data)
     {
@@ -543,7 +549,12 @@ class DBA_Table extends PEAR
     }
 
     /**
-     * @access private
+     * Unpacks a string into an array containing the data from the original
+     * packed row. Think of this as a cross-language version of deserialize.
+     *
+     * @access  private
+     * @param   array packedData row data to unpack
+     * @returns array field=>value pairs
      */
     function _unpackRow ($packedData)
     {
@@ -557,7 +568,11 @@ class DBA_Table extends PEAR
     }
 
     /**
-     * @access private
+     * Concatenates fields in a row into a single string
+     *
+     * @param   array $unpackedData
+     * @returns string
+     * @access  private
      */
     function _packRawRow ($unpackedData)
     {
@@ -565,7 +580,10 @@ class DBA_Table extends PEAR
     }
 
     /**
-     * @access private
+     * Expands fields in a row into an array of fields
+     * @param   string $packedData
+     * @returns array
+     * @access  private
      */
     function _unpackRawRow ($packedData)
     {
@@ -575,6 +593,7 @@ class DBA_Table extends PEAR
     /**
      * Inserts a new row in a table
      * 
+     * @access  public
      * @param   array $data assoc array or ordered list of data to insert
      * @returns mixed PEAR_Error on failure, the row index on success
      */
@@ -594,7 +613,12 @@ class DBA_Table extends PEAR
     }
 
     /**
-     * @access public
+     * Replaces an existing row in a table, inserts if the row does not exist
+     *
+     * @access  public
+     * @param   string $key row id to replace
+     * @param   array  $data assoc array or ordered list of data to insert
+     * @returns mixed  PEAR_Error on failure, the row index on success
      */
     function replaceRow ($key, $data)
     {
@@ -606,7 +630,11 @@ class DBA_Table extends PEAR
     }
 
     /**
-     * @access public
+     * Deletes an existing row in a table
+     *
+     * @access  public
+     * @param   string $key row id to delete
+     * @returns object PEAR_Error on failure
      */
     function deleteRow ($key)
     {
@@ -614,15 +642,33 @@ class DBA_Table extends PEAR
     }
 
     /**
-     * @access public
+     * Fetches an existing row from a table
+     *
+     * @access  public
+     * @param   string $key row id to fetch
+     * @returns mixed  PEAR_Error on failure, the row array on success
      */
     function getRow ($key)
     {
-        return $this->_unpackRow($this->_dba->fetch($key));
+        $result = $this->_dba->fetch($key);
+        if (!PEAR::isError($result)) {
+            return $this->_unpackRow($result);
+        } else {
+            return $result;
+        }
     }
 
     /**
-     * @access public
+     * Converts the results from any of the row operations to a 'finalized'
+     * display-ready form. That means that timestamps, sets and enums are
+     * converted into strings. This obviously has some consequences if you plan
+     * on chaining the results into another row operation, so don't call this
+     * unless it is the final operation.
+     *
+     * @access  public
+     * @param   array $rows rows to finalize, if none are specified, returns the
+     * whole table
+     * @returns mixed  PEAR_Error on failure, the row array on success
      */
     function finalizeRows ($rows=null)
     {
@@ -644,7 +690,12 @@ class DBA_Table extends PEAR
     }
 
     /**
+     * Returns the specified rows. A multiple-value version of getRow
+     *
      * @access public
+     * @param   array $rowKeys keys of rows to get, if none are specified, returns the
+     * whole table
+     * @returns mixed  PEAR_Error on failure, the row array on success
      */
     function getRows ($rowKeys=null)
     {
@@ -673,6 +724,7 @@ class DBA_Table extends PEAR
 
     /**
      * Returns an array of the defined field names in the table
+     *
      * @access  public
      * @returns array
      */
@@ -682,7 +734,12 @@ class DBA_Table extends PEAR
     }
 
     /**
-     * @access private
+     * Adds spaces around symbol tokens so that strtok will separate them
+     * properly from other tokens.
+     *
+     * @access  private
+     * @param   string $string
+     * @returns string
      */
     function _addSpaces ($string)
     {
@@ -693,7 +750,13 @@ class DBA_Table extends PEAR
     }
 
     /**
+     * Converts a query expression into PHP code for executing a select.
+     *
      * @access private
+     * @param  string $rawQuery the incoming query
+     * @param  array  $fieldTokens list of tokens that should be treated as
+     * field names
+     * @returns string PHP code
      */
     function _parsePHPQuery ($rawQuery, $fieldTokens)
     {
@@ -719,7 +782,16 @@ class DBA_Table extends PEAR
     }
 
     /**
+     * Performs a select on a table. This means that a subset of rows in a
+     * table are filtered and returned based on the query. Accepts any valid
+     * expression of the form '(field == field) || (field > 3)', etc. Using the
+     * expression '*' returns the entire table
+     * SQL analog: 'select * from rows where rawQuery'
+     *
      * @access public
+     * @param  string $rawQuery query expression for performing the select
+     * @param  array  $rows rows to select on
+     * @returns mixed  PEAR_Error on failure, the row array on success
      */
     function select ($rawQuery, $rows=null)
     {
@@ -792,7 +864,16 @@ class DBA_Table extends PEAR
     }
 
     /**
+     * Sorts rows by field in either ascending or descending order
+     * SQL analog: 'select * from rows, order by fields'
+     *
      * @access public
+     * @param  mixed $fields a string with the field name to sort by or an
+     * array of fields to sort by in order of preference
+     * @param  string $order 'a' for ascending, 'd' for descending
+     * @param  array $rows rows to sort, sorts the entire table if not
+     * specified
+     * @returns mixed  PEAR_Error on failure, the row array on success
      */
     function sort ($fields, $order='a', $rows=null)
     {
@@ -808,13 +889,17 @@ class DBA_Table extends PEAR
             }
 
             // if we haven't passed any rows to select from, use the whole table
-            if (is_null($rows))
+            if (is_null($rows)) {
                 $rows = $this->getRows();
+            }
 
-            if ($order=='a')
+            if ($order=='a') {
                 uasort($rows, array($this, '_sortCmpA'));
-            else
+            } elseif ($order=='d') {
                 uasort($rows, array($this, '_sortCmpD'));
+            } else {
+                return $this->raiseError("DBA: $order is not a valid sort order");
+            }
 
             return $rows;
         } else {
@@ -823,7 +908,14 @@ class DBA_Table extends PEAR
     }
 
     /**
+     * Projects rows by field. This means that a subset of the possible fields i
+     * are in the resulting rows. The SQL analog is 'select fields from table'
+     *
      * @access public
+     * @param  array $fields fields to project
+     * @param  array $rows rows to project, projects entire table if not
+     * specified
+     * @returns mixed  PEAR_Error on failure, the row array on success
      */
     function project ($fields, $rows=null)
     {
@@ -853,7 +945,12 @@ class DBA_Table extends PEAR
     }
 
     /**
+     * Compares two rows
+     *
      * @access public
+     * @param array $a row a
+     * @param array $b row b
+     * @returns bool true if they are the same, false if they are not
      */
     function cmpRows ($a, $b)
     {
@@ -867,7 +964,12 @@ class DBA_Table extends PEAR
     }
 
     /**
+     * Returns the unique rows from a set of rows
+     * 
      * @access public
+     * @param  array $rows rows to process, uses entire table if not
+     * specified
+     * @returns mixed  PEAR_Error on failure, the row array on success
      */
     function unique($rows=null)
     {
