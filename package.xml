@@ -20,22 +20,25 @@
 
     <release>
         <license>LGPL</license>
-        <version>0.15</version>
-        <date>2002-07-08</date>
-        <state>beta</state>
+        <version>0.16</version>
+        <date>2002-07-14</date>
+        <state>devel</state>
         <notes>
-            Initial release. Like many things, the documentation is not totally
-            completed and expect some changes/additions to the API as I try
-            building some sample applications with this, discovering what works
-            and what doesn't. See the test files for hints on usage; the most
-            useful bit currently is DBA_Relational, which provides a simple
-            data management system. It uses DBA_Table which uses DBA. They build
-            on each other, but can be used individually.
-
-            See empSchema and hatSchema for examples of how to create table
-            schemas. See test_relational.php and test_table.php for examples of
-            how to formulate queries. See benchmark_drivers.php for a method of
-            determining the performance of various DBA drivers for your system.
+            <![CDATA[
+            More API changes to come, but so far, they're minimal. I'm getting
+            things cleaned up so that the upcoming SQL frontend will fit nicely.
+            
+            * Schema format has changed; use DBA_* constants rather than
+              strings to organize meta data. See example schemas.
+            * Dropped support for autodecrement; initialize autoincrement by
+              supplying a default value rather than using the keyword 'init'
+            * Fixed-length char type support added, varchar preallocates
+              space in DBA driver if size is supplied
+            * Fixed some problems with inserting on tables when no primary
+              key was specified
+            * Added DBA_Toolbox.php to hold utility functions that are
+              not necessary for working with DBA, just useful.
+            ]]>
         </notes>
         <filelist>
             <dir name="/" baseinstalldir="DB/DBA">
@@ -45,6 +48,7 @@
                 <file role="php">DBA_Builtin.php</file>
                 <file role="php">DBA_Table.php</file>
                 <file role="php">DBA_Relational.php</file>
+                <file role="php">DBA_Toolbox.php</file>
                 <dir name="tests" role="test">
                     <file role="test">benchmark_drivers.php</file>
                     <file role="test">test_simple.php</file>
@@ -53,7 +57,7 @@
                     <file role="test">empSchema.php</file>
                     <file role="test">hatSchema.php</file>
                 </dir>
-                <dir name="docs">
+                <dir name="docs" role="doc">
                     <file role="doc">README.txt</file>
                     <file role="doc">Examples.txt</file>
                 </dir>

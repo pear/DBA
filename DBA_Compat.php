@@ -29,7 +29,7 @@
  * work.
  *
  * @author Brent Cook <busterb@mail.utexas.edu>
- * @version 0.15
+ * @version 0.16
  * @access public
  * @package DBA
  * @see PHP dba Documentation

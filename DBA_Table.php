@@ -74,7 +74,7 @@ define('DBA_NOTNULL', 6);
  * @author  Brent Cook <busterb@mail.utexas.edu>
  * @package DBA
  * @access  public
- * @version 0.15
+ * @version 0.16
  */
 class DBA_Table extends PEAR
 {

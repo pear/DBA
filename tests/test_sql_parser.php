@@ -36,7 +36,7 @@ $queries = array(
   category set('sexy','\'family time\'',\"outdoors\",'generic','very weird') NULL,
   description text NULL,
   id int default 200 PRIMARY KEY
-);",
+)",
 "CREATE TABLE photos (
   filename varchar(60) not NULL,
   name varchar(60) default \"no name\",
@@ -44,7 +44,7 @@ $queries = array(
   price float (4,2),
   description text default 'hello',
   id int default 0 primary key auto_increment not null,
-);",
+)",
 "create table brent (
     filename varchar(10),
     description varchar(20),
@@ -80,6 +80,7 @@ $lexer = new Lexer();
 $parser = new Sql_Parser();
 
 foreach ($queries as $query) {
+//    $query = implode(';', $queries);
     echo "SQL:\n$query\n\n";
 
     $results = $parser->parse($query);
