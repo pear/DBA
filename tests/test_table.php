@@ -75,15 +75,14 @@ if (PEAR::isError($result)) {
     exit;
 }
 
-$table->open ('hats', 'w');
-
+// open and close table multiple times while inserting
 for ($i=0; $i < 2; ++$i) {
+    $table->open ('hats', 'w');
     foreach ($new_hats as $hat) {
         $table->insertRow($hat);
     }
+    $table->close();
 }
-
-$table->close();
 
 $table->open ('hats', 'r');
 

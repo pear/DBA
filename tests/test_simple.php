@@ -35,7 +35,7 @@ if (PEAR::isError($error=$testDB->open('test', 'c')))
 {
     echo $error->getMessage()."\n";
 } else {
-    for ($i=0; $i<1000; ++$i) {
+    for ($i=0; $i<5000; ++$i) {
         $testKey = rand (0, 99);
         $testData = $testDataArray[rand(0, 8)];
         switch (rand(0, 3)) {

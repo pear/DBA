@@ -24,6 +24,7 @@ class DBA
     * Return a DBA object
     *
     * @static
+    * @version 0.0.12
     * @param  string $driver  Type of storage object to return
     * @return object Object   DBA storage object
     */

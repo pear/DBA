@@ -29,7 +29,7 @@ define ('DBA_SCHEMA_KEY', '__schema__');
  * It uses a DBA class as the storage driver.
  *
  * @author Brent Cook <busterb@mail.utexas.edu>
- * @version 0.0.11
+ * @version 0.0.12
  */
 class DBA_Table extends PEAR
 {
@@ -455,15 +455,17 @@ class DBA_Table extends PEAR
                         $buffer .= strtolower($value);
                         break;
                     case 'autoincrement':
-                        if (isset($fieldMeta['floor'])) {
-                            $buffer .= $value.';floor=0';
-                            break;
-                        }
-                    case 'autodecrement':
+                        $buffer .= $value;
                         if (!isset($fieldMeta['ceiling'])) {
-                            $buffer .= $value.';ceiling=0';
-                            break;
+                            $buffer .= ';ceiling=0';
                         }
+                        break;
+                    case 'autodecrement':
+                        $buffer .= $value;
+                        if (!isset($fieldMeta['floor'])) {
+                            $buffer .= ';floor=0';
+                        }
+                        break;
                     default:
                         $buffer .= $value;
                 }
@@ -516,6 +518,7 @@ class DBA_Table extends PEAR
     {
         $buffer = array();
         $i = 0;
+        print_r($this->_schema);
         foreach ($this->_schema as $fieldName => $fieldMeta) {
 
             if (isset($data[$fieldName])) {
@@ -531,12 +534,12 @@ class DBA_Table extends PEAR
             } else {
                 
                 // no data is supplied
-                if ($fieldMeta['autoincrement']) {
+                if ($fieldMeta['autoincrement']==1) {
                     // get a value as well as increase the ceiling
-                    $c_value = ++$this->_schema[$fieldName]['ceiling'];
-                } elseif ($fieldMeta['autodecrement']) {
+                    $c_value = $this->_schema[$fieldName]['ceiling']++;
+                } elseif ($fieldMeta['autodecrement']==1) {
                     // get a value and decrease the floor
-                    $c_value = --$this->_schema[$fieldName]['floor'];
+                    $c_value = $this->_schema[$fieldName]['floor']--;
                 } else {
                     // use the default value
                     $c_value = $this->_packField($fieldName,

@@ -27,7 +27,7 @@
  * work.
  *
  * @author Brent Cook <busterb@mail.utexas.edu>
- * @version 0.0.11
+ * @version 0.0.12
  * @see PHP dba Documentation
  */
 

@@ -29,7 +29,7 @@ require_once 'PEAR.php';
  * that this class does not address yet.
  *
  * @author  Brent Cook
- * @version 0.0.11
+ * @version 0.0.12
  * @access  public
  * @package DBA
  */
