@@ -60,6 +60,7 @@ define('SQL_INSERT',112);
 define('SQL_DELETE',113);
 define('SQL_SELECT',114);
 define('SQL_UPDATE',115);
+define('SQL_ALTER',116);
 // conjunctions
 define('SQL_BY',120);
 define('SQL_AS',121);
@@ -76,7 +77,7 @@ define('SQL_RLIKE',133);
 define('SQL_CLIKE',134);
 define('SQL_SLIKE',135);
 define('SQL_STEP',136);
-define('SQL_SET',137);
+//define('SQL_SET_MOD',137);
 define('SQL_PRIMARY',138);
 define('SQL_KEY',139);
 define('SQL_UNIQUE',140);
@@ -94,11 +95,12 @@ define('SQL_VALUE',153);
 define('SQL_VALUES',154);
 define('SQL_NULL',155);
 define('SQL_INDEX',156);
-define('SQL_SET_FUNCT',157);
+//define('SQL_SET_FUNCT',157);
 define('SQL_CONSTRAINT',158);
 define('SQL_DEFAULT',159);
 define('SQL_NOTNULL',160);
 // types
+define('SQL_NUM',170);
 define('SQL_FLOAT',171);
 define('SQL_FIXED',172);
 define('SQL_INT',173);
@@ -113,6 +115,16 @@ define('SQL_TIME',181);
 define('SQL_IPV4',182);
 define('SQL_SET',183);
 define('SQL_ENUM',184);
+define('SQL_TIMESTAMP',185);
+// functions
+define('SQL_AVG_FUNC',190);
+define('SQL_COUNT_FUNC',191);
+define('SQL_MAX_FUNC',192);
+define('SQL_MIN_FUNC',193);
+define('SQL_SUM_FUNC',194);
+define('SQL_NEXTVAL_FUNC',195);
+define('SQL_CURRVAL_FUNC',196);
+define('SQL_SETVAL_FUNC',197);
 // }}}
 
 /**
@@ -170,7 +182,6 @@ class Sql_Parser
         'default'=>  SQL_DEFAULT,
         'order'=>    SQL_ORDER,
         'check'=>    SQL_CHECK,
-        'set'=>      SQL_SET,
         'step'=>     SQL_STEP,
         'auto_increment'=> SQL_AUTOINCREMENT,
         'value'=>    SQL_VALUE,
@@ -217,7 +228,6 @@ class Sql_Parser
     function Sql_Parser($string = null) {
         if (is_string($string)) {
             $this->lexer = new Lexer($string);
-            $this->lexer->string = $string;
             $this->lexer->symtab =& $this->symtab;
         }
     }
@@ -248,9 +258,12 @@ class Sql_Parser
     // {{{ raiseError($message)
     function raiseError($message) {
         $end = 0;
-        while (($this->lexer->string[$this->lexer->lineBegin+$end] != "\n") &&
-               ($this->lexer->string[$this->lexer->lineBegin+$end]))
-            ++$end;
+        if ($this->lexer->string != '') {
+            while (($this->lexer->string{$this->lexer->lineBegin+$end} != "\n")
+                && ($this->lexer->string{$this->lexer->lineBegin+$end})) {
+                ++$end;
+            }
+        }
         $message = 'Parse error: '.$message.' on line '.
             ($this->lexer->lineNo+1)."\n";
         $message .= substr($this->lexer->string, $this->lexer->lineBegin, $end)."\n";
@@ -479,11 +492,10 @@ class Sql_Parser
     {
         if (is_string($string)) {
             $this->lexer = new Lexer($string);
-            $this->lexer->string = $string;
             $this->lexer->symtab =& $this->symtab;
         } else {
             if (!is_object($this->lexer)) {
-                return $this->raiseError('No initial string sepcified');
+                return $this->raiseError('No initial string specified');
             }
         }
 
