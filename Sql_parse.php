@@ -283,9 +283,14 @@ class Sql_Parser
         }
         $this->getTok();
         if (($this->token == 'and') || ($this->token == 'or')) {
-            return array('arg_2' => $clause,
-                         'op' => $this->token,
-                         'arg_1' => $this->parseSearchClause());
+            $subClause = $this->parseSearchClause();
+            if (PEAR::isError($subClause)) {
+                return $subClause;
+            } else {
+                return array('arg_2' => $clause,
+                            'op' => $this->token,
+                            'arg_1' => $subClause);
+            }
         } else {
             $this->lexer->unget();
             return $clause;
@@ -546,15 +551,59 @@ class Sql_Parser
                 $tree['command'] = 'select';
                 $this->getTok();
                 if (($this->token == 'distinct') || ($this->token == 'all')) {
+                    $tree['set_quantifier'] = $this->token;
                     $this->getTok();
                 }
+                if ($this->token == '*') {
+                    $tree['column_names'][] = '*';
+                    $this->getTok();
+                } elseif ($this->token == 'ident') {
+                    while ($this->token == 'ident') {
+                        $tree['column_names'][] = $this->lexer->tokText;
+                        $this->getTok();
+                        if ($this->token == ',') {
+                            $this->getTok();
+                        }
+                    }
+                } elseif ($this->isFunc()) {
+                    if (!isset($tree['set_quantifier'])) {
+                        $tree['set_function'] = $this->token;
+                    } else {
+                        return $this->raiseError('Cannot use "'.
+                                $tree['set_quantifier'].'" with '.$this->token);
+                    }
+                } else {
+                    return $this->raiseError('Expected columns or a set function');
+                }
+                if ($this->token != 'from') {
+                    return $this->raiseError('Expected "from"');
+                }
+                $this->getTok();
                 while ($this->token == 'ident') {
                     $tree['table_names'][] = $this->lexer->tokText;
                     $this->getTok();
                     if ($this->token == ',') {
                         $this->getTok();
-                    } elseif ($this->token != 'set') {
-                        return $this->raiseError('Expected "set"');
+                    } elseif (($this->token == 'where') ||
+                              ($this->token == 'order') ||
+                              ($this->token == 'limit') ||
+                              (is_null($this->token))) {
+                        break;
+                    }
+                }
+                while (!is_null($this->token)) {
+                    switch ($this->token) {
+                        case 'where':
+                            $clause =& $this->parseSearchClause();
+                            if (PEAR::isError($clause)) {
+                                return $clause;
+                            }
+                            $tree['where_clause'] =& $clause;
+                            break;
+                        case 'order':
+                        case 'limit':
+                        default:
+                            return $this->raiseError('Unexpected clause');
                     }
                 }
                 break;
