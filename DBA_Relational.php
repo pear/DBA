@@ -90,7 +90,6 @@ class DBA_Relational extends PEAR
         }
 
         if ($this->_tables[$tableName]->isOpen()) {
-
             if (!((($mode == 'r') && $this->_tables[$tableName]->isReadable())
                || (($mode == 'w') && $this->_tables[$tableName]->isWritable())))
             {

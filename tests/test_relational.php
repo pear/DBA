@@ -50,7 +50,6 @@ foreach ($empSchema as $tableName=>$tableSchema) {
         $results = $db->select($tableName, '*');
 
         echo "Query: \$db->select($tableName, '*');\n";
-        print_r($results);
         echo $db->formatResults($db->finalizeRows($tableName, $results));
         echo "------------------------------------------------\n\n";
     }

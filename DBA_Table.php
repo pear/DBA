@@ -212,7 +212,7 @@ class DBA_Table extends PEAR
      *
      * @returns object PEAR_Error on failure
      */
-    function lockTableEx()
+    function lockEx()
     {
         return ($this->_dba->reopen('w'));
     }
@@ -222,7 +222,7 @@ class DBA_Table extends PEAR
      *
      * @returns object PEAR_Error on failure
      */
-    function lockTableSh($table_name)
+    function lockSh($table_name)
     {
         return ($this->_dba->reopen('r'));
     }
@@ -342,7 +342,7 @@ class DBA_Table extends PEAR
                 break;
             case 'varchar':
                 if (is_string ($value)) {
-                    if ($this->_schema[$field]['size']) {
+                    if ($this->_schema[$field]['size']>0) {
                         $c_value = rtrim(substr($value, 0,
                                         $this->_schema[$field]['size']));
                     } else {
@@ -350,7 +350,7 @@ class DBA_Table extends PEAR
                     }
                 }
                 break;
-            case 'integer': case 'int':
+            case 'integer':
             case 'float':
             case 'numeric':
                 if (is_numeric ($value)) {
@@ -383,12 +383,8 @@ class DBA_Table extends PEAR
                 return $c_value;
             case 'enum':
                 return $this->_schema[$field]['domain'][$value];
-            case 'bool':
-                if ($value != '1') {
-                    return true;
-                } else {
-                    return false;
-                }
+            case 'boolean':
+                return ($value == '1');
             case 'timestamp':
             case 'integer':
                 return intval($value);
@@ -396,6 +392,7 @@ class DBA_Table extends PEAR
             case 'numeric':
                 return floatval($value);
             case 'varchar':
+            case 'text':
                 return $value;
         }
     }
@@ -421,7 +418,7 @@ class DBA_Table extends PEAR
                     $buffer .= "$element, ";
                 }
                 return substr($buffer,0 ,-2);
-            case 'bool':
+            case 'boolean':
                 if ($value) return "true";
                 return "false";
             case 'timestamp':
@@ -465,7 +462,11 @@ class DBA_Table extends PEAR
                         $buffer .= implode(',',$value);
                         break;
                     case 'type':
-                        $buffer .= strtolower($value);
+                        // sanitize type names
+                        $value = strtolower($value);
+                        if ($value == 'int') $value = 'integer';
+                        elseif ($value == 'bool') $value = 'boolean';
+                        $buffer .= $value;
                         break;
                     case 'autoincrement':
                         $buffer .= $value;
