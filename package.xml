@@ -20,13 +20,11 @@ DBA is a wrapper for the php DBA functions. It includes a file-based emulator an
 
     <release>
         <license>LGPL</license>
-        <version>1.0</version>
-        <date>2002-12-17</date>
+        <version>1.1</version>
+        <date>2003-01-08</date>
         <state>stable</state>
         <notes>
-This is the first stable release.
-
- * Updated db_exists() to handle more driver types
+* Added static DBA:drop()
         </notes>
         <filelist>
             <dir name="/" baseinstalldir="/">

@@ -17,6 +17,9 @@
 // | License along with this library; if not, write to the Free Software  |
 // | Foundation, Inc., 59 Temple Place, Suite 330,Boston,MA 02111-1307 USA|
 // +----------------------------------------------------------------------+
+// | Authors: Brent Cook <busterb@mail.utexas.edu>                        |
+// |          Olaf Conradi <conrado@drake.bt.co.uk>                       |
+// +----------------------------------------------------------------------+
 //
 // $Id$
 //
@@ -87,6 +90,19 @@ class DBA extends PEAR
         }
     }
 
+    /**
+     * Deletes a DBA database from the filesystem
+     *
+     * @static
+     * @param   string $driver type of storage object to return
+     * @return  object DBA storage object, returned by reference
+     */
+    function drop($name, $driver = 'file')
+    {
+        $db = DBA::create($driver);
+        return $db->db_drop($name);
+    }
+    
     /**
      * Returns whether a result code from a DBA method is an error
      *

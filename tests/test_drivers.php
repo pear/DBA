@@ -34,65 +34,89 @@ $testDataArray = array ('1', '22', '333', '4444', '55555', '666666',
 
 $maxDataIndex = sizeof($testDataArray)-1;
 
-foreach (DBA::getDriverList() as $driver) {
-echo "Testing $driver\n\n";
-$testDB =& DBA::create($driver);
+//$testDrivers = DBA::getDriverList();
+$testDrivers = array('file');
 
-if (PEAR::isError($error=$testDB->open('file_test', 'c'))) {
-    echo $error->getMessage()."\n";
-    exit;
-}
+echo "Testing create/insert/replace/remove/drop/read/open/close functionality\n";
+foreach ($testDrivers as $driver) {
+    echo "Testing $driver driver\n\n";
+    $testDB =& DBA::create($driver);
 
-// main testing loop
-for ($i=0; $i<5000; ++$i) {
-    $testKey = rand (0, 200);
-    $testData = $testDataArray[rand(0, 8)];
-    switch (rand(0, 3)) {
-        case 0:
-            if (!$testDB->exists($testKey)) {
-                $result = $testDB->insert($testKey, $testData);
-            }
-            break;
-        case 1:
-            if ($testDB->exists($testKey)) {
-                $result = $testDB->remove($testKey);
-            }
-            break;
-        case 2:
-            $result = $testDB->replace($testKey, $testData);
-            break;
-        case 3:
-            if ($testDB->exists($testKey)) {
-                $result = $testDB->fetch($testKey);
-            }
-    }
-    if (PEAR::isError($result)) {
+    if (PEAR::isError($result=$testDB->open('test_db', 'c'))) {
         echo $result->getMessage()."\n";
+        exit;
+    }
+
+    // main testing loop
+    for ($i=0; $i<5000; ++$i) {
+        $testKey = rand (0, 200);
+        $testData = $testDataArray[rand(0, 8)];
+        switch (rand(0, 3)) {
+            case 0:
+                if (!$testDB->exists($testKey)) {
+                    $result = $testDB->insert($testKey, $testData);
+                }
+                break;
+            case 1:
+                if ($testDB->exists($testKey)) {
+                    $result = $testDB->remove($testKey);
+                }
+                break;
+            case 2:
+                $result = $testDB->replace($testKey, $testData);
+                break;
+            case 3:
+                if ($testDB->exists($testKey)) {
+                    $result = $testDB->fetch($testKey);
+                }
+        }
+        if (PEAR::isError($result)) {
+            echo $result->getMessage()."\n";
+        }
+    }
+
+    if (PEAR::isError($result = $testDB->close())) {
+        echo $result->getMessage();
+        exit;
+    }
+
+    if (PEAR::isError($result=$testDB->open('test_db', 'r'))) {
+        echo $result->getMessage()."\n";
+        exit;
+    }
+
+    $key = $testDB->firstkey();
+    while ($key !== FALSE) {
+        echo "$key = ".$testDB->fetch($key)."\n";
+        $key = $testDB->nextkey($key);
+    }
+
+    if (PEAR::isError($result = $testDB->close())) {
+        echo $result->getMessage();
+        exit;
+    }
+
+    if (PEAR::isError($result = $testDB->drop())) {
+        echo $result->getMessage();
+        exit;
     }
 }
-$result = $testDB->close();
-if (PEAR::isError($result)) {
-    echo $result->getMessage();
-    exit;
-}
 
-$testDB->open('file_test', 'r');
-$key = $testDB->firstkey();
-while ($key !== FALSE) {
-    echo "$key = ".$testDB->fetch($key)."\n";
-    $key = $testDB->nextkey($key);
-}
+echo "Testing static drop functionality\n";
+// test static drop
+foreach ($testDrivers as $driver) {
+    echo "Testing $driver driver\n\n";
+    $testDB =& DBA::create($driver);
 
-$result = $testDB->close();
-if (PEAR::isError($result)) {
-    echo $result->getMessage();
-    exit;
-}
-$result = $testDB->drop();
-if (PEAR::isError($result)) {
-    echo $result->getMessage();
-    exit;
-}
+    if (PEAR::isError($result=$testDB->open('test_db', 'c'))) {
+        echo $result->getMessage()."\n";
+        exit;
+    }
+
+    if (PEAR::isError($result = DBA::drop('test_db'))) {
+        echo $result->getMessage();
+        exit;
+    }
 }
 
 ?>
