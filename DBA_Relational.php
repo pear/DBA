@@ -84,7 +84,7 @@ class DBA_Relational extends PEAR
      */
     function _DBA_Relational()
     {
-        echo "I'm Melting!\n";
+//        echo "I'm Melting!\n";
         $this->close();
     }
 

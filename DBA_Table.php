@@ -68,7 +68,7 @@ class DBA_Table extends PEAR
      */
     function _DBA_Table()
     {
-        echo "DBA_Table {$this->_dba->_dbName} is melting!\n";
+//        echo "DBA_Table {$this->_dba->_dbName} is melting!\n";
         $this->close();
     }
 

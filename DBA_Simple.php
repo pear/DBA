@@ -257,7 +257,7 @@ class DBA_Simple extends PEAR
      */
     function _DBA_Simple()
     {
-        echo "DBA_Simple {$this->_dbName} melting!\n";
+        //echo "DBA_Simple {$this->_dbName} melting!\n";
         $this->close();
     }
 
@@ -642,7 +642,6 @@ class DBA_Simple extends PEAR
             $loc = intval($loc);
             $size = intval($size);
             $vsize = intval($vsize);
-            echo strlen($loc).', ';
             // is this an free block?
             if ($key == '') {
                 // check if this block had been previously marked as used
