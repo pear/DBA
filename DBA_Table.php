@@ -121,6 +121,11 @@ class DBA_Table extends PEAR
      */
     var $_primaryKey=array();
 
+    /**
+     * Name of the DBA driver to use
+     */
+    var $_driver;
+
     // }}}
 
     // {{{ DBA_Table($driver = 'simple')
@@ -135,6 +140,7 @@ class DBA_Table extends PEAR
         $this->PEAR();
         // initialize the internal dba object
         $this->_dba =& DBA::create($driver);
+        $this->_driver = $driver;
     }
     // }}}
 
@@ -219,37 +225,45 @@ class DBA_Table extends PEAR
 
     // {{{ create($tableName, $schema)
     /**
-     * Creates a new table. Note, this closes any open table.
+     * Creates a new table. Note, this is a static function, and operates
+     * independently of a table object. It no longer closes an open table.
      *
      * @param   string $tableName   name of the table to create
      * @param   array  $schema field schema for the table
      * @return  object PEAR_Error on failure
      */
-    function create($tableName, $schema)
+    function create($tableName, $schema, $driver)
     {
+        echo "$tableName, $schema, $driver\n";
         // pack the schema
-        $packedSchema = $this->_packSchema($schema +
+        $packedSchema = DBA_Table::_packSchema($schema +
             array('_rowid'=>array(DBA_TYPE => DBA_INTEGER,
                                 DBA_DEFAULT => 0,
                                 DBA_AUTOINCREMENT => true),
                 '_timestamp'=>array(DBA_TYPE => DBA_TIMESTAMP,
                                 DBA_DEFAULT => 'time()',
                                 DBA_DEFAULTTYPE => DBA_FUNCTION)));
+
         if (PEAR::isError($packedSchema)) {
             return $packedSchema;
         }
 
-        $r = $this->_dba->open($tableName, 'n');
+        $dba = DBA::create($driver);
+        if (PEAR::isError($dba)) {
+            return $dba;
+        }
+
+        $r = $dba->open($tableName, 'n');
         if (PEAR::isError($r)) {
             return $r;
         }
 
-        $r = $this->_dba->insert(DBA_SCHEMA_KEY, $packedSchema);
+        $r = $dba->insert(DBA_SCHEMA_KEY, $packedSchema);
         if (PEAR::isError($r)) {
             return $r;
         }
 
-        $r = $this->_dba->close();
+        $r = $dba->close();
         if (PEAR::isError($r)) {
             return $r;
         }
@@ -282,7 +296,7 @@ class DBA_Table extends PEAR
      */
     function tableExists($tableName)
     {
-        return $this->_dba->db_exists($tableName);
+        return DBA::exists($tableName, $this->_driver);
     }
     // }}}
 
@@ -1014,40 +1028,6 @@ class DBA_Table extends PEAR
     }
     // }}}
 
-    // {{{ _sortCmpA($a, $b)
-    /**
-     * Comparison function for sorting ascending order
-     *
-     * @access  private
-     * @return  int
-     */
-    function _sortCmpA($a, $b)
-    {
-        foreach ($this->_sortFields as $field) {
-            if ($a[$field] < $b[$field]) return -1;
-            if ($a[$field] > $b[$field]) return 1;
-        }
-        return 0;
-    }
-    // }}}
-
-    // {{{ _sortCmpD($a, $b)
-    /**
-     * Comparison function for sorting descending order
-     *
-     * @access  private
-     * @return  int
-     */
-    function _sortCmpD($a, $b)
-    {
-        foreach ($this->_sortFields as $field) {
-            if ($a[$field] < $b[$field]) return 1;
-            if ($a[$field] > $b[$field]) return -1;
-        }
-        return 0;
-    }
-    // }}}
-
     // {{{ _parseFieldString($fieldString, $possibleFields)
     /**
      * explodes a string of field names into an array
@@ -1083,32 +1063,71 @@ class DBA_Table extends PEAR
      */
     function sort($fields, $order, $rows)
     {
+        global $_dba_sort_fields;
+        if (!function_exists('_dbaSortCmpA')) {
+        // {{{ _dbaSortCmpA($a, $b)
+        /**
+        * Comparison function for sorting ascending order
+        *
+        * @access  private
+        * @return  int
+        */
+        function _dbaSortCmpA($a, $b)
+        {
+            global $_dba_sort_fields;
+            foreach ($_dba_sort_fields as $field) {
+                if ($a[$field] < $b[$field]) return -1;
+                if ($a[$field] > $b[$field]) return 1;
+            }
+            return 0;
+        }
+        // }}}
+
+        // {{{ _dbaSortCmpD($a, $b)
+        /**
+        * Comparison function for sorting descending order
+        *
+        * @access  private
+        * @return  int
+        */
+        function _dbaSortCmpD($a, $b)
+        {
+            global $_dba_sort_fields;
+            foreach ($_dba_sort_fields as $field) {
+                if ($a[$field] < $b[$field]) return 1;
+                if ($a[$field] > $b[$field]) return -1;
+            }
+            return 0;
+        }
+        // }}}
+        }
+
         if (is_array($rows)) {
             if (is_string($fields)) {
                 // parse the sort string to produce an array of sort fields
                 // we pass the sortfields as a member variable because
                 // uasort does not pass extra parameters to the comparison
                 // function
-                $this->_sortFields = $this->_parseFieldString($fields,
+                $_dba_sort_fields = DBA_Table::_parseFieldString($fields,
                                        reset($rows));
             } else {
                 if (is_array($fields)) {
                     // we already have an array of sort fields
-                    $this->_sortFields = $fields;
+                    $_dba_sort_fieldssortFields = $fields;
                 }
             }
 
             if ($order=='a') {
-                uasort($rows, array($this, '_sortCmpA'));
+                uasort($rows, '_dbaSortCmpA');
             } elseif ($order=='d') {
-                uasort($rows, array($this, '_sortCmpD'));
+                uasort($rows, '_dbaSortCmpD');
             } else {
-                return $this->raiseError("$order is not a valid sort order");
+               return DBA_Table::raiseError("$order is not a valid sort order");
             }
 
             return $rows;
         } else {
-            return $this->raiseError('no rows to sort specified');
+            return DBA_Table::raiseError('no rows to sort specified');
         }
     }
     // }}}
@@ -1128,7 +1147,7 @@ class DBA_Table extends PEAR
         if (is_array($rows)) {
             $projectFields = array();
             if (is_string($fields)) {
-                $projectFields = $this->_parseFieldString($fields,
+                $projectFields = DBA_Table::_parseFieldString($fields,
                                        reset($rows));
             } else {
                 if (is_array($fields)) {
@@ -1144,7 +1163,7 @@ class DBA_Table extends PEAR
             }
             return $projectedRows;
         } else {
-            return $this->raiseError('no rows to sort specified');
+            return DBA_Table::raiseError('no rows to sort specified');
         }
     }
     // }}}
@@ -1190,7 +1209,7 @@ class DBA_Table extends PEAR
             }
             return $results;
         } else {
-            return $this->raiseError('no rows to sort specified');
+            return DBA_Table::raiseError('no rows to sort specified');
         }
     }
     // }}}

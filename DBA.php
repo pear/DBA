@@ -21,6 +21,8 @@
 // $Id$
 //
 
+require_once('PEAR.php');
+
 /**
  * DBA is a set of classes for handling and extending Berkeley DB style
  * databases. It works around some of the quirks in the built-in dba
@@ -35,20 +37,34 @@
 class DBA
 {
     /**
-    * Creates a new DBA object
-    *
-    * @static
-    * @param   string $driver type of storage object to return
-    * @return  object DBA storage object, returned by reference
-    */
+     * Creates a new DBA object
+     *
+     * @static
+     * @param   string $driver type of storage object to return
+     * @return  object DBA storage object, returned by reference
+     */
     function &create($driver = 'simple')
     {
+        echo "$driver\n";
         if (!function_exists('dba_open') || ($driver=='simple')) {
             require_once 'DB/DBA/DBA_Simple.php';
             return new DBA_Simple();
-        } else {
+        } elseif (($driver == 'db3') || ($driver == 'gdbm')){
             require_once 'DB/DBA/DBA_Builtin.php';
             return new DBA_Builtin($driver);
+        } else {
+            return PEAR::raiseError('Unknown DBA driver, '.$driver);
+        }
+    }
+
+    function exists($name, $driver = 'simple')
+    {
+        if (!function_exists('dba_open') || ($driver=='simple')) {
+            return (file_exists($name.'.idx') && file_exists($name.'.dat'));
+        } elseif (($driver == 'db3') || ($driver == 'gdbm')){
+            return file_exists($name);
+        } else {
+            return PEAR::raiseError('Unknown DBA driver, '.$driver);
         }
     }
 }

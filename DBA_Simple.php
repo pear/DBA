@@ -148,7 +148,7 @@ class DBA_Simple extends PEAR
                     break;
             case 'c':
                     // should we create a new database?
-                    if (!(file_exists($idx_name) || file_exists($dat_name))) {
+                    if (!DBA_Simple::db_exists($dbName)) {
                         $file_mode = 'w+b';
                         $this->_writable = true;
                         $this->_readable = true;

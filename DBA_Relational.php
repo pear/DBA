@@ -45,13 +45,6 @@ class DBA_Relational extends PEAR
     var $_tables=array();
 
     /**
-     * Handle to manager table; used for handling multi-table operations
-     * @access private
-     * @var object
-     */
-    var $_manager;
-
-    /**
      * Location of table data files
      * @access private
      * @var string
@@ -86,8 +79,10 @@ class DBA_Relational extends PEAR
 
         $this->_driver = $driver;
 
-        // initialize the manager table
-        $this->_manager =& new DBA_Table($this->_driver);
+        if (!$this->tableExists('_tables')) {
+            $this->createTable('_tables', 
+                array('name'=>array(DBA_TYPE=>DBA_VARCHAR, DBA_SIZE=>30)));
+        }
     }
     // }}}
 
@@ -170,7 +165,7 @@ class DBA_Relational extends PEAR
      */
     function tableExists($tableName)
     {
-        return $this->_manager->tableExists($this->_home.$tableName);
+        return DBA::exists($this->_home.$tableName, $this->_driver);
     }
     // }}}
 
@@ -185,7 +180,8 @@ class DBA_Relational extends PEAR
      */
     function createTable($tableName, $schema)
     {
-        return $this->_manager->create($this->_home.$tableName, $schema);
+        return DBA_Table::create($this->_home.$tableName, $schema,
+                                 $this->_driver);
     }
     // }}}
 
@@ -343,7 +339,7 @@ class DBA_Relational extends PEAR
      */
     function sort($fields, $order='a', $rows)
     {
-        return $this->_manager->sort($fields, $order, $rows);
+        return DBA_Table::sort($fields, $order, $rows);
     }
     // }}}
 
@@ -360,7 +356,7 @@ class DBA_Relational extends PEAR
      */
     function project($fields, $rows)
     {
-        return $this->_manager->project($fields, $rows);
+        return DBA_Table::project($fields, $rows);
     }
     // }}}
 
@@ -375,7 +371,7 @@ class DBA_Relational extends PEAR
      */
     function unique($rows)
     {
-        return $this->_manager->unique($rows);
+        return DBA_Table::unique($rows);
     }
     // }}}
 
