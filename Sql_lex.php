@@ -85,13 +85,6 @@ class Lexer
     }
 // }}}
 
-    function getCurrLine() {
-        $end = 0;
-        while ($this->string[$this->lineBegin+$end] != "\n")
-            ++$end;
-        return trim(substr($this->string, $this->lineBegin, $end));
-    }
-
 // {{{ lex($this->string)
 function lex()
 {
