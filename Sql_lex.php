@@ -55,13 +55,15 @@ class Lexer
     var $tokText = '';
     var $lineNo = 0;
     var $lineBegin = 0;
-    var $string;
+    var $string = '';
+    var $stringLen = 0;
 // }}}
 
 // {{{ incidental functions
     function Lexer($string = '')
     {
         $this->string = $string;
+        $this->stringLen = strlen($string);
     }
 
     function get() {
@@ -76,7 +78,7 @@ class Lexer
 
     function skip() {
         ++$this->tokStart;
-        return $this->string{$this->tokPtr++};
+        return ($this->tokPtr != $this->stringLen) ? $this->string{$this->tokPtr++} : '';
     }
 
     function revert() {
@@ -89,13 +91,10 @@ class Lexer
     }
 // }}}
 
-// {{{ lex($this->string)
+// {{{ lex()
 function lex()
 {
-    if ($state == 1000) {
-        return 0;
-    }
-
+    if ($this->string == '') return;
     $state = 0;
     while (1) {
         //echo "State: $state, Char: $c\n";
@@ -177,13 +176,12 @@ function lex()
                 $this->unget();
                 $this->tokText = substr($this->string, $this->tokStart,
                                         $this->tokLen);
-                $tokval = $this->symtab[strtolower($this->tokText)];
-                if ($tokval) {
+                if (isset($this->symtab[strtolower($this->tokText)])) {
                     $this->tokStart = $this->tokPtr;
-                    return ($tokval);
+                    return $this->symtab[strtolower($this->tokText)];
                 } else {
                     $this->tokStart = $this->tokPtr;
-                    return (TOK_IDENT);
+                    return TOK_IDENT;
                 }
                 break;
             // }}}
