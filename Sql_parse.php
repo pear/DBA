@@ -212,13 +212,14 @@ class Sql_Parser
 
     function getParams(&$values, &$types) {
         $values = array();
+        $types = array();
         while ($this->token != ')') {
             $this->getTok();
             if ($this->isVal()) {
                 $values[] = $this->lexer->tokText;
                 $types[] = $this->token;
             } elseif ($this->token == ')') {
-                return $values;
+                return;
             } else {
                 return $this->raiseError('Expected a value');
             }
@@ -378,24 +379,26 @@ class Sql_Parser
                 }
                 switch ($fields[$i][SQL_TYPE]) {
                     case SQL_FIXED: case SQL_FLOAT:
-                        if (!sizeof($values)) {
-                            break;
-                        }
-                        if (sizeof($values) != 2) {
-                            return $this->raiseError('Expected 2 parameters');
-                        }
-                        if (($types[0] != SQL_INTEGER) ||
-                            ($types[1] != SQL_INTEGER)) {
-                            return $this->raiseError('Expected an integer');
-                        }
-                        $fields[$i][SQL_SIZE] = $values[0];
-                        $fields[$i][SQL_DECIMALS] = $values[1];
+                        if (isset($values[0])) {
+                        if ($types[0] == TOK_INT_VAL) {
+                            $fields[$i][SQL_SIZE] = $values[0];
+                            if (isset($types[1])) {
+                            if ($types[1] == TOK_INT_VAL) {
+                                $fields[$i][SQL_DECIMALS] = $values[1];
+                            } else { 
+                                return $this->raiseError('Expected an integer '.
+                                                            'for second parameter');
+                            }}
+                        } else {
+                            return $this->raiseError('Expected an integer '.
+                                                     'for second parameter');
+                        }}
                         break;
                     case SQL_CHAR: case SQL_VARCHAR:
                         if (sizeof($values) != 1) {
                             return $this->raiseError('Expected 1 parameter');
                         }
-                        if ($types[0] != SQL_INTEGER) {
+                        if ($types[0] != TOK_INT_VAL) {
                             return $this->raiseError('Expected an integer');
                         }
                         $fields[$i][SQL_SIZE] = $values[0];
@@ -404,7 +407,8 @@ class Sql_Parser
                         if (sizeof($values) > 1) {
                             return $this->raiseError('Expected 1 parameter');
                         }
-                        if ($types[0] != SQL_INTEGER) {
+                        if ($types[0] != TOK_INT_VAL) {
+                            print_r($types);
                             return $this->raiseError('Expected an integer');
                         }
                         $fields[$i][SQL_SIZE] = $values[0];
@@ -478,17 +482,17 @@ class Sql_Parser
                         }
                         break;
                 }
-                case SQL_INSERT:
+                break;
+            case SQL_INSERT:
+                $this->getTok();
+                if ($this->token == SQL_INTO) {
+                    $tree[SQL_COMMAND] = SQL_CREATE_TABLE;
                     $this->getTok();
-                    if ($this->token == SQL_INTO) {
-                        $tree[SQL_COMMAND] = SQL_CREATE_TABLE;
-                        $this->getTok();
-                        if ($this->token == SQL_IDENT) {
-                            $tree[SQL_NAME] = $this->lexer->tokText;
-                        }
-                    } else {
-                        return $this->raiseError('Expected "into"');
+                    if ($this->token == SQL_IDENT) {
+                        $tree[SQL_NAME] = $this->lexer->tokText;
                     }
+                } else {
+                    return $this->raiseError('Expected "into"');
                 }
                 break;
         }
