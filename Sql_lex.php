@@ -64,23 +64,18 @@ define('SQL_UINT32',310);
 define('SQL_UINT64',311);
 define('SQL_BOOL',312);
 define('SQL_CHAR',313);
-define('SQL_TEXT',314);
-define('SQL_REAL',315);
-define('SQL_DATE',316);
-define('SQL_MONEY',317);
-define('SQL_TIME',318);
-define('SQL_IPV4',319);
-define('SQL_LIMIT',320);
-define('SQL_CREATE_TABLE',321);
-define('SQL_CREATE_INDEX',322);
-define('SQL_CREATE_SEQUENCE',323);
-define('SQL_DROP_TABLE',324);
-define('SQL_DROP_INDEX',325);
-define('SQL_DROP_SEQUENCE',326);
-define('SQL_SEQUENCE',327);
-define('SQL_VALUE',328);
-define('SQL_STEP',329);
-define('SQL_AVL_INDEX',330);
+define('SQL_VARCHAR',314);
+define('SQL_TEXT',315);
+define('SQL_REAL',316);
+define('SQL_DATE',317);
+define('SQL_MONEY',318);
+define('SQL_TIME',319);
+define('SQL_IPV4',320);
+define('SQL_LIMIT',321);
+define('SQL_SEQUENCE',328);
+define('SQL_VALUE',329);
+define('SQL_STEP',330);
+define('SQL_AVL_INDEX',331);
 // }}}
 
 class Lexer
@@ -156,6 +151,7 @@ class Lexer
         '>'=>       SQL_GT,
         'integer'=> SQL_INT,
         'char'=>    SQL_CHAR,
+        'varchar'=> SQL_VARCHAR,
         'avg'=>     SQL_SET_FUNCT,
         'date'=>    SQL_DATE,
         'float8'=>  SQL_REAL,
@@ -169,10 +165,16 @@ class Lexer
 
     var $tokPtr = 0;
     var $tokStart = 0;
-    var $text = '';
     var $tokLen = 0;
+    var $currTok = '';
+    var $lastTok = '';
     var $lineno = 0;
     var $string;
+
+    function Lexer($string = '')
+    {
+        $this->string = $string;
+    }
 
     function get() {
         ++$this->tokLen;
@@ -192,6 +194,7 @@ class Lexer
     function revert() {
         $this->tokPtr = $this->tokStart;
         $this->tokLen = 0;
+        $this->currTok = $this->lastTok;
     }
 
     function isCompop($c) {
@@ -207,22 +210,21 @@ function lex()
 
     $state = 0;
     while (1) {
-        //echo 'State '.$state;
+        //echo "State: $state, Char: $c\n";
         switch($state) {
             // {{{ State 0 : Start of token
             CASE(0):
                 $this->tokPtr = $this->tokStart;
-                $this->text = '';
+                $this->currTok = '';
                 $this->tokLen = 0;
                 $c = $this->get();
-                while ($c == ' ' || $c == '\t' || $c == '\n') {
-                    if ($c == '\n') {
+                while (($c == ' ') || ($c == "\t") || ($c == "\n")) {
+                    if ($c == "\n") {
                         ++$this->lineno;
                     }
                     $c = $this->skip();
                     $this->tokLen = 1;
                 }
-                //echo ", $c\n";
                 if ($c == '\'') {
                     $state = 12;
                     break;
@@ -287,16 +289,14 @@ function lex()
             /* {{{ State 2 : Complete keyword or ident */
             CASE(2):
                 $this->unget();
-                //echo "$this->tokStart, $this->tokLen\n";
-                //echo substr($this->string,$this->tokStart,$this->tokLen)."\n";
-                $tokval = $this->symtab[
-                        substr($this->string,$this->tokStart,$this->tokLen)];
-//                $tokval = _findKeyword($this->tokStart,$this->tokLen);
+                $tokval = $this->symtab[strtolower(
+                    substr($this->string,$this->tokStart,$this->tokLen))];
                 if ($tokval) {
                     $this->tokStart = $this->tokPtr;
                     return ($tokval);
                 } else {
-                    $this->text = substr($this->string, $this->tokStart, $this->tokLen);
+                    $this->lastTok = $this->currTok;
+                    $this->currTok = substr($this->string, $this->tokStart, $this->tokLen);
                     $this->tokStart = $this->tokPtr;
                     return (SQL_IDENT);
                 }
@@ -318,7 +318,8 @@ function lex()
             // {{{ State 4: Complete ident
             CASE(4):
                 $this->unget();
-                $this->text = substr($this->string, $this->tokStart, $this->tokLen);
+                $this->lastTok = $this->currTok;
+                $this->currTok = substr($this->string, $this->tokStart, $this->tokLen);
                 $this->tokStart = $this->tokPtr;
                 return (SQL_IDENT);
             // }}}
@@ -341,7 +342,8 @@ function lex()
             // {{{ State 6: Complete integer number
             CASE(6):
                 $this->unget();
-                $this->text = substr($this->string,$this->tokStart,$this->tokLen);
+                $this->lastTok = $this->currTok;
+                $this->currTok = substr($this->string,$this->tokStart,$this->tokLen);
                 $this->tokStart = $this->tokPtr;
                 return (SQL_NUM);
                 break;
@@ -369,7 +371,8 @@ function lex()
             // {{{ State 8: Complete real number */
             CASE(8):
                 $this->unget();
-                $this->text = substr($this->string, $this->tokStart, $this->tokLen);
+                $this->lastTok = $this->currTok;
+                $this->currTok = substr($this->string, $this->tokStart, $this->tokLen);
                 $this->tokStart = $this->tokPtr;
                 return (SQL_REAL_NUM);
             // }}}
@@ -418,27 +421,31 @@ function lex()
 
             // {{{ State 12: Incomplete text string
             CASE(12):
+//                $this->currTok = $this->readTextLiteral;
+
                 $bail = false;
                 while (!$bail) {
                     switch ($this->get()) {
-                        case null:
-                            $this->text = '';
+                        case '':
+                            $this->lastTok = $this->currTok;
+                            $this->currTok = '';
                             $bail = true;
                             break;
                         case '\\':
                             if ($this->get()) {
-                                $this->text = '';
+                                $this->lastTok = $this->currTok;
+                                $this->currTok = '';
                                 $bail = true;
                             }
                             break;
                         case '\'':
-                            $this->text = substr($this->string,$tok, $this->tokLen);
+                            $this->lastTok = $this->currTok;
+                            $this->currTok = substr($this->string, $this->tokStart, $this->tokLen);
                             $bail = true;
                             break;
                     }
                 }
-//                $this->text = _readTextLiteral($this->tokStart);
-                if ($this->text) {
+                if ($this->currTok) {
                     $state = 13;
                     break;
                 }
@@ -513,7 +520,8 @@ function lex()
             // {{{ State 19: Complete Sys Var
             CASE(19):
                 $this->unget();
-                $this->text = substr($this->tokStart,$this->tokLen);
+                $this->lastTok = $this->currTok;
+                $this->currTok = substr($this->tokStart,$this->tokLen);
                 $this->tokStart = $this->tokPtr;
                 return (SQL_SYS_VAR);
             // }}}
@@ -521,15 +529,14 @@ function lex()
             // {{{ State 999 : Unknown token.  Revert to single char
             CASE(999):
                 $this->revert();
-                $c = $this->get();
-                $this->text = $c;
+                $this->currTok = $this->get();
                 $this->tokStart = $this->tokPtr;
-                return ($this->text[0]);
+                return ($this->currTok);
             // }}}
 
             // {{{ State 1000 : End Of Input
             CASE(1000):
-                $this->text = '*end of input*';
+                $this->currTok = '*end of input*';
                 $this->tokStart = $this->tokPtr;
                 return (SQL_END_OF_INPUT);
             // }}}
