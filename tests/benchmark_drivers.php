@@ -41,6 +41,8 @@ $transactionsInterval = 2000;
 
 $maxTransactions = $transactionsInterval * 8;
 
+// These drivers are known to work. cdbm and db2 have problems that prevent
+// them from being suitable drivers
 $drivers = array('db3', 'gdbm', 'simple');
 
 $prefix = './data/';
