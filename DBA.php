@@ -94,7 +94,7 @@ class DBA extends PEAR
      */
     function getDriverList()
     {
-        return array('gdbm', 'db3', 'db2', 'file');
+        return array('gdbm', 'db3', 'file', 'db2');
     }
 }
 ?>

@@ -21,12 +21,15 @@ DBA is a wrapper for the php DBA functions. It includes a file-based emulator an
     <release>
         <license>LGPL</license>
         <version>0.9.4</version>
-        <date>2002-09-26</date>
+        <date>2002-09-29</date>
         <state>beta</state>
         <notes>
-This release updates the driver constructors so that they call their base class's constructors. This makes PEAR's virtual destructor system function properly.
+Several nice changes for this release:
+ * The DBA::exists() function has been renamed to DBA::db_exists(). This is to not be confused with the driver method exists().
 
-NOTE: The file driver appears to work incorrectly with the latest PHP CVS. I am currently investigating the issue. For now, either use CVS from a few weeks ago, or PHP up to 4.2.3.
+ * Added db2 support. Apparently, it just didn't work on my OS due to outdated db2 libraries (Slackware-current). Be sure to compile PHP with db2 2.7.7.
+
+ * Added db_drop() and drop() methods to the drivers. db_drop() is static and takes a database name as an argument; drop() deletes the currently open or last open database.
 
 Many of the functions that were included with the earlier developer releases, such as the table manager and SQL parser, have been split into separate packages to be released soon.
         </notes>
@@ -42,7 +45,7 @@ Many of the functions that were included with the earlier developer releases, su
                 </dir>
                 <dir name="tests" role="test">
                     <file role="test">benchmark_drivers.php</file>
-                    <file role="test">test_file_driver.php</file>
+                    <file role="test">test_drivers.php</file>
                     <file role="test">test_compatibility.php</file>
                 </dir>
                 <dir name="docs" role="doc">
