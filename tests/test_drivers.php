@@ -27,14 +27,16 @@
 
 ini_set('include_path',ini_get('include_path').':../../');
 include 'PEAR.php';
-include 'DBA/Driver/File.php';
+include 'DBA.php';
 
 $testDataArray = array ('1', '22', '333', '4444', '55555', '666666',
                         '7777777', '88888888', '999999999');
 
 $maxDataIndex = sizeof($testDataArray)-1;
 
-$testDB =& new DBA_Driver_File();
+foreach (DBA::getDriverList() as $driver) {
+echo "Testing $driver\n\n";
+$testDB =& DBA::create($driver);
 
 if (PEAR::isError($error=$testDB->open('file_test', 'c'))) {
     echo $error->getMessage()."\n";
@@ -68,7 +70,11 @@ for ($i=0; $i<5000; ++$i) {
         echo $result->getMessage()."\n";
     }
 }
-$testDB->close();
+$result = $testDB->close();
+if (PEAR::isError($result)) {
+    echo $result->getMessage();
+    exit;
+}
 
 $testDB->open('file_test', 'r');
 $key = $testDB->firstkey();
@@ -77,6 +83,16 @@ while ($key !== FALSE) {
     $key = $testDB->nextkey($key);
 }
 
-//$testDB->close();
+$result = $testDB->close();
+if (PEAR::isError($result)) {
+    echo $result->getMessage();
+    exit;
+}
+$result = $testDB->drop();
+if (PEAR::isError($result)) {
+    echo $result->getMessage();
+    exit;
+}
+}
 
 ?>
