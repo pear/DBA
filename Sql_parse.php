@@ -709,14 +709,42 @@ class Sql_Parser
                     }
                     $this->getTok();
                     while ($this->token == 'ident') {
+                        $col = $this->lexer->tokText;
                         $this->getTok();
-/*
-                        if ($this->token == 'asc') ||
-                        $tree['sort_spec']
-*/
+                        if (isset($this->synonyms[$this->token])) {
+                            $order = $this->synonyms[$this->token];
+                            if (($order != 'asc') && ($order != 'desc')) {
+                                return $this->raiseError('Unexpected token');
+                            }
+                            $this->getTok();
+                        } else {
+                            $order = 'desc';
+                        }
+                        if ($this->token == ',') {
+                            $this->getTok();
+                        }
+                        $tree['sort_order'][$col] = $order;
                     }
                     break;
                 case 'limit':
+                    $this->getTok();
+                    echo "Got here!\n";
+                    if ($this->token != 'int_val') {
+                        return $this->raiseError('Expected an integer value');
+                    }
+                    $length = $this->lexer->tokText;
+                    $start = 0;
+                    $this->getTok();
+                    if ($this->token == ',') {
+                        $this->getTok();
+                        if ($this->token != 'int_val') {
+                            return $this->raiseError('Expected an integer value');
+                        }
+                        $start = $length;
+                        $length = $this->lexer->tokText;
+                    }
+                    $tree['limit_clause'] = array('start'=>$start,
+                                                  'length'=>$length);
                     break;
                 default:
                     return $this->raiseError('Unexpected clause');
