@@ -62,8 +62,8 @@ $queries = array(
              date_prod DATE, 
              kind      CHAR(10), 
              len       INTERVAL HOUR TO MINUTE
-             CONSTRAINT production UNIQUE(date_prod)
 )",
+//             CONSTRAINT production UNIQUE(date_prod)
 "CREATE TABLE distributors ( 
              did      DECIMAL(3) PRIMARY KEY DEFAULT NEXTVAL('serial'), 
              name     VARCHAR(40) NOT NULL CHECK (name <> '') 

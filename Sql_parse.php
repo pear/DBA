@@ -248,6 +248,39 @@ class Sql_Parser
                         return $this->raiseError('Expected )');
                     }
                     break;
+                case 'month': case 'year': case 'day': case 'hour':
+                case 'minute': case 'second':
+                    $intervals = array(
+                                    array('month', 'year'),
+                                    array('second', 'minute', 'hour', 'day'));
+                    foreach ($intervals as $class) {
+                        if (in_array($option, $class)) {
+                            $constraintOpts = array('quantum_1'=>$this->token);
+                            $this->getTok();
+                            if ($this->token == 'to') {
+                                $this->getTok();
+                                if (!in_array($this->token, $class)) {
+                                    return $this->raiseError(
+                                        'Expected interval quanta');
+                                }
+                                if ($class[$this->token] >=
+                                    $constraintOpts['quantum_1']) {
+                                    return $this->raiseError($this->token.
+                                        ' is not smaller than '.
+                                        $constraintOpts['quantum_1']);
+                                } 
+                                $constraintOpts['quantum_2'] = $this->token;
+                            } else {
+                                $this->lexer->unGet();
+                            }
+                            break;
+                        }
+                    }
+                    if (!isset($constraintOpts['quantum_1'])) {
+                        return $this->raiseError('Expected interval quanta');
+                    }
+                    $constraintOpts['type'] = 'values';
+                    break;
                 case 'null':
                     $haveValue = false;
                     break;
