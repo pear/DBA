@@ -87,21 +87,36 @@ function parseCreate($rawquery) {
                 $token = strtolower(DBA_Sql::getToken());
                 // parse field-specific parameters
                 switch ($fieldType) {
-                    case 'int': case 'integer': case 'float':
-                    case 'numeric': case 'bigint': case 'littleint':
-                    case 'tinyint':
+                    case 'int': case 'integer': case 'bigint':
+                    case 'littleint': case 'tinyint': case 'mediumint':
+                        if ($token == '(') {
+                            $tables[$tableName][$fieldName]['size'] =
+                                                    DBA_Sql::getToken();
+                            if (DBA_Sql::getToken() != ')') {
+                                return PEAR::raiseError(
+                                    "expected ) on $fieldName, $fieldType");
+                            }
+                            $token = DBA_Sql::getToken();
+                        }
+                        break;
+                    case 'decimal': case 'numeric':
+                        if ($token != '(') {
+                            return PEAR::raiseError(
+                                "expected ( on $fieldName, $fieldType");
+                        }
+                    case 'real': case 'double': case 'float':
                         if ($token == '(') {
                             $tables[$tableName][$fieldName]['size'] =
                                                     DBA_Sql::getToken();
                             $token = DBA_Sql::getToken();
                             if ($token == ',') {
                                 $tables[$tableName][$fieldName]
-                                    ['decimal'] = DBA_Sql::getToken();
+                                    ['decimals'] = DBA_Sql::getToken();
                                 $token = DBA_Sql::getToken();
                             }
                             if ($token != ')') {
                                 return PEAR::raiseError(
-                                "Parse error $token on $rawquery");
+                                    "expected ) on $fieldName, $fieldType");
                             }
                             $token = DBA_Sql::getToken();
                         }
@@ -112,7 +127,7 @@ function parseCreate($rawquery) {
                                 DBA_Sql::getToken();
                             if (DBA_Sql::getToken() != ')') {
                                 return PEAR::raiseError(
-                                    "Parse error at $token on $rawquery");
+                                    "expected ) on $fieldName, $fieldType");
                             }
                             $token = DBA_Sql::getToken();
                         }
@@ -124,13 +139,13 @@ function parseCreate($rawquery) {
                                                      $fieldName);
                         }
                         $element = 0;
-                        while ($token != ')') {
+                        while ($token && ($token != ')')) {
                             $tables[$tableName][$fieldName]['domain']
                                 [$element] = DBA_Sql::getString();
                             $token = DBA_Sql::getToken();
-                            if (($token == ',') || ($token == ')')) {
+                            if ($token == ',') {
                                 ++$element;
-                            } else {
+                            } elseif ($token != ')') {
                                 return PEAR::raiseError('Invalid element at '
                                                         .$token);
                             }
@@ -140,32 +155,45 @@ function parseCreate($rawquery) {
                     default:
                 }
 
+                echo $token."\n";
                 // parse extra options
-                while (!(($token == ',') || ($token == ')'))) {
+                while ($token && !(($token == ',') || ($token == ')'))) {
                     switch ($token) {
                         case 'default':
                             $tables[$tableName][$fieldName]['default'] =
                                 DBA_Sql::getString();
                             break;
-                        case 'auto_increment':
-                            $tables[$tableName][$fieldName]['autoincrement']=
-                                $token;
+                        case 'primary':
+                            $token = strtolower(DBA_Sql::getToken());
+                            if ($token != 'key') {
+                                return PEAR::raiseError(
+                                    "Expected 'key', got $token on $fieldName,".
+                                    $fieldType);
+                            } else {
+                                $tables[$tableName][$fieldName]['primarykey']=true;
+                            }
                             break;
                         case 'not':
                             $token = strtolower(DBA_Sql::getToken());
                             if ($token != 'null') {
                                 return PEAR::raiseError(
-                                "Parse error at $token on $rawquery");
+                                    "Parse error at $token on $rawquery");
                             } else {
                                 $tables[$tableName][$fieldName]['notnull']=true;
                             }
                             break;
-                        case 'null':
-                            $tables[$tableName][$fieldName]['null']=true;
+                        case 'null': case 'auto_increment': case 'zerofill':
+                            $tables[$tableName][$fieldName][$token]=true;
+                            break;
+                        case 'unsigned': case 'zerofill':
+                            $tables[$tableName][$fieldName][$token]=true;
                             break;
                     }
                     $token = strtolower(DBA_Sql::getToken());
                 }
+            }
+            if ($token != ')') {
+                return PEAR::raiseError('Unexpected end of input');
             }
         }
     } else {

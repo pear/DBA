@@ -29,26 +29,28 @@ require_once 'PEAR.php';
 require_once '../DBA_Sql.php';
 
 $queries = array(
-"create table nodefinitions",
-"create dogfood",
 "CREATE TABLE albums (
   name varchar(60),
   directory varchar(60),
   rating enum (1,2,3,4,5,6,7,8,9,10) NOT NULL,
   category set(sexy,'\'family time\'',outdoors,generic,'very weird') NULL,
   description text NULL,
-  id int auto_increment default 200
+  id int auto_increment default 200 PRIMARY KEY
 )",
-
 "CREATE TABLE photos (
   filename varchar(60) not NULL,
   name varchar(60) default \"no name\",
   album int,
   price float (4,2),
   description text default 'hello',
-  id int
-)"
-
+  id int default 0 primary key autoincrement not null
+)",
+"create table nodefinitions",
+"create dogfood",
+"create table dunce (name varchar",
+"create table dunce (name varchar(2,3))",
+"create table dunce (enum)",
+"create table dunce (enum(23))",
 );
 
 foreach ($queries as $query) {
