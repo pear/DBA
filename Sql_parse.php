@@ -281,7 +281,15 @@ class Sql_Parser
         } else {
             $clause['arg_1'] = $this->lexer->tokText;
         }
-        return $clause;
+        $this->getTok();
+        if (($this->token == 'and') || ($this->token == 'or')) {
+            return array('arg_2' => $clause,
+                         'op' => $this->token,
+                         'arg_1' => $this->parseSearchClause());
+        } else {
+            $this->lexer->unget();
+            return $clause;
+        }
     }
     // }}}
 
