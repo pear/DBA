@@ -27,12 +27,15 @@ class SqlParserTest extends PHPUnit_TestCase {
         foreach ($tests as $number=>$test) {
             $result = $this->parser->parse($test['sql']);
             $expected = $test['expect'];
+            $message = "\nSQL: {$test['sql']}\n";
             if (PEAR::isError($result)) {
-                $message = "\nSQL: {$test['sql']}\n";
+                $result = $result->getMessage();
+                $message .= "\nError:\n".$result;
+            } else {
                 $message .= "\nExpected:\n".$this->dumper->r_display($expected);
                 $message .= "\nResult:\n".$this->dumper->r_display($result);
-                $result = $result->getMessage();
             }
+            $message .= "\n*********************\n";
             $this->assertEquals($expected, $result, $message, $number);
         }
     }
