@@ -25,25 +25,25 @@ require_once 'PEAR.php';
 /**
  * Location in the index file for a block location
  */
-define('DBA_LOC',0);
+define('DBA_SIMPLE_LOC',0);
 
 /**
  * Location in the index file for a block size
  */
-define('DBA_SIZE',1);
+define('DBA_SIMPLE_SIZE',1);
 
 /**
  * Location in the index file for a block value size
  */
-define('DBA_VSIZE',2);
+define('DBA_SIMPLE_VSIZE',2);
 
 /**
  * Location in the index file for a block key
  */
-define('DBA_KEY',3);
+define('DBA_SIMPLE_KEY',3);
 
 /**
- * DBA_Simple provides an all-PHP implementation of a DBM-style database.
+ * DBA_Simple provides a file-based implementation of a DBM-style database.
  * It uses two files, and index and a data file to manage key/value pairs.
  * These two files use the suffixes '.dat' and '.idx'. When a database is
  * opened, only the index file is read. The index file contains pointers
@@ -332,8 +332,8 @@ class DBA_Simple extends PEAR
                 return $this->raiseError('DBA: cannot fetch key '.$key.
                               ', it does not exist');
             } else {
-                fseek($this->_datFP, $this->_usedBlocks[$key][DBA_LOC]);
-                return fread($this->_datFP,$this->_usedBlocks[$key][DBA_VSIZE]);
+                fseek($this->_datFP, $this->_usedBlocks[$key][DBA_SIMPLE_LOC]);
+                return fread($this->_datFP,$this->_usedBlocks[$key][DBA_SIMPLE_VSIZE]);
             }
         } else {
             return $this->raiseError('DBA: cannot fetch '.$key.' on '.
@@ -429,19 +429,19 @@ class DBA_Simple extends PEAR
 
             } else {
                 // the value is not new
-                $size = $this->_usedBlocks[$key][DBA_SIZE];
+                $size = $this->_usedBlocks[$key][DBA_SIMPLE_SIZE];
 
                 // is the value smaller or equal in size to its block size
                 if ($size >= $vsize) {
                     // move to the block's location in the data file
-                    $loc = $this->_usedBlocks[$key][DBA_LOC];
+                    $loc = $this->_usedBlocks[$key][DBA_SIMPLE_LOC];
                     fseek($this->_datFP, $loc);
 
                     // write to the data file
                     fwrite($this->_datFP, str_pad($value, $size), $size);
 
                     // update internal indecies
-                    $this->_usedBlocks[$key][DBA_VSIZE] = $vsize;
+                    $this->_usedBlocks[$key][DBA_SIMPLE_VSIZE] = $vsize;
                     $this->_writeIdxEntry($loc, $size, $vsize, $key);
 
                 // the value is larger than its allocated space
@@ -492,9 +492,10 @@ class DBA_Simple extends PEAR
             $loc = ftell($this->_datFP);
 
             // write to the data file
-            $size = $vsize + ceil($vsize / 10); // make size 10% larger
+            $size = $vsize + ceil($vsize / 20); // make size 5% larger
+
             // add a useless "\n" to new values. This makes the data file
-            // readable in any text editor
+            // readable in any text editor. Useful when things go wrong :P
             fwrite($this->_datFP, str_pad($value, $size)."\n", $size+1);
 
             // update internal block lists
@@ -535,8 +536,8 @@ class DBA_Simple extends PEAR
      */
     function _freeUsedBlock($key)
     {
-        $loc = $this->_usedBlocks[$key][DBA_LOC];
-        $size = $this->_usedBlocks[$key][DBA_SIZE];
+        $loc = $this->_usedBlocks[$key][DBA_SIMPLE_LOC];
+        $size = $this->_usedBlocks[$key][DBA_SIMPLE_SIZE];
         unset($this->_usedBlocks[$key]);
 
         $this->_freeBlocks[$loc] = $size;
@@ -666,9 +667,9 @@ class DBA_Simple extends PEAR
         // write the used blocks
         if (isset($this->_usedBlocks)) {
             foreach ($this->_usedBlocks as $key=>$block) {
-                $this->_writeIdxEntry($block[DBA_LOC],
-                                      $block[DBA_SIZE],
-                                      $block[DBA_VSIZE], $key);
+                $this->_writeIdxEntry($block[DBA_SIMPLE_LOC],
+                                      $block[DBA_SIMPLE_SIZE],
+                                      $block[DBA_SIMPLE_VSIZE], $key);
             }
         }
         fflush($this->_idxFP);
@@ -690,5 +691,4 @@ class DBA_Simple extends PEAR
         }
     }
 }
-
 ?>
