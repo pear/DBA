@@ -101,7 +101,6 @@ class DBA_Driver_Builtin extends DBA
      */
     function open($dbName='', $mode='r', $persistent = false)
     {
-        echo "Got here";
         if (is_null($this->_driver)) {
             return $this->raiseError('No dba driver specified');
         }
