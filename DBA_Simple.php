@@ -18,6 +18,8 @@
 //
 // $Id$
 
+require_once 'PEAR.php';
+
 /**
  * Location in the index file for a block location
  * @const DBA_LOC
@@ -69,11 +71,11 @@ define('DBA_KEY',3);
  * The sync function calls fflush on the data and index files.
  *
  * @author  Brent Cook
- * @version 0.0.9
+ * @version 0.0.11
  * @access  public
  * @package DBA
  */
-class DBA_Simple {
+class DBA_Simple extends PEAR {
 
     /**
      * Name of the database
@@ -108,6 +110,7 @@ class DBA_Simple {
     /**
      * Opens a database.
      *
+     * @access  public
      * @param   string  $dbName The name of a database
      * @param   string  $mode The mode in which to open a database.
      *                   'r' opens read-only.
@@ -115,14 +118,13 @@ class DBA_Simple {
      *                   'n' creates a new database and opens read-write.
      *                   'c' creates a new database if the database does not
      *                      exist and opens read-write.
-     * @returns boolean true on success, false on failure
+     * @returns object PEAR_Error on failure
      */
     function open($dbName='', $mode='r')
     {
         if ($dbName == '')
         {
-            trigger_error('DBA: No database name specified', E_USER_WARNING);
-            return false;
+            return $this->raiseError('DBA: No database name specified');
         } else {
             $this->_dbName = $dbName;
             $dat_name = $dbName.'.dat';
@@ -157,8 +159,7 @@ class DBA_Simple {
                     $this->_readable = true;
                     break;
             default:
-                trigger_error("DBA: Invalid file mode: $mode", E_USER_ERROR);
-                return false;
+                return $this->raiseError("DBA: Invalid file mode: $mode");
         }
 
         // open the index file
@@ -166,9 +167,8 @@ class DBA_Simple {
         if ($this->_idxFP === false) {
             $this->_writable = false;
             $this->_readable = false;
-            trigger_error('DBA: Could not open index file: '.$idx_name.
-                          ' with mode '. $file_mode, E_USER_WARNING);
-            return false;
+            return $this->raiseError('DBA: Could not open index file: '.$idx_name.
+                          ' with mode '. $file_mode);
         }
 
         // open the data file
@@ -177,9 +177,8 @@ class DBA_Simple {
             fclose ($this->_idxFP);
             $this->_writable = false;
             $this->_readable = false;
-            trigger_error('DBA: Could not open data file: '.
-                          $dat_name, E_USER_WARNING);
-            return false;
+            return $this->raiseError('DBA: Could not open data file: '.
+                          $dat_name);
         }
 
         // get a shared lock if read-only, otherwise get an exclusive lock
@@ -205,7 +204,8 @@ class DBA_Simple {
     /**
      * Closes an open database.
      *
-     * @returns boolean true on success, false on failure
+     * @access  public
+     * @returns object PEAR_Error on failure
      */
     function close()
     {
@@ -221,8 +221,7 @@ class DBA_Simple {
             fclose($this->_datFP);
             return true;
         } else {
-            return trigger_error('DBA: No database was open', E_USER_WARNING);
-            return false;
+            return $this->raiseError('DBA: No database was open');
         }
     }
 
@@ -231,8 +230,9 @@ class DBA_Simple {
      * If the database is already in the requested mode, then this function
      * does nothing.
      *
+     * @access  public
      * @param   string  $mode 'r' for read-only, 'w' for read/write
-     * @returns boolean true on success, false on failure
+     * @returns object PEAR_Error on failure
      */
     function reopen($mode)
     {
@@ -254,14 +254,14 @@ class DBA_Simple {
                 }
             }
         } else {
-            trigger_error('DBA: No database was open', E_USER_WARNING);
-            return false;
+            return $this->raiseError('DBA: No database was open');
         }
     }
 
     /**
      * Returns the current read status for the database
      *
+     * @access  public
      * @returns boolean
      */
     function isOpen()
@@ -272,6 +272,7 @@ class DBA_Simple {
     /**
      * Returns the current read status for the database
      *
+     * @access  public
      * @returns boolean
      */
     function isReadable()
@@ -282,6 +283,7 @@ class DBA_Simple {
     /**
      * Returns the current write status for the database
      *
+     * @access  public
      * @returns boolean
      */
      function isWritable()
@@ -292,8 +294,9 @@ class DBA_Simple {
     /**
      * Deletes the value at location $key
      *
+     * @access  public
      * @param   string  $key key to delete
-     * @returns boolean true on success, false on failure
+     * @returns object PEAR_Error on failure
      */
     function delete($key)
     {
@@ -304,20 +307,19 @@ class DBA_Simple {
                 $this->_freeUsedBlock($key);
                 return true;
             } else {
-                trigger_error('DBA: cannot delete key: '.
-                               $key. ', it does not exist', E_USER_WARNING);
-                return false;
+                return $this->raiseError('DBA: cannot delete key: '.
+                               $key. ', it does not exist');
             }
         } else {
-            trigger_error('DBA: cannot delete key '.
-                           $key. ', DB not writable', E_USER_WARNING);
-            return false;
+            return $this->raiseError('DBA: cannot delete key '.
+                           $key. ', DB not writable');
         }
     }
 
     /**
      * Returns the value that is stored at $key.
      *
+     * @access  public
      * @param   string $key key to examine
      * @returns mixed  the requested value on success, false on failure
      */
@@ -327,23 +329,22 @@ class DBA_Simple {
         {
             if (!isset($this->_usedBlocks[$key]))
             {
-                trigger_error('DBA: cannot fetch key '.$key.
-                              ', it does not exist', E_USER_WARNING);
-                return false;
+                return $this->raiseError('DBA: cannot fetch key '.$key.
+                              ', it does not exist');
             } else {
                 fseek($this->_datFP, $this->_usedBlocks[$key][DBA_LOC]);
                 return fread($this->_datFP, $this->_usedBlocks[$key][DBA_VSIZE]);
             }
         } else {
-            trigger_error('DBA: cannot fetch '.$key.' on '.
-                          $this->_dbName. ', DB not readable', E_USER_WARNING);
-            return false;
+            return $this->raiseError('DBA: cannot fetch '.$key.' on '.
+                          $this->_dbName. ', DB not readable');
         }
     }
 
     /**
      * Returns the first key in the database
      *
+     * @access  public
      * @returns mixed string on success, false on failure
      */
     function firstkey()
@@ -360,6 +361,7 @@ class DBA_Simple {
     /**
      * Returns the next key in the database, false if there is a problem
      *
+     * @access  public
      * @returns mixed string on success, false on failure
      */
     function nextkey()
@@ -375,6 +377,7 @@ class DBA_Simple {
     /**
      * Returns ths number of keys in the database
      *
+     * @access  public
      * @returns int
      */
     function size()
@@ -391,17 +394,17 @@ class DBA_Simple {
      * Inserts a new value at $key. Will not overwrite if the key/value pair
      * already exist
      *
+     * @access  public
      * @param   string  $key key to insert
      * @param   string  $value value to store
-     * @returns boolean true on success, false on failure
+     * @returns object PEAR_Error on failure
      */
     function insert($key, $value)
     {
         if ($this->exists($key))
         {
-            trigger_error('DBA: cannot insert on key: '.
-                          $key. ', it already exists', E_USER_WARNING);
-            return false;
+            return $this->raiseError('DBA: cannot insert on key: '.
+                          $key. ', it already exists');
         } else {
             return $this->replace($key, $value);
         }
@@ -411,9 +414,10 @@ class DBA_Simple {
      * Inserts a new value at key. If the key/value pair
      * already exist, overwrites the value
      *
+     * @access  public
      * @param   $key    string the key to insert
      * @param   $val    string the value to store
-     * @returns boolean true on success, false on failure
+     * @returns object PEAR_Error on failure
      */
     function replace($key, $value)
     {
@@ -454,9 +458,8 @@ class DBA_Simple {
             }
             return true;
         } else {
-            trigger_error('DBA: cannot replace on '.
-                          $this->_dbName. ', DB not writable', E_USER_WARNING);
-            return false;
+            return $this->raiseError('DBA: cannot replace on '.
+                          $this->_dbName. ', DB not writable');
         }
     }
     
@@ -464,9 +467,9 @@ class DBA_Simple {
      * Allocates a new block of at least $vsize and writes $key=>$val
      * to the database
      *
-     * param   string $key
-     * param   string $value
-     * param   int    $vsize
+     * @param   string $key
+     * @param   string $value
+     * @param   int    $vsize
      * @access private
      */
     function _writeNewBlock($key, $value, $vsize)
@@ -530,7 +533,7 @@ class DBA_Simple {
      * Places a used block on the free list, updates indicies accordingly
      *
      * @access  private
-     * param    string $key
+     * @param    string $key
      * @returns mixed
      */
     function _freeUsedBlock($key)
@@ -547,22 +550,23 @@ class DBA_Simple {
      * Creates a new database file if one does not exist. If it already exists,
      * updates the last-updated timestamp on the database
      *
+     * @access  public
      * @param   string  $dbName the database to create
-     * @returns boolean true on success, false on failure
+     * @returns object PEAR_Error on failure
      */
     function create($dbName)
     {
         if (@touch($dbName.'.dat') && @touch($dbName.'.idx')) {
             return true;
         } else {
-            trigger_error('DBA: Could not create database: '.$dbName);
-            return false;
+            return $this->raiseError('DBA: Could not create database: '.$dbName);
         }
     }
 
     /**
      * Indicates whether a database with given name exists
      *
+     * @access  public
      * @param   string  $dbName the database name to check for existence
      * @returns boolean
      */
@@ -574,6 +578,7 @@ class DBA_Simple {
     /**
      * Check whether key exists
      *
+     * @access  public
      * @param   string   $key
      * @returns boolean
      */
@@ -584,6 +589,7 @@ class DBA_Simple {
 
     /**
      * Synchronizes an open database to disk
+     * @access  public
      */
     function sync()
     {
@@ -595,6 +601,7 @@ class DBA_Simple {
 
     /**
      * Optimizes an open database
+     * @access  public
      */
     function optimize()
     {
@@ -674,8 +681,8 @@ class DBA_Simple {
 
     /**
      * Writes a used block entry to an index file
+     *
      * @access private
-     * @returns boolean
      */
     function _writeIdxEntry($loc, $size, $vsize=NULL, $key=NULL)
     {

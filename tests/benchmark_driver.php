@@ -71,19 +71,25 @@ foreach ($maxTestKeys as $maxTestKey) {
                 $testData = $testDataArray[rand(0, $maxDataIndex)];
                 switch (rand(0, 3)) {
                     case 0:
-                        $result = @$testDB->insert($testKey, $testData);
+                        if (!$testDB->exists($testKey)) {
+                            ++$actualTransactions;
+                            $testDB->insert($testKey, $testData);
+                        }
                         break;
                     case 1:
-                        $result = @$testDB->delete($testKey);
+                        if ($testDB->exists($testKey)) {
+                            ++$actualTransactions;
+                            $testDB->delete($testKey);
+                        }
                         break;
                     case 2:
-                        $result = @$testDB->replace($testKey, $testData);
+                        $testDB->replace($testKey, $testData);
                         break;
                     case 3:
-                        $result = @$testDB->fetch($testKey);
-                }
-                if ($result) {
-                    ++$actualTransactions;
+                        if ($testDB->exists($testKey)) {
+                            ++$actualTransactions;
+                            $testDB->fetch($testKey);
+                        }
                 }
             }
             $testDB->close();

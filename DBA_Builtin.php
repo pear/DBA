@@ -18,17 +18,22 @@
 //
 // $Id$
 
+require_once 'PEAR.php';
+
 /**
  * DBA_Builtin uses the builtin dba functions of PHP as the underlying driver
  * for a DBA class. Depending on the driver, this can be faster or slower than
  * the DBA_Simple class.
  *
+ * This class has been tested with DB3 and GDBM. Other drivers may have quirks
+ * that this class does not address yet.
+ *
  * @author  Brent Cook
- * @version 0.0.9
+ * @version 0.0.11
  * @access  public
  * @package DBA
  */
-class DBA_Builtin {
+class DBA_Builtin extends PEAR{
 
     /**
      * Name of the database
@@ -62,6 +67,7 @@ class DBA_Builtin {
 
     /* Constructor
      *
+     * @access public
      * @param   string  $driver dba driver to use
      */
     function DBA_Builtin ($driver = 'gdbm')
@@ -72,6 +78,7 @@ class DBA_Builtin {
     /**
      * Opens a database.
      *
+     * @access public
      * @param   string  $dbName The name of a database
      * @param   string  $mode The mode in which to open a database.
      *                   'r' opens read-only.
@@ -80,7 +87,7 @@ class DBA_Builtin {
      *                   'c' creates a new database if the database does not
      *                      exist and opens read-write.
      * @param   string  $driver dba driver to use
-     * @returns boolean true on success, false on failure
+     * @returns object PEAR_Error on failure
      */
     function open ($dbName='', $mode='r', $driver=NULL)
     {
@@ -89,8 +96,7 @@ class DBA_Builtin {
         }
 
         if (is_null($this->_driver)) {
-            trigger_error('DBA: No dba driver specified');
-            return false;
+            return $this->raiseError('DBA: No dba driver specified');
         }
 
         if ($this->_driver == 'gdbm') {
@@ -100,8 +106,7 @@ class DBA_Builtin {
         }
 
         if ($dbName == '') {
-            trigger_error('DBA: No database name specified', E_USER_WARNING);
-            return false;
+            return $this->raiseError('DBA: No database name specified');
         } else {
             $this->_dbName = $dbName;
         }
@@ -120,8 +125,7 @@ class DBA_Builtin {
                     $this->_readable = true;
                     break;
             default:
-                trigger_error("DBA: Invalid file mode: $mode", E_USER_ERROR);
-                return false;
+                return $this->raiseError("DBA: Invalid file mode: $mode", E_USER_ERROR);
         }
 
         // open the index file
@@ -129,9 +133,8 @@ class DBA_Builtin {
         if ($this->_dba === false) {
             $this->_writable = false;
             $this->_readable = false;
-            trigger_error("DBA: Could not open database: $dbName"
+            return $this->raiseError("DBA: Could not open database: $dbName"
                           ." with mode $mode");
-            return false;
         }
         return true; // everything worked out
     }
@@ -139,7 +142,8 @@ class DBA_Builtin {
     /**
      * Closes an open database.
      *
-     * @returns boolean true on success, false on failure
+     * @access public
+     * @returns object PEAR_Error on failure
      */
     function close ()
     {
@@ -150,8 +154,7 @@ class DBA_Builtin {
             dba_close($this->_dba);
             return true;
         } else {
-            return trigger_error('DBA: No database was open', E_USER_WARNING);
-            return false;
+            return $this->raiseError('DBA: No database was open');
         }
     }
 
@@ -160,8 +163,9 @@ class DBA_Builtin {
      * If the database is already in the requested mode, then this function
      * does nothing.
      *
+     * @access public
      * @param   string  $mode 'r' for read-only, 'w' for read/write
-     * @returns boolean true on success, false on failure
+     * @returns object PEAR_Error on failure
      */
     function reopen ($mode)
     {
@@ -180,14 +184,14 @@ class DBA_Builtin {
                 return true;
             }
         } else {
-            trigger_error('DBA: No database was open', E_USER_WARNING);
-            return false;
+            return $this->raiseError('DBA: No database was open');
         }
     }
 
     /**
      * Returns the current read status for the database
      *
+     * @access public
      * @returns boolean
      */
     function isOpen()
@@ -198,6 +202,7 @@ class DBA_Builtin {
     /**
      * Returns the current read status for the database
      *
+     * @access public
      * @returns boolean
      */
     function isReadable()
@@ -208,6 +213,7 @@ class DBA_Builtin {
     /**
      * Returns the current write status for the database
      *
+     * @access public
      * @returns boolean
      */
      function isWritable()
@@ -218,28 +224,28 @@ class DBA_Builtin {
     /**
      * Deletes the value at location $key
      *
+     * @access public
      * @param   string  $key key to delete
-     * @returns boolean true on success, false on failure
+     * @returns object PEAR_Error on failure
      */
     function delete($key)
     {
         if ($this->isWritable())
         {
             if (!dba_delete($key, $this->_dba)) {
-                trigger_error('DBA: cannot delete key: '.
-                               $key. ', it does not exist', E_USER_WARNING);
-                return false;
+                return $this->raiseError('DBA: cannot delete key: '.
+                               $key. ', it does not exist');
             }
         } else {
-            trigger_error('DBA: cannot delete key '.
-                           $key. ', DB not writable', E_USER_WARNING);
-            return false;
+            return $this->raiseError('DBA: cannot delete key '.
+                           $key. ', DB not writable');
         }
     }
 
     /**
      * Returns the value that is stored at $key.
      *
+     * @access public
      * @param   string $key key to examine
      * @returns mixed  the requested value on success, false on failure
      */
@@ -247,23 +253,22 @@ class DBA_Builtin {
     {
         if ($this->isReadable())
         {
-            if (dba_exists($key)) {
+            if (dba_exists($key, $this->_dba)) {
                 return dba_fetch($key, $this->_dba);
             } else {
-                trigger_error('DBA: cannot fetch key '.$key.
-                              ', it does not exist', E_USER_WARNING);
-                return false;
+                return $this->raiseError('DBA: cannot fetch key '.$key.
+                              ', it does not exist');
             }
         } else {
-            trigger_error('DBA: cannot fetch '.$key.' on '.
-                          $this->_dbName. ', DB not readable', E_USER_WARNING);
-            return false;
+            return $this->raiseError('DBA: cannot fetch '.$key.' on '.
+                          $this->_dbName. ', DB not readable');
         }
     }
 
     /**
      * Returns the first key in the database
      *
+     * @access public
      * @returns mixed string on success, false on failure
      */
     function firstkey()
@@ -279,6 +284,7 @@ class DBA_Builtin {
     /**
      * Returns the next key in the database, false if there is a problem
      *
+     * @access public
      * @returns mixed string on success, false on failure
      */
     function nextkey()
@@ -295,9 +301,10 @@ class DBA_Builtin {
      * Inserts a new value at $key. Will not overwrite if the key/value pair
      * already exist
      *
+     * @access public
      * @param   string  $key key to insert
      * @param   string  $value value to store
-     * @returns boolean true on success, false on failure
+     * @returns object PEAR_Error on failure
      */
     function insert($key, $value)
     {
@@ -305,16 +312,14 @@ class DBA_Builtin {
 
             if ((!$this->_hasReplace && dba_exists($key, $this->_dba)) ||
                 (!dba_insert($key, $value, $this->_dba))) {
-                trigger_error('DBA: cannot insert on key: '.
-                               $key. ', it already exists', E_USER_WARNING);
-                return false;
+                return $this->raiseError('DBA: cannot insert on key: '.
+                               $key. ', it already exists');
             } else {
                 return true;
             }
         } else {
-            trigger_error('DBA: cannot replace on '.
-                          $this->_dbName. ', DB not writable', E_USER_WARNING);
-            return false;
+            return $this->raiseError('DBA: cannot replace on '.
+                          $this->_dbName. ', DB not writable');
         }
     }
 
@@ -322,9 +327,10 @@ class DBA_Builtin {
      * Inserts a new value at key. If the key/value pair
      * already exist, overwrites the value
      *
+     * @access public
      * @param   $key    string the key to insert
      * @param   $val    string the value to store
-     * @returns boolean true on success, false on failure
+     * @returns object PEAR_Error on failure
      */
     function replace($key, $value)
     {
@@ -341,9 +347,8 @@ class DBA_Builtin {
             }
 
         } else {
-            trigger_error('DBA: cannot replace on '.
-                          $this->_dbName. ', DB not writable', E_USER_WARNING);
-            return false;
+            return $this->raiseError('DBA: cannot replace on '.
+                          $this->_dbName. ', DB not writable');
         }
     }
     
@@ -351,9 +356,10 @@ class DBA_Builtin {
      * Creates a new database file if one does not exist. If it already exists,
      * updates the last-updated timestamp on the database
      *
+     * @access public
      * @param   string  $dbName the database to create
      * @param   string  $driver the dba driver to use
-     * @returns boolean true on success, false on failure
+     * @returns object PEAR_Error on failure
      */
     function create($dbName, $driver='gdbm')
     {
@@ -361,14 +367,14 @@ class DBA_Builtin {
         if (($db !== false) && dba_close($db)) {
             return true;
         } else {
-            trigger_error('DBA: Could not create database: '.$dbName);
-            return false;
+            return $this->raiseError('DBA: Could not create database: '.$dbName);
         }
     }
 
     /**
      * Indicates whether a database with given name exists
      *
+     * @access public
      * @param   string  $dbName the database name to check for existence
      * @returns boolean
      */
@@ -380,6 +386,7 @@ class DBA_Builtin {
     /**
      * Check whether key exists
      *
+     * @access public
      * @param   string   $key
      * @returns boolean
      */
@@ -390,6 +397,7 @@ class DBA_Builtin {
 
     /**
      * Synchronizes an open database to disk
+     * @access public
      */
     function sync()
     {
@@ -398,6 +406,7 @@ class DBA_Builtin {
 
     /**
      * Optimizes an open database
+     * @access public
      */
     function optimize()
     {
