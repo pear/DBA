@@ -234,8 +234,14 @@ class DBA_Table extends PEAR
      */
     function create($tableName, $schema, $driver)
     {
+        // validate the schema
+        $v_schema = DBA_Table::_validateSchema($schema);
+        if (PEAR::isError($v_schema)) {
+            return $v_schema;
+        }
+
         // pack the schema
-        $packedSchema = DBA_Table::_packSchema($schema +
+        $packedSchema = DBA_Table::_packSchema($v_schema +
             array('_rowid'=>array(DBA_TYPE => DBA_INTEGER,
                                 DBA_DEFAULT => 0,
                                 DBA_AUTOINCREMENT => true),
@@ -268,7 +274,34 @@ class DBA_Table extends PEAR
         }
     }
     // }}}
+    
+    function _validateSchema($schema) {
+        foreach ($schema as $field=>$meta) {
 
+            if (($field == '_rowid') || ($field == '_timestamp')) {
+                return $this->raiseError("Cannot use $field as a field name");
+            }
+
+            if (isset($meta[DBA_AUTOINCREMENT])) {
+                if ($meta[DBA_TYPE] == DBA_INTEGER) {
+                    if (!isset($meta[DBA_DEFAULT])) {
+                        $meta[DBA_DEFAULT] = 0;
+                        $meta[DBA_DEFAULTTYPE] = DBA_INTEGER;
+                    }
+                } else {
+                    return $this->raiseError('Cannot use autoincrement with a non-integer');
+                }
+            }
+
+            if (isset($meta[DBA_DEFAULTTYPE]) && 
+                ($meta[DBA_DEFAULTTYPE] == DBA_FUNCTION) && 
+                ($meta[DBA_DEFAULT] != 'time()')) {
+                    return $this->raiseError($meta[DBA_DEFAULT].' is not a valid function');
+            }
+            $schema[$field] = $meta;
+        }
+        return $schema;
+    }
     // {{{ getSchema()
     /**
      * Returns the stored schema for the table
@@ -615,6 +648,10 @@ class DBA_Table extends PEAR
             } elseif (isset($fieldMeta[DBA_DEFAULT])) {
 
                 if (isset($fieldMeta[DBA_AUTOINCREMENT])) {
+                    // set the default value to 0 if none has been set before
+                    if (!isset($this->_schema[$fieldName][DBA_DEFAULT])) {
+                        $this->_schema[$fieldName][DBA_DEFAULT] = 0;
+                    }
                     // use the autoincrement value
                     $c_value = $this->_packField($fieldName,
                                     $this->_schema[$fieldName][DBA_DEFAULT]++);
@@ -633,7 +670,6 @@ class DBA_Table extends PEAR
             } elseif (isset($fieldMeta[DBA_NOTNULL])) {
 
                 return $this->raiseError("$fieldName cannot be null");
-
             } else {
                 // when all else fails
                 $c_value = null;
@@ -712,12 +748,15 @@ class DBA_Table extends PEAR
      */
     function replace($rawQuery, $data, $rows=null)
     {
+        echo $rawQuery;
         $rows =& $this->select($rawQuery, $rows);
         if (PEAR::isError($rows)) {
             return $rows;
         }
 
-        $packedRow =& $this->_packRow($data);
+        // _packRow will calculate a new primary key for each row;
+        // passing a dummy value preserves the current keys
+        $packedRow =& $this->_packRow($data, $dummy);
         if (PEAR::isError($packedRow)) {
             return $packedRow;
         }
@@ -742,7 +781,9 @@ class DBA_Table extends PEAR
     function replaceKey($key, $data)
     {
         if ($this->isOpen()) {
-            $packedRow =& $this->_packRow($data);
+            // _packRow will calculate a new primary key for each row;
+            // passing a dummy value preserves the current keys
+            $packedRow =& $this->_packRow($data, $dummy);
             if (PEAR::isError($packedRow)) {
                 return $packedRow;
             }
