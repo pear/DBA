@@ -129,7 +129,7 @@ class DBA_Relational extends PEAR
     {
         if (is_string($tableName)) {
             if (!isset($this->_tables[$tableName])) {
-                if (!$this->_manager->tableExists($this->_home.$tableName)) {
+                if (!$this->tableExists($tableName)) {
                     return $this->raiseError('table "'.$tableName.
                                               '" does not exist');
                 } else {
@@ -161,7 +161,7 @@ class DBA_Relational extends PEAR
      */
     function tableExists($tableName)
     {
-        return !PEAR::isError($this->_openTable($tableName));
+        return $this->_manager->tableExists($this->_home.$tableName);
     }
 
     /**
