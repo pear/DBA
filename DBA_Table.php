@@ -818,7 +818,6 @@ class DBA_Table extends PEAR
 
             // perform the select
             $results = array();
-            echo $PHPSelect;
             eval ($PHPSelect);
 
             return $results;
