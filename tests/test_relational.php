@@ -47,15 +47,9 @@ foreach ($empSchema as $tableName=>$tableSchema) {
         foreach ($empData[$tableName] as $row) {
             $result = $db->insert($tableName, $row);
             if (PEAR::isError($result)) {
-            echo $result->getMessage()."\n";
+                echo $result->getMessage()."\n";
             }
         }
-
- //       $results = $db->select($tableName, '*');
-
-//        echo "Query: \$db->select($tableName, '*');\n";
- //       echo $db->formatTextResults($db->finalize($tableName, $results));
-//        echo "------------------------------------------------\n\n";
     }
 }
 
@@ -63,55 +57,93 @@ foreach ($empSchema as $tableName=>$tableSchema) {
 $db->close();
 
 $queries = array(
-                '$db->select("emp", "*")',
-                '$db->select("deptloc", "*")',
-                '$db->select("location", "*")',
-                '$db->select("dept", "*")',
-                '$db->select("account", "*")',
-                '$db->select("nothere", "pigs == \'fly\'")',
-                '$db->select("emp", "salary >= 1500")',
-                '$db->sort("empname", "a",
-                    $db->select("emp", "(job != \'analyst\') and (job != \'intern\')")
-                 )',
-                '$db->sort("empname", "d",
-                    $db->select("emp", "(job != \'analyst\') and (job != \'intern\')")
-                 )',
-                '$db->join("emp", "dept", "emp.deptno == dept.deptno")',
-                '$db->join("location", 
-                    $db->join("dept", "deptloc", "dept.deptno == deptloc.deptno"),
-                    "location.locno == B.locno"
-                 )',
-                '$db->sort("manager", "a",
-                    $db->join("location",
-                        $db->join("dept", "deptloc", "dept.deptno == deptloc.deptno"),
-                        "location.locno == B.locno"
-                    )
-                 )',
-                '$db->sort("empname, locname, deptname", "a",
-                    $db->project("empname, locname, deptname",
-                        $db->join("emp", 
-                            $db->join("location",
-                                $db->join("dept", "deptloc", "dept.deptno == deptloc.deptno"),
-                                "location.locno == B.locno"
-                            ),
-                            "emp.id == B.manager"
-                        )
-                    )
-                 )'
-                );
+'$db->select("emp", "*")',
+'$db->select("deptloc", "*")',
+'$db->select("location", "*")',
+'$db->select("dept", "*")',
+'$db->select("account", "*")',
+'$db->select("nothere", "pigs == \'fly\'")',
+'$db->select("emp", "salary >= 1500")',
 
-foreach ($queries as $query) {
-    echo "Query: $query\n";
+'$db->sort("empname", "a",
+    $db->select("emp", "(job != \'analyst\') and (job != \'intern\')")
+    )',
+
+'$db->sort("empname", "d",
+    $db->select("emp", "(job != \'analyst\') and (job != \'intern\')")
+    )',
+
+'$db->project("empname, deptname, deptno",
+    $db->join("emp", "dept", "emp.deptno == dept.deptno")
+    )',
+
+'$db->join("location", 
+    $db->join("dept", "deptloc", "dept.deptno == deptloc.deptno"),
+        "location.locno == B.locno"
+    )',
+
+'$db->sort("manager", "a",
+    $db->join("location",
+        $db->join("dept", "deptloc", "dept.deptno == deptloc.deptno"),
+            "location.locno == B.locno"
+        )
+    )',
+
+'$db->sort("empname, locname, deptname", "a",
+    $db->project("empname, locname, deptname",
+        $db->join("emp", 
+            $db->join("location",
+                $db->join("dept", "deptloc", "dept.deptno == deptloc.deptno"),
+                    "location.locno == B.locno"
+                ),
+                "emp.id != B.manager"
+            )
+        )
+    )'
+);
+
+$sql_queries = array(
+'SELECT * FROM emp',
+'SELECT * FROM deptloc',
+'SELECT * FROM location',
+'SELECT * FROM dept',
+'SELECT * FROM account',
+'SELECT * FROM nothere WHERE pigs = "fly"',
+'SELECT * FROM emp
+WHERE salary >= 1500',
+'SELECT * from emp
+WHERE (job <> "analyst") AND (job <> "intern")
+ORDER BY empname',
+'SELECT * from emp
+WHERE (job <> "analyst") AND (job <> "intern")
+ORDER BY empname DESC',
+'SELECT empname, deptname, deptno FROM emp, dept
+WHERE emp.deptno = dept.deptno',
+'SELECT * FROM location, dept, deptloc
+WHERE dept.deptno = deptloc.deptno AND location.locno = deptloc.locno',
+'SELECT * FROM location, dept, deptloc
+WHERE dept.deptno = deptloc.deptno AND location.locno = deptloc.locno
+ORDER BY manager',
+'SELECT empname, locname, deptname FROM location, dept, deptloc, emp
+WHERE dept.deptno = deptloc.deptno AND location.locno = deptloc.locno
+AND emp.id <> dept.manager
+ORDER BY empname, locname, deptname'
+);
+
+foreach ($queries as $key=>$query) {
+    echo "Query:\n$query\n\n";
+    echo "SQL equivalent:\n$sql_queries[$key]\n\n";
     eval ('$results = '.$query.';');
 
     if (PEAR::isError($results)) { 
         echo " Query failed.\n";
         echo $results->getMessage()."\n";
     } else {
+        echo "Results:\n";
         echo $db->formatTextResults($results);
     }
 
-    echo "------------------------------------------------\n\n";
+    echo "\n************************************************\n\n";
 }
 	
 //	$db->close();

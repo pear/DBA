@@ -50,7 +50,7 @@ if (PEAR::isError($error=$testDB->open('test', 'c')))
                 break;
             case 1:
                 if ($testDB->exists($testKey)) {
-                    $result = $testDB->delete($testKey);
+                    $result = $testDB->remove($testKey);
                 }
                 break;
             case 2:

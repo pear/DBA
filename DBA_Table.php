@@ -41,7 +41,7 @@ define('DBA_FIELD_SEPARATOR', '|');
  * a complete, relational database system.
  *
  * Enough functionality exists within this class to create and delete tables,
- * insert, retrieve, delete and validate data based on a table schema, and
+ * insert, retrieve, remove and validate data based on a table schema, and
  * perform basic database operations such as selects, projects and sorts.
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
@@ -733,16 +733,16 @@ class DBA_Table extends PEAR
     }
 
     /**
-     * Deletes an existing row in a table
+     * Removes an existing row in a table
      *
      * @access  public
-     * @param   string $key row id to delete
+     * @param   string $key row id to remove
      * @return  object
      * @returns PEAR_Error on failure
      */
-    function delete($key)
+    function remove($key)
     {
-        return $this->_dba->delete($key);
+        return $this->_dba->remove($key);
     }
 
     /**

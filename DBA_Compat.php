@@ -49,7 +49,7 @@ if (!function_exists('dba_open')) {
 
 	function dba_delete($key, &$dba)
 	{
-		return !PEAR::isError($dba->delete($key));
+		return !PEAR::isError($dba->remove($key));
 	}
 
 	function dba_exists($key, &$dba)

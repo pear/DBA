@@ -230,14 +230,14 @@ class DBA_Builtin extends PEAR{
      }
 
     /**
-     * Deletes the value at location $key
+     * Removes the value at location $key
      *
      * @access  public
      * @param   string  $key key to delete
      * @return  object
      * @returns PEAR_Error on failure
      */
-    function delete($key)
+    function remove($key)
     {
         if ($this->isWritable()) {
             if (!dba_delete($key, $this->_dba)) {

@@ -301,14 +301,14 @@ class DBA_Simple extends PEAR
      }
 
     /**
-     * Deletes the value at location $key
+     * Removes the value at location $key
      *
      * @access  public
-     * @param   string  $key key to delete
+     * @param   string  $key key to remove
      * @return  object
      * @returns PEAR_Error on failure
      */
-    function delete($key)
+    function remove($key)
     {
         if ($this->isWritable()) {
             if (isset($this->_usedBlocks[$key])) {

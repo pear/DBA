@@ -260,21 +260,21 @@ class DBA_Relational extends PEAR
     }
 
     /**
-     * Deletes an existing row in a table
+     * Remove an existing row in a table
      *
      * @access  public
      * @param   string $tableName table on which to operate
-     * @param   string $key row id to delete
+     * @param   string $key row id to remove
      * @return  object
      * @returns PEAR_Error on failure
      */
-    function delete($tableName, $key)
+    function remove($tableName, $key)
     {
         $result = $this->_openTable($tableName, 'w');
         if (PEAR::isError($result)) {
             return $result;
         } else {
-            return $this->_tables[$tableName]->delete($key);
+            return $this->_tables[$tableName]->remove($key);
         }
     }
 
