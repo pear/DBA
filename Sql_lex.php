@@ -98,7 +98,7 @@ function lex()
 
     $state = 0;
     while (1) {
-        echo "State: $state, Char: $c\n";
+        //echo "State: $state, Char: $c\n";
         switch($state) {
             // {{{ State 0 : Start of token
             case 0:

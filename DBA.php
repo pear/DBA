@@ -45,7 +45,6 @@ class DBA
      */
     function &create($driver = 'simple')
     {
-        echo "$driver\n";
         if (!function_exists('dba_open') || ($driver=='simple')) {
             require_once 'DB/DBA/DBA_Simple.php';
             return new DBA_Simple();
