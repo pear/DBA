@@ -42,7 +42,7 @@ class Sql_Parser
     var $types = array();
     var $symbols = array();
     var $operators = array();
-    var $typeClasses = array();
+    var $typeMap = array();
 
 // {{{ function Sql_Parser($string = null)
     function Sql_Parser($string = null) {
@@ -51,7 +51,7 @@ class Sql_Parser
         $this->types = array_flip(explode(' ',$dialect['types']));
         $this->functions = array_flip(explode(' ',$dialect['functions']));
         $this->operators = array_flip(explode(' ',$dialect['operators']));
-        $this->typeClasses = $typeClasses;
+        $this->typeMap = $typeMap;
         if (is_string($string)) {
             $this->lexer = new Lexer($string);
             $this->lexer->symbols =& $this->symbols;
@@ -373,46 +373,46 @@ class Sql_Parser
             // parse field type
             $this->getTok();
             if ($this->isType($this->token)) {
-                $fields[$name]['type'] = $this->token;
+                $fields[$name]['type'] = $this->typeMap[$this->token];
             } else {
                 return $this->raiseError('Expected a valid type');
             }
 
-            // parse type parameters
             $this->getTok();
+            // handle special cases
+            if ($this->token == 'precision') {
+                if ($fields[$name]['type'] != 'real') {
+                    return $this->raiseError('Unexpected token');
+                }
+                $this->getTok();
+            }
+            // parse type parameters
             if ($this->token == '(') {
                 $results = $this->getParams($values, $types);
                 if (PEAR::isError($results)) {
                     return $results;
                 }
-                $typeClass = $this->typeClasses[$fields[$name]['type']];
-                switch ($typeClass) {
-                    case 'real':
-                        if (isset($values[0])) {
-                        if ($types[0] == 'int_val') {
-                            $fields[$name]['length'] = $values[0];
-                            if (isset($types[1])) {
-                            if ($types[1] == 'int_val') {
-                                $fields[$name]['decimals'] = $values[1];
-                            } else { 
-                                return $this->raiseError('Expected an integer '.
-                                                            'for second parameter');
-                            }}
-                        } else {
-                            return $this->raiseError('Expected an integer '.
-                                                     'for second parameter');
-                        }}
-                        break;
-                    case 'char':
-                        if (sizeof($values) != 1) {
-                            return $this->raiseError('Expected 1 parameter');
+                switch ($fields[$name]['type']) {
+                    case 'dec':
+                        if (isset($values[1])) {
+                            if ($types[1] != 'int_val') {
+                                return $this->raiseError('Expected an integer');
+                            }
+                            $fields[$name]['decimals'] = $values[1];
                         }
+                    case 'float':
                         if ($types[0] != 'int_val') {
                             return $this->raiseError('Expected an integer');
                         }
                         $fields[$name]['length'] = $values[0];
                         break;
-                    case 'integer':
+                    case 'char': case 'varchar':
+                        if ($types[0] != 'int_val') {
+                            return $this->raiseError('Expected an integer');
+                        }
+                        $fields[$name]['length'] = $values[0];
+                        break;
+                    case 'integer': case 'int':
                         if (sizeof($values) > 1) {
                             return $this->raiseError('Expected 1 parameter');
                         }

@@ -24,7 +24,7 @@ array(
                     'type'=>'ident'),
                 'op'=>'<>',
                 'arg_2'=>array(
-                    'value'=>'4',
+                    'value'=>4,
                     'type'=>'int_val')
             )
         )

@@ -199,8 +199,8 @@ function lex()
             // {{{ State 6: Complete integer number
             case 6:
                 $this->unget();
-                $this->tokText = substr($this->string, $this->tokStart,
-                                        $this->tokLen);
+                $this->tokText = intval(substr($this->string, $this->tokStart,
+                                        $this->tokLen));
                 $this->tokStart = $this->tokPtr;
                 return 'int_val';
                 break;
@@ -228,8 +228,8 @@ function lex()
             // {{{ State 8: Complete real number */
             case 8:
                 $this->unget();
-                $this->tokText = substr($this->string, $this->tokStart,
-                                        $this->tokLen);
+                $this->tokText = floatval(substr($this->string, $this->tokStart,
+                                        $this->tokLen));
                 $this->tokStart = $this->tokPtr;
                 return 'real_val';
             // }}}
