@@ -20,35 +20,40 @@
 
 /** 
  * dba compatibility layer
+ * This works in reverse of the rest of the DBA classes. If you have code
+ * that requires the PHP dba functions, but are using a system where they
+ * are not available, including this file will define a set for you.
+ *
  * @author Brent Cook <busterb@mail.utexas.edu>
- * @version 0.1
+ * @version 0.0.11
  * @see PHP dba Documentation
  */
 
-require_once ('DBA_simple.php');
-
 if (!function_exists('dba_open')) {
+
+    require_once 'PEAR.php';
+    require_once 'DB_DBA/DBA_Simple.php';
 
 	function dba_close(&$dba)
 	{
-		$result = $dba->close();
+		$result = !PEAR::isError($dba->close());
         unset($dba);
         return $result;
 	}
 
 	function dba_delete($key, &$dba)
 	{
-		return $dba->delete($key);
+		return !PEAR::isError($dba->delete($key));
 	}
 
 	function dba_exists($key, &$dba)
 	{
-		return $dba->exists($key);
+		return !PEAR::isError($dba->exists($key));
 	}
 
 	function dba_fetch($key, &$dba)
 	{
-        return $dba->fetch($key);
+        return !PEAR::isError($dba->fetch($key));
 	}
 
 	function dba_firstkey(&$dba)
@@ -58,7 +63,7 @@ if (!function_exists('dba_open')) {
 
 	function dba_insert($key, $value, &$dba)
 	{
-		return $dba->insert($key, $value);
+		return !PEAR::isError($dba->insert($key, $value));
 	}
 
 	function dba_nextkey(&$dba)
@@ -70,27 +75,31 @@ if (!function_exists('dba_open')) {
 	{
 		$dba = new DBA_Simple();
 		$dba->open($filename, $mode);
-		return $dba;
+        if (PEAR::isError($dba)) {
+            return false;
+        } else {
+            return $dba;
+        }
 	}
 
-    function dba_optimize()
-    {
-        return $dba->optimize();
-    }
-
-    function dba_popen()
+    function dba_popen(&$dba)
     {
         return FALSE;
     }
 
 	function dba_replace($key, $value, &$dba)
 	{
-		return $dba->replace($key, $value);
+		return !PEAR::isError($dba->replace($key, $value));
 	}
 
-    function dba_sync()
+    function dba_sync(&$dba)
     {
-        return $dba->sync();
+        $dba->sync();
+    }
+
+    function dba_optimize(&$dba)
+    {
+        $dba->optimize();
     }
 }
 ?>
