@@ -693,7 +693,8 @@ class DBA_Table extends PEAR
             if ($this->_dba->isOpen()) {
                 $rows = $this->getRows();
             } else {
-                return $this->raiseError('DBA: table not open and no rows');
+                return $this->raiseError('DBA: table not open and no rows
+specified');
             }
         }
 
@@ -900,22 +901,20 @@ class DBA_Table extends PEAR
      *                     specified
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function sort($fields, $order='a', $rows=null)
+    function sort($fields, $order='a', &$rows)
     {
-        if ($this->_dba->isOpen()) {
+        if (is_array($rows)) {
             if (is_string($fields)) {
                 // parse the sort string to produce an array of sort fields
+                // we pass the sortfields as a member variable because
+                // uasort does not pass extra parameters to the comparison
+                // function
                 $this->_sortFields = $this->_parseFieldString($fields);
             } else {
                 if (is_array($fields)) {
                     // we already have an array of sort fields
                     $this->_sortFields = $fields;
                 }
-            }
-
-            // if we haven't passed any rows to select from, use the whole table
-            if (is_null($rows)) {
-                $rows = $this->getRows();
             }
 
             if ($order=='a') {
@@ -928,7 +927,7 @@ class DBA_Table extends PEAR
 
             return $rows;
         } else {
-            return $this->raiseError('DBA: table not open');
+            return $this->raiseError('DBA: no rows to sort specified');
         }
     }
 
@@ -942,9 +941,9 @@ class DBA_Table extends PEAR
      *                     specified
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function project($fields, $rows=null)
+    function project($fields, &$rows)
     {
-        if ($this->_dba->isOpen()) {
+        if (is_array($rows)) {
             $projectFields = array();
             if (is_string($fields)) {
                 $projectFields = $this->_parseFieldString($fields);
@@ -955,9 +954,6 @@ class DBA_Table extends PEAR
                 }
             }
 
-            if (is_null($rows))
-                $rows = $this->getRows();
-
             foreach ($rows as $key=>$row) {
                 foreach ($projectFields as $field) {
                     $projectedRows[$key][$field] = $row[$field];
@@ -965,7 +961,7 @@ class DBA_Table extends PEAR
             }
             return $projectedRows;
         } else {
-            return $this->raiseError('DBA: table not open');
+            return $this->raiseError('DBA: no rows to sort specified');
         }
     }
 
@@ -996,13 +992,9 @@ class DBA_Table extends PEAR
      *                     specified
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function unique($rows=null)
+    function unique(&$rows)
     {
-        if ($this->_dba->isOpen()) {
-
-            if (is_null($rows))
-                $rows = $this->getRows();
-
+        if (is_array($rows)) {
             $results = array();
             foreach ($rows as $key=>$row) {
                 if (!isset($current) || ($current != $row)) {
@@ -1012,7 +1004,7 @@ class DBA_Table extends PEAR
             }
             return $results;
         } else {
-            return $this->raiseError('DBA: table not open');
+            return $this->raiseError('DBA: no rows to sort specified');
         }
     }
 }
