@@ -66,7 +66,7 @@ class Lexer
 
     function get() {
         ++$this->tokLen;
-        return $this->string[$this->tokPtr++];
+        return $this->string{$this->tokPtr++};
     }
 
     function unget() {
@@ -76,7 +76,7 @@ class Lexer
 
     function skip() {
         ++$this->tokStart;
-        return $this->string[$this->tokPtr++];
+        return $this->string{$this->tokPtr++};
     }
 
     function revert() {
@@ -85,7 +85,7 @@ class Lexer
     }
 
     function isCompop($c) {
-        return ($c == '<' || $c == '>' || $c == '=');
+        return (($c == '<') || ($c == '>') || ($c == '='));
     }
 // }}}
 
@@ -123,17 +123,17 @@ function lex()
                     $state = 18;
                     break;
                 }
-                if (strlen($c) && ctype_alpha($c)) {
+                if (sizeof($c) && ctype_alpha($c)) {
                     $state = 1;
                     break;
                 }
-                if (strlen($c) && ctype_digit($c)) {
+                if (sizeof($c) && ctype_digit($c)) {
                     $state = 5;
                     break;
                 }
                 if ($c == '.') {
                     $t = $this->get();
-                    if (strlen($c) && ctype_digit($t)) {
+                    if (sizeof($c) && ctype_digit($t)) {
                         $this->unget();
                         $state = 7;
                         break;
@@ -164,7 +164,7 @@ function lex()
             // {{{ State 1 : Incomplete keyword or ident
             case 1:
                 $c = $this->get();
-                if (strlen($c) && ctype_alnum($c) || ($c == '_')) {
+                if (sizeof($c) && ctype_alnum($c) || ($c == '_')) {
                     $state = 1;
                     break;
                 }
@@ -191,7 +191,7 @@ function lex()
             // {{{ State 5: Incomplete real or int number
             case 5:
                 $c = $this->get();
-                if (strlen($c) && ctype_digit($c)) {
+                if (sizeof($c) && ctype_digit($c)) {
                     $state = 5;
                     break;
                 }
@@ -206,7 +206,8 @@ function lex()
             // {{{ State 6: Complete integer number
             case 6:
                 $this->unget();
-                $this->tokText = substr($this->string,$this->tokStart,$this->tokLen);
+                $this->tokText = substr($this->string, $this->tokStart,
+                                        $this->tokLen);
                 $this->tokStart = $this->tokPtr;
                 return (TOK_INT_VAL);
                 break;
@@ -223,7 +224,7 @@ function lex()
                 }
                 /* Analogy End   */
 
-                if (strlen($c) && ctype_digit($c)) {
+                if (sizeof($c) && ctype_digit($c)) {
                     $state = 7;
                     break;
                 }
@@ -234,7 +235,8 @@ function lex()
             // {{{ State 8: Complete real number */
             case 8:
                 $this->unget();
-                $this->tokText = substr($this->string, $this->tokStart, $this->tokLen);
+                $this->tokText = substr($this->string, $this->tokStart,
+                                        $this->tokLen);
                 $this->tokStart = $this->tokPtr;
                 return (TOK_REAL_VAL);
             // }}}
@@ -242,7 +244,7 @@ function lex()
             // {{{ State 9: Incomplete signed number
             case 9:
                 $c = $this->get();
-                if (strlen($c) && ctype_digit($c)) {
+                if (sizeof($c) && ctype_digit($c)) {
                     $state = 5;
                     break;
                 }
@@ -270,7 +272,7 @@ function lex()
             case 11:
                 $this->unget();
                 $tokval = $this->symtab[
-                        substr($this->string,$this->tokStart,$this->tokLen)];
+                        substr($this->string, $this->tokStart, $this->tokLen)];
                 if ($tokval)
                 {
                     $this->tokStart = $this->tokPtr;
@@ -344,7 +346,7 @@ function lex()
             // {{{ state 16: Exponent Value-first digit in Scientific Notation
             case 16:
                     $c = $this->get();
-                    if (strlen($c) && ctype_digit($c)) {
+                    if (sizeof($c) && ctype_digit($c)) {
                             $state = 17;
                             break;
                     }
@@ -355,7 +357,7 @@ function lex()
             // {{{ State 17: Exponent Value in Scientific Notation
             case 17:
                     $c = $this->get();
-                    if (strlen($c) && ctype_digit($c)) {
+                    if (sizeof($c) && ctype_digit($c)) {
                             $state = 17;
                             break;
                     }
@@ -367,7 +369,7 @@ function lex()
             // {{{ State 18 : Incomplete System Variable
             case 18:
                 $c = $this->get();
-                if (strlen($c) && ctype_alnum($c) || $c == '_') {
+                if (sizeof($c) && ctype_alnum($c) || $c == '_') {
                     $state = 18;
                     break;
                 }
