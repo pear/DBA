@@ -43,7 +43,7 @@ $queries = array(
   album int,
   price float (4,2),
   description text default 'hello',
-  id int default 0 primary key autoincrement not null,
+  id int default 0 primary key auto_increment not null,
 );",
 "create table brent (
     filename varchar(10),
@@ -77,7 +77,7 @@ $queries = array(
 
 $lexer = new Lexer();
 
-$parser = new Parser();
+$parser = new Sql_Parser();
 
 foreach ($queries as $query) {
     echo "SQL:\n$query\n\n";
