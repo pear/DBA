@@ -31,7 +31,7 @@ require_once 'PEAR.php';
  * @access  public
  * @package DBA
  */
-function addQuickformDBA(&$form, $schema, $auxMeta)
+function dbaToQuickform(&$form, $schema, $auxMeta)
 {
     foreach ($schema as $name=>$meta) {
         if (isset($auxMeta['default'])) {
@@ -73,7 +73,7 @@ function addQuickformDBA(&$form, $schema, $auxMeta)
  * Postprocess $_POST variables that were left by a form using addQuickformDBA
  * @return array DBA row suitable for inserting into a DBA table
  */
-function processQuickformDBA(&$form, $schema, $auxMeta)
+function quickformToDBA(&$form, $schema, $auxMeta)
 {
     foreach ($schema as $name=>$meta) {
         if ($isset($auxMeta[$name]) && isset($_POST[$name])) {
