@@ -102,12 +102,12 @@ echo "Query: $query\n\n";
 printQueryResults ($results, array('brand', 'quantity'));
 
 $sortFields = 'quantity, hat_id';
-$results = $table->sort($sortFields);
+$results = $table->sort($sortFields, 'a', $table->getRows());
 echo "Sorting by quantity, hat_id, ascending order\n";
 printQueryResults ($results, array('brand', 'quantity', 'hat_id'));
 
 $sortField = 'quantity';
-$results = array_reverse ($table->sort($sortField));
+$results = $table->sort($sortField, 'd', $table->select('*'));
 echo "Sorting by $sortField, descending order\n";
 printQueryResults ($results, array('brand', 'quantity'));
 

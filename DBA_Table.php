@@ -878,12 +878,12 @@ specified');
      * @param   string  $fieldString field names to explode
      * @returns array
      */
-    function _parseFieldString($fieldString)
+    function _parseFieldString($fieldString, $possibleFields)
     {
         $fields = array();
-        $tokens = split('/[ \,]/', $fieldString);
+        $tokens = preg_split('/[ \,]/', $fieldString);
         foreach ($tokens as $token) {
-            if (isset($this->_schema[$token])) {
+            if (isset($possibleFields[$token])) {
                 $fields[] = $token;
             }
         }
@@ -898,11 +898,10 @@ specified');
      * @param   mixed  $fields a string with the field name to sort by or an
      *                         array of fields to sort by in order of preference
      * @param   string $order 'a' for ascending, 'd' for descending
-     * @param   array  $rows rows to sort, sorts the entire table if not
-     *                     specified
+     * @param   array  $rows rows to sort
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function sort($fields, $order='a', &$rows)
+    function sort($fields, $order, $rows)
     {
         if (is_array($rows)) {
             if (is_string($fields)) {
@@ -910,7 +909,8 @@ specified');
                 // we pass the sortfields as a member variable because
                 // uasort does not pass extra parameters to the comparison
                 // function
-                $this->_sortFields = $this->_parseFieldString($fields);
+                $this->_sortFields = $this->_parseFieldString($fields,
+                                       reset($rows));
             } else {
                 if (is_array($fields)) {
                     // we already have an array of sort fields
@@ -938,16 +938,16 @@ specified');
      *
      * @access  public
      * @param   array  $fields fields to project
-     * @param   array  $rows rows to project, projects entire table if not
-     *                     specified
+     * @param   array  $rows rows to project
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function project($fields, &$rows)
+    function project($fields, $rows)
     {
         if (is_array($rows)) {
             $projectFields = array();
             if (is_string($fields)) {
-                $projectFields = $this->_parseFieldString($fields);
+                $projectFields = $this->_parseFieldString($fields,
+                                       reset($rows));
             } else {
                 if (is_array($fields)) {
                     // we already have an array of fields
@@ -989,11 +989,10 @@ specified');
      * Returns the unique rows from a set of rows
      * 
      * @access  public
-     * @param   array  $rows rows to process, uses entire table if not
-     *                     specified
+     * @param   array  $rows rows to process
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function unique(&$rows)
+    function unique($rows)
     {
         if (is_array($rows)) {
             $results = array();

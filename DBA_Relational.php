@@ -32,6 +32,9 @@ class DBA_Relational extends PEAR
     // table handles
     var $_tables=array();
 
+    // handle to manager table; used for handling multi-table operations
+    var $_manager;
+
     // location of table data files
     var $_home;
 
@@ -49,11 +52,14 @@ class DBA_Relational extends PEAR
     {
         // add trailing slash if not present
         if (substr($home, -1) != '/') {
-            $this->_home = $home.'/';
-        } else {
-            $this->_home = $home;
+            $home = $home.'/';
         }
+        $this->_home = $home;
+
         $this->_driver = $driver;
+
+        // initialize the manager table
+        $this->_manager =& new DBA_Table($this->_driver);
     }
 
     /**
@@ -81,7 +87,7 @@ class DBA_Relational extends PEAR
     {
         if (!isset($this->_tables[$tableName])) {
 
-            $this->_tables[$tableName] = new DBA_Table($this->_driver);
+            $this->_tables[$tableName] =& new DBA_Table($this->_driver);
 
             if (!$this->_tables[$tableName]->tableExists($this->_home.$tableName)) {
                 unset($this->_tables[$tableName]);
@@ -311,7 +317,6 @@ class DBA_Relational extends PEAR
      * SQL analog: 'select * from rows, order by fields'
      *
      * @access  public
-     * @param   string $tableName table on which to operate
      * @param   mixed  $fields a string with the field name to sort by or an
      *                         array of fields to sort by in order of preference
      * @param   string $order 'a' for ascending, 'd' for descending
@@ -319,14 +324,9 @@ class DBA_Relational extends PEAR
      *                       specified
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function sort($tableName, $fields, $order='a', $rows=null)
+    function sort($fields, $order='a', $rows)
     {
-        $result = $this->_openTable($tableName, 'r');
-        if (PEAR::isError($result)) {
-            return $result;
-        } else {
-            return $this->_tables[$tableName]->sort($fields, $order, $rows);
-        }
+        return $this->_manager->sort($fields, $order, $rows);
     }
 
     /**
@@ -334,39 +334,27 @@ class DBA_Relational extends PEAR
      * are in the resulting rows. The SQL analog is 'select fields from table'
      *
      * @access  public
-     * @param   string $tableName table on which to operate
      * @param   array $fields fields to project
      * @param   array $rows rows to project, projects entire table if not
      *                      specified
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function project ($tableName, $fields, $rows=null)
+    function project($fields, $rows)
     {
-        $result = $this->_openTable($tableName, 'r');
-        if (PEAR::isError($result)) {
-            return $result;
-        } else {
-            return $this->_tables[$tableName]->project($fields, $rows);
-        }
+        return $this->_manager->project($fields, $rows);
     }
 
     /**
      * Returns the unique rows from a set of rows
      *
      * @access  public
-     * @param   string $tableName table on which to operate
      * @param   array  $rows rows to process, uses entire table if not
      *                     specified
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function unique ($tableName, $rows=null)
+    function unique($rows)
     {
-        $result = $this->_openTable($tableName, 'r');
-        if (PEAR::isError($result)) {
-            return $result;
-        } else {
-            return $this->_tables[$tableName]->unique($rows);
-        }
+        return $this->_manager->unique($rows);
     }
 
     /**
@@ -464,7 +452,7 @@ class DBA_Relational extends PEAR
      * @param  string $tableB   name of table to join
      * @param  string $rawQuery expression of how to join tableA and tableB
      */
-    function join ($tableA, $tableB, $rawQuery)
+    function join($tableA, $tableB, $rawQuery)
     {
         // validate tables
         if (!$this->_validateTable($tableA, $rowsA, $fieldsA, 'A')) {

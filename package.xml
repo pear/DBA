@@ -24,8 +24,11 @@
         <date>2002-07-03</date>
         <state>alpha</state>
         <notes>
-           autoincrement/decrement now store their ceiling/floor values
-           properly. improvments to simple driver
+             * autoincrement/decrement now store their ceiling/floor values
+               properly. improvments to simple driver
+             * fixed handling of text and boolean types
+             * sort, project and unique now work more like static functions;
+               they no longer require a table to be open
         </notes>
         <filelist>
             <dir name="/" baseinstalldir="DB/DBA">
