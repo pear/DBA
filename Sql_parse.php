@@ -112,7 +112,7 @@ class Sql_Parser
     function isVal() {
        return (($this->token == 'real_val') ||
                ($this->token == 'int_val') ||
-               ($this->token == 'string'));
+               ($this->token == 'text_val'));
     }
     // }}}
 
@@ -263,7 +263,8 @@ class Sql_Parser
         if ($this->isReserved()) {
             return $this->raiseError('Expected a column name or value');
         }
-        $clause['arg_2'] = $this->lexer->tokText;
+        $clause['arg_2']['value'] = $this->lexer->tokText;
+        $clause['arg_2']['type'] = $this->token;
         $this->getTok();
         if (!$this->isOperator()) {
             return $this->raiseError('Expected an operator');
@@ -272,14 +273,9 @@ class Sql_Parser
         $this->getTok();
         if ($this->isReserved()) {
             return $this->raiseError('Expected a column name or value');
-        } elseif ($this->token == '(') {
-            $clause['arg_1'] = $this->parseSearchClause;
-            $this->getTok();
-            if ($this->token != ')') {
-                return $this->raiseError('Expected )');
-            }
         } else {
-            $clause['arg_1'] = $this->lexer->tokText;
+            $clause['arg_1']['value'] = $this->lexer->tokText;
+            $clause['arg_1']['type'] = $this->token;
         }
         $this->getTok();
         if (($this->token == 'and') || ($this->token == 'or')) {

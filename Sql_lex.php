@@ -25,7 +25,7 @@ include 'DB/DBA/ctype.php';
 
 // {{{ token definitions
 // variables: 'ident', 'sys_var'
-// values:    'real_val', 'string', 'int_val', null
+// values:    'real_val', 'text_val', 'int_val', null
 // }}}
 
 /**
@@ -308,7 +308,7 @@ function lex()
             // {{{ State 13: Complete text string
             case 13:
                 $this->tokStart = $this->tokPtr;
-                return 'string';
+                return 'text_val';
                 break;
             // }}}
 
