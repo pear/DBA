@@ -344,6 +344,27 @@ class DBA_Driver_Builtin extends DBA
     }
     // }}}
 
+    // {{{ getkeys()
+    /**
+     * Returns all keys in the database
+     *
+     * @access  public
+     * @return  mixed  array
+     */
+    function getkeys()
+    {
+        $keys = array();
+        if ($this->isReadable()) {
+            $key = $this->firstkey();
+            while ($key !== FALSE) {
+                $keys[] = $key;
+                $key = $this->nextkey($key);
+            }
+        }
+        return $keys;
+    }
+    // }}}
+
     // {{{ insert($key, $value)
     /**
      * Inserts a new value at $key. Will not overwrite if the key/value pair

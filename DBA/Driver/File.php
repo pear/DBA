@@ -416,11 +416,29 @@ class DBA_Driver_File extends DBA
      */
     function nextkey()
     {
-        if ($this->isReadable() &&($this->size() > 0)
+        if ($this->isReadable() && ($this->size() > 0)
             && next($this->_usedBlocks)) {
             return key($this->_usedBlocks);
         } else {
             return false;
+        }
+    }
+    // }}}
+
+
+    // {{{ getkeys()
+    /**
+     * Returns all keys in the database
+     *
+     * @access  public
+     * @return  mixed  array
+     */
+    function getkeys()
+    {
+        if ($this->isReadable() && ($this->size() > 0)) {
+            return array_keys($this->_usedBlocks);
+        } else {
+            return array();
         }
     }
     // }}}
