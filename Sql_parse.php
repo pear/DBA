@@ -274,6 +274,7 @@ class Sql_Parser
     // }}}
 
     function isFunc() {
+    }
 
     // {{{ getTok()
     function getTok() {
