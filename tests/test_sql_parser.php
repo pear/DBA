@@ -82,7 +82,7 @@ $queries = array(
 "update table1 set col=1 where not col = 2",
 "update table2 set col=1 where col > 2 and col <> 4",
 "update table2 set col=1 where col > 2 and col <> 4 or dog=\"Hello\"",
-"update table3 set col=1 where col > 2 and (col < 30)",
+"update table3 set col=1 where col > 2 and col < 30",
 "select * from dog where cat <> 4",
 "select legs, hairy from dog",
 "select max(length) from dog",

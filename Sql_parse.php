@@ -225,13 +225,11 @@ class Sql_Parser
                     if (PEAR::isError($results)) {
                         return $results;
                     }
-                    $results['type'] = 'check_function';
+                    $results['type'] = 'check';
                     $constraintOpts =& $results;
-                    $this->getTok();
                     if ($this->token != ')') {
                         return $this->raiseError('Expected )');
                     }
-                    //print_r($results);
                     break;
                 case 'varying': case 'unique':
                     $this->getTok();
@@ -313,7 +311,6 @@ class Sql_Parser
                             'arg_2' => $subClause);
             }
         } else {
-            echo $this->token;
             $this->lexer->unget();
             return $clause;
         }
