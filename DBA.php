@@ -121,7 +121,7 @@ class DBA extends PEAR
     function isError($value)
     {
         return (is_object($value) &&
-            (get_class($value) == 'dba_error' || is_subclass_of($value, 'dba_error')));
+            (is_a($value, 'dba_error') || is_subclass_of($value, 'dba_error')));
     }
     
     /**

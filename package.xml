@@ -25,6 +25,7 @@ DBA is a wrapper for the php DBA functions. It includes a file-based emulator an
         <state>stable</state>
         <notes>
 * Added static DBA:drop()
+* Fixed error handling to work with PHP 5's change in get_class()
         </notes>
         <filelist>
             <dir name="/" baseinstalldir="/">
