@@ -65,7 +65,7 @@ $queries = array(
                 '$db->sort("emp", "empname", "d", $db->select("emp", "(job != analyst) and (job != intern)"))',
                 '$db->join("emp", "dept", "emp.deptno == dept.deptno")',
                 '$db->join("location", $db->join("dept", "deptloc", "dept.deptno == deptloc.deptno"), "location.locno == B.locno")',
-                '$db->sort("manager", "a", $db->join("location", $db->join("dept", "deptloc", "dept.deptno == deptloc.deptno"), "location.locno == B.locno"))'
+                '$db->sort("emp", "manager", "a", $db->join("location", $db->join("dept", "deptloc", "dept.deptno == deptloc.deptno"), "location.locno == B.locno"))'
                 );
 
 foreach ($queries as $query) {

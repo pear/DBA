@@ -406,9 +406,9 @@ class DBA_Relational extends PEAR
         $phpQuery = '';
 
         // scan the tokens in the raw query to build a new query
-        // if the token is a field name, use it as a key in $row[]
-        $token = strtok($rawQuery, ' ');
-        while ($token) {
+        // if the token is a field name, use it as a key in $rowN[]
+        $tokens = explode(' ', $rawQuery);
+        foreach ($tokens as $token) {
             // is this token a field name?
             if ($i = strpos($token, '.')) {
                 // trim everything after the '.'
@@ -426,7 +426,6 @@ class DBA_Relational extends PEAR
             } else {
                 $phpQuery .= $token;
             }
-            $token = strtok(' ');
         }
         return $phpQuery;
     }

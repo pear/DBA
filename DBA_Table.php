@@ -770,15 +770,14 @@ class DBA_Table extends PEAR
 
         // scan the tokens in the raw query to build a new query
         // if the token is a field name, use it as a key in $row[]
-        $token = strtok($rawQuery, ' ');
-        while ($token) {
+        $tokens = explode(' ', $rawQuery);
+        foreach ($tokens as $token) {
             // is this token a field name?
             if (in_array($token, $fieldTokens)) {
                 $phpQuery .= "\$row['$token']";
             } else {
                 $phpQuery .= $token;
             }
-            $token = strtok(' ');
         }
         return $phpQuery;
     }
@@ -817,6 +816,7 @@ class DBA_Table extends PEAR
 
             // perform the select
             $results = array();
+            echo $PHPSelect;
             eval ($PHPSelect);
 
             return $results;
