@@ -217,7 +217,7 @@ class DBA_Table extends PEAR
     function create($tableName, $schema)
     {
         // pack the schema
-        $packedSchema = $this->_packSchema($this->_systemVariables + $schema);
+        $packedSchema = $this->_packSchema($schema + $this->_systemVariables);
         
         if (PEAR::isError($packedSchema)) {
             return $packedSchema;
@@ -324,49 +324,6 @@ class DBA_Table extends PEAR
     function lockSh($table_name)
     {
         return $this->_dba->reopen('r');
-    }
-
-    /**
-     * DBA_Table keeps an internal row index (key)
-     * This function returns the highest row index
-     *
-     * @access  private
-     * @return  mixed an integer or false if there are no keys
-     */
-    function _findMaxKey()
-    {
-        $maxKey = 0;
-        $key = $this->_dba->firstkey();
-        while ($key !== false) {
-            if (is_numeric ($key) && ($key > $maxKey)) {
-                $maxKey = $key;
-            }
-            $key = $this->_dba->nextkey($key);
-        }
-        return $maxKey;
-    }
-
-    /**
-     * Returns a unique key to be used as a row index
-     *
-     * @access  private
-     * @return  integer a new key
-     */
-    function _getUniqueKey()
-    {
-        // find the maxKey if necessary
-        if (is_null($this->_maxKey)) {
-            $this->_maxKey = $this->_findMaxKey();
-        }
-
-        // check if this is the first key
-        if ($this->_maxKey === false) {
-            $this->_maxKey = 0;
-        } else {
-            $this->_maxKey++;
-        }
-
-        return $this->_maxKey;
     }
 
     /**
@@ -620,7 +577,6 @@ class DBA_Table extends PEAR
             }
 
             if ($this->_primaryKey[$fieldName]) {
-                echo $fieldName;
                 $key[] = $c_value;
             }
 
@@ -849,7 +805,7 @@ class DBA_Table extends PEAR
         $rows = array();
         if ($this->_dba->isOpen()) {
             $key = $this->_dba->firstkey();
-            while ($key) {
+            while ($key !== false) {
                 if ($key != DBA_SCHEMA_KEY) {
                     if (is_null($rowKeys)) {
                         $rows[$key] = $this->_unpackRow(
