@@ -225,7 +225,8 @@ function lex()
                     $c = $this->skip();
                     $this->tokLen = 1;
                 }
-                if ($c == '\'') {
+                if (($c == '\'') || ($c == '"')) {
+                    $quote = $c;
                     $state = 12;
                     break;
                 }
@@ -431,14 +432,15 @@ function lex()
                             $this->currTok = '';
                             $bail = true;
                             break;
-                        case '\\':
-                            if ($this->get()) {
+                        case "\\":
+                            if (!$this->get()) {
                                 $this->lastTok = $this->currTok;
                                 $this->currTok = '';
                                 $bail = true;
                             }
+                                //$bail = true;
                             break;
-                        case '\'':
+                        case $quote:
                             $this->lastTok = $this->currTok;
                             $this->currTok = substr($this->string, $this->tokStart, $this->tokLen);
                             $bail = true;
