@@ -33,7 +33,7 @@ $queries = array(
   name varchar(60),
   directory varchar(60),
   rating enum (1,2,3,4,5,6,7,8,9,10) NOT NULL,
-  category set(sexy,family,outdoors,generic),
+  category set(sexy,family,outdoors,generic,'very weird') NULL,
   description text NULL,
   id int auto_increment default 200
 )",
@@ -42,6 +42,7 @@ $queries = array(
   filename varchar(60) not NULL,
   name varchar(60),
   album int,
+  price float (4,2),
   description text,
   id int
 )"
