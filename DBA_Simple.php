@@ -452,7 +452,7 @@ class DBA_Simple extends PEAR {
                     fseek($this->_datFP, $this->_usedBlocks[$key][DBA_LOC]);
 
                     // write to the data file
-                    fwrite($this->_datFP, $value, $vsize);
+                    fwrite($this->_datFP, str_pad($value, $size), $size);
 
                     // update internal indecies
                     $this->_usedBlocks[$key][DBA_VSIZE] = $vsize;
@@ -487,15 +487,15 @@ class DBA_Simple extends PEAR {
         $loc = $this->_getFreeBlock($vsize);
         if ($loc !== false)
         {
+            // update free block list
+            $size = $this->_freeBlocks[$loc];
+            unset($this->_freeBlocks[$loc]);
+
             // move to the block's location in the data file
             fseek($this->_datFP, $loc, SEEK_SET);
 
             // write to the data file
-            fwrite($this->_datFP, $value, $vsize);
-
-            // update internal indecies
-            $size = $this->_freeBlocks[$loc];
-            unset($this->_freeBlocks[$loc]);
+            fwrite($this->_datFP, str_pad($value,$size), $size);
 
             $this->_usedBlocks[$key] = array($loc, $size, $vsize);
             $this->_writeIdxEntry($loc, $size, $vsize, $key);
@@ -507,11 +507,14 @@ class DBA_Simple extends PEAR {
             $loc = ftell($this->_datFP);
 
             // write to the data file
-            fwrite($this->_datFP, $value, $vsize);
+            $size = $vsize + ceil($vsize / 10); // make size 10% larger
+            // add a useless "\n" to new values. This makes the data file
+            // readable in any text editor
+            fwrite($this->_datFP, str_pad($value, $size)."\n", $size+1);
 
-            // update internal indecies
-            $this->_usedBlocks[$key] = array($loc, $vsize, $vsize);
-            $this->_writeIdxEntry($loc, $vsize, $vsize, $key);
+            // update internal block lists
+            $this->_usedBlocks[$key] = array($loc, $size, $vsize);
+            $this->_writeIdxEntry($loc, $size, $vsize, $key);
         }
     }
 
@@ -520,7 +523,7 @@ class DBA_Simple extends PEAR {
      *
      * @access private
      * @param   int   $reqsize Requested size
-     * @returns mixed integer on success, false on failure
+     * @returns mixed location of free block, false if there are no free blocks
      */
     function _getFreeBlock($reqsize)
     {
