@@ -51,7 +51,6 @@ class Sql_Parser
         $this->types = array_flip(explode(' ',$dialect['types']));
         $this->functions = array_flip(explode(' ',$dialect['functions']));
         $this->operators = array_flip(explode(' ',$dialect['operators']));
-        print_r($this->operators);
         $this->typeClasses = $typeClasses;
         if (is_string($string)) {
             $this->lexer = new Lexer($string);
@@ -97,7 +96,7 @@ class Sql_Parser
         $message .= str_repeat(' ', ($this->lexer->tokPtr - 
                                $this->lexer->lineBegin -
                                strlen($this->lexer->tokText)))."^";
-        $message .= 'found instead: '.$this->lexer->tokText."\n";
+        $message .= ' found instead: '.$this->lexer->tokText."\n";
 
         return PEAR::raiseError($message);
     }
@@ -418,7 +417,7 @@ class Sql_Parser
                         $tree['command'] = 'create_table';
                         $this->getTok();
                         if ($this->token == 'ident') {
-                            $tree['table_names'][] = $this->lexer->tokText;
+                            $tree['table_name'] = $this->lexer->tokText;
                             $fields =& $this->parseFieldList();
                             if (PEAR::isError($fields)) {
                                 return $fields;
@@ -450,18 +449,11 @@ class Sql_Parser
                 if ($this->token == 'into') {
                     $tree['command'] = 'insert';
                     $this->getTok();
-                    while ($this->token == 'ident') {
-                        $tree['table_names'][] = $this->lexer->tokText;
+                    if ($this->token == 'ident') {
+                        $tree['table_name'] = $this->lexer->tokText;
                         $this->getTok();
-                        if ($this->token == ',') {
-                            $this->getTok();
-                        } elseif (($this->token != '(') &&
-                                  ($this->token != 'values')) {
-                            return $this->raiseError('Expected "(" or "values"');
-                        }
-                    }
-                    if (!isset($tree['table_names'])) {
-                        return $this->raiseError('No tables specified');
+                    } else {
+                        return $this->raiseError('Expected table name');
                     }
                     if ($this->token == '(') {
                         $results = $this->getParams($values, $types);
@@ -506,17 +498,14 @@ class Sql_Parser
             case 'update':
                 $tree['command'] = 'update';
                 $this->getTok();
-                while ($this->token == 'ident') {
-                    $tree['table_names'][] = $this->lexer->tokText;
-                    $this->getTok();
-                    if ($this->token == ',') {
-                        $this->getTok();
-                    } elseif ($this->token != 'set') {
-                        return $this->raiseError('Expected "set"');
-                    }
+                if ($this->token == 'ident') {
+                    $tree['table_name'] = $this->lexer->tokText;
+                } else {
+                    return $this->raiseError('Expected table name');
                 }
-                if (!isset($tree['table_names'])) {
-                    return $this->raiseError('No tables specified');
+                $this->getTok();
+                if ($this->token != 'set') {
+                    return $this->raiseError('Expected "set"');
                 }
                 while (true) {
                     $this->getTok();
@@ -558,6 +547,15 @@ class Sql_Parser
                 $this->getTok();
                 if (($this->token == 'distinct') || ($this->token == 'all')) {
                     $this->getTok();
+                }
+                while ($this->token == 'ident') {
+                    $tree['table_names'][] = $this->lexer->tokText;
+                    $this->getTok();
+                    if ($this->token == ',') {
+                        $this->getTok();
+                    } elseif ($this->token != 'set') {
+                        return $this->raiseError('Expected "set"');
+                    }
                 }
                 break;
             // }}}
