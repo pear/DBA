@@ -69,7 +69,11 @@ function printQueryResults($results, $fields=null)
 
 $table=new DBA_Table();
 
-$table->create ('hats', $hatTableStruct);
+$result = $table->create ('hats', $hatTableStruct);
+if (PEAR::isError($result)) {
+    echo $result->getMessage()."\n";
+    exit;
+}
 
 $table->open ('hats', 'w');
 
@@ -86,7 +90,7 @@ $table->open ('hats', 'r');
 $query = '(type != bowler) and (type != fedora)';
 $results = $table->select($query);
 echo "Query: $query\n\n";
-printQueryResults ($results, array('brand', 'quantity'));
+printQueryResults ($results, array('brand', 'quantity', 'type'));
 
 $query = 'quantity <= 50';
 $results = $table->select($query);

@@ -18,9 +18,10 @@
 //
 // $Id$
 //
+require_once 'PEAR.php';
 require_once 'DB_DBA/DBA.php';
 
-define ('DBA_TABLE_META', '__meta__');
+define ('DBA_SCHEMA_KEY', '__schema__');
 
 /**
  * DBA Table
@@ -30,7 +31,7 @@ define ('DBA_TABLE_META', '__meta__');
  * @author Brent Cook <busterb@mail.utexas.edu>
  * @version 0.0.10
  */
-class DBA_Table
+class DBA_Table extends PEAR
 {
     /**
      * DBA object handle
@@ -42,87 +43,110 @@ class DBA_Table
      * Describes the types of fields in a table
      * @access private
      */
-    var $_fieldSchema;
+    var $_schema;
 
     /**
+     * Default date format
      * @access private
      */
     var $_dateFormat = 'D M j G:i:s T Y';
 
     /**
      * Constructor
+     *
      * @param object $dba dba object to use for storage, you need this sometime
      */
-    function DBA_Table ($driver = 'simple')
+    function DBA_Table($driver = 'simple')
     {
         // initialize the internal dba object
         $this->_dba = DBA::create($driver);
     }
 
     /**
+     * PEAR emulated destructor calls close on PHP shutdown
+     * @access private
+     */
+    function _DBA_Table()
+    {
+        $this->close();
+    }
+
+    /**
      * Opens a table
      *
+     * @access public
      * @param string $tableName name of the table to open
      * @param char   $mode      mode to open the table; one of r,w,c,n
      * @param object $dba       dba object to use for storage, you need this
-     * @returns boolean false on error, true on success
+     * @returns object PEAR_Error on failure
      */
-    function open ($tableName, $mode = 'r')
+    function open($tableName, $mode = 'r')
     {
-        if (!($this->_dba->open($tableName, $mode))) {
-            return false;
+        $result = $this->_dba->open($tableName, $mode);
+        if (PEAR::isError($result)) {
+            return $result;
         }
 
-        // fetch the field descriptor at the key, DBA_TABLE_META
-        if ($fieldString = $this->_dba->fetch(DBA_TABLE_META)) {
-            // unpack the field descriptor into a PHP structure
-            $this->_fieldSchema = $this->_unpackFieldSchema($fieldString);
-            return true;
+        // fetch the field descriptor at the key, DBA_SCHEMA_KEY
+        if (!PEAR::isError($schema = $this->_dba->fetch(DBA_SCHEMA_KEY))) {
+
+            // unpack the field schema into an array
+            $this->_schema = $this->_unpackSchema($schema);
+
         } else {
-            trigger_error('DBA: Table is missing field descriptor at key, '.
-                           DBA_TABLE_META, E_USER_WARNING);
-            return false;
+            $this->raiseError('DBA: Table is missing field descriptor at key, '.
+                               DBA_SCHEMA_KEY);
         }
     }
 
     /**
      * Closes a table
-     * @returns boolean false on error, true on success
+     *
+     * @access public
+     * @returns object PEAR_Error on failure
      */
-    function close ()
+    function close()
     {
         if ($this->_dba->isWritable()) {
             // pack up the field structure and store it back in the table
-            $fieldString = $this->_packFieldSchema($this->_fieldSchema);
-            $this->_dba->replace(DBA_TABLE_META, $fieldString);
-            return $this->_dba->close();
+            $schema = $this->_packSchema($this->_schema);
+            $this->_dba->replace(DBA_SCHEMA_KEY, $schema);
         }
-        return true;
+        return $this->_dba->close();
     }
 
     /**
-     * Creates a new table. Note, this closes any open table if $dba is not
-     * specified
+     * Creates a new table. Note, this closes any open table.
      *
      * @param string $tableName   name of the table to create
-     * @param array  $fieldSchema field schema for the table
+     * @param array  $schema field schema for the table
      * @param object $dba         dba object to use
      */
-    function create ($tableName, $fieldSchema)
+    function create ($tableName, $schema)
     {
-        // pack the fieldSchema
-        $fieldString = $this->_packFieldSchema($fieldSchema);
+        // pack the schema
+        $packedSchema = $this->_packSchema($schema);
 
         $r = $this->_dba->open($tableName, 'n');
-        $r = $r && $this->_dba->insert(DBA_TABLE_META, $fieldString);
-        $r = $r && $this->_dba->close();
-        // return the result of the creation operations
-        return $r;
+        if (PEAR::isError($r)) {
+            return $r;
+        }
+
+        $r = $this->_dba->insert(DBA_SCHEMA_KEY, $packedSchema);
+        if (PEAR::isError($r)) {
+            return $r;
+        }
+
+        $r = $this->_dba->close();
+        if (PEAR::isError($r)) {
+            return $r;
+        }
     }
 
     /**
      * Check whether table exists
      *
+     * @access public
      * @param $key string
      * @returns boolean
      */
@@ -168,13 +192,13 @@ class DBA_Table
      */
     function fieldExists($fieldName)
     {
-        return ($this->isOpen() && isset($this->_fieldSchema[$fieldName]));
+        return ($this->isOpen() && isset($this->_schema[$fieldName]));
     }
 
     /**
      * Aquire an exclusive lock on the table
      *
-     * returns @boolean
+     * @returns object PEAR_Error on failure
      */
     function lockTableEx ()
     {
@@ -183,7 +207,8 @@ class DBA_Table
 
     /**
      * Aquire a shared lock on the table
-     * returns @boolean
+     *
+     * @returns object PEAR_Error on failure
      */
     function lockTableSh ($table_name)
     {
@@ -243,7 +268,7 @@ class DBA_Table
      */
     function _packField($field, $value)
     {
-        switch ($this->_fieldSchema[$field]['type'])
+        switch ($this->_schema[$field]['type'])
         {
             case 'set':
                 if (is_string($value)) {
@@ -255,7 +280,7 @@ class DBA_Table
                     foreach ($value as $element) {
                         if (is_string($element)) {
                             $c_element = array_search($element,
-                                         $this->_fieldSchema[$field]['domain']);
+                                         $this->_schema[$field]['domain']);
                             if (!is_null($c_element)) {
                                 $c_value[] = $c_element;
                             }
@@ -267,7 +292,7 @@ class DBA_Table
             case 'enum':
                 if (is_string ($value)) {
                     $c_value = array_search($value,
-                                      $this->_fieldSchema[$field]['domain']);
+                                      $this->_schema[$field]['domain']);
                     if (!is_null($c_value)) {
                         $c_value = strval($c_value);
                     }
@@ -305,9 +330,9 @@ class DBA_Table
                 break;
             case 'varchar':
                 if (is_string ($value)) {
-                    if ($this->_fieldSchema[$field]['size']) {
+                    if ($this->_schema[$field]['size']) {
                         $c_value = rtrim(substr($value, 0,
-                                        $this->_fieldSchema[$field]['size']));
+                                        $this->_schema[$field]['size']));
                     } else {
                         $c_value = rtrim ($value);
                     }
@@ -333,21 +358,21 @@ class DBA_Table
      */
     function _unpackField($field, $value)
     {
-        switch ($this->_fieldSchema[$field]['type'])
+        switch ($this->_schema[$field]['type'])
         {
             case 'set':
                 $c_value = array();
                 $value = explode (',',$value);
                 if (is_array($value)) {
                     foreach ($value as $element) {
-                        $c_value[] = $this->_fieldSchema[$field]['domain'][$element];
+                        $c_value[] = $this->_schema[$field]['domain'][$element];
                     }
                 }
                 return $c_value;
             case 'enum':
-                return $this->_fieldSchema[$field]['domain'][$value];
+                return $this->_schema[$field]['domain'][$value];
             case 'bool':
-                if ($value == '1') {
+                if ($value != '1') {
                     return true;
                 } else {
                     return false;
@@ -369,13 +394,14 @@ class DBA_Table
      * timestamps are converted to a readable date. No more operations
      * should be performed on a field after this though.
      *
+     * @access private
      * @param $field  mixed
      * @param $value  string
      * @returns string
      */
     function _finalizeField($field, $value)
     {
-        switch ($this->_fieldSchema[$field]['type'])
+        switch ($this->_schema[$field]['type'])
         {
             case 'set':
                 $buffer = '';
@@ -387,7 +413,7 @@ class DBA_Table
                 if ($value) return "true";
                 return "false";
             case 'timestamp':
-                if ($format = $this->_fieldSchema[$field]['format']) {
+                if ($format = $this->_schema[$field]['format']) {
                     return date($format, $value);
                 } else {
                     return date($this->_dateFormat, $value);
@@ -409,12 +435,12 @@ class DBA_Table
      * VARCHAR => name;varchar;size=<num>;init=<string>
      * NUMERIC => name;int;size=<num>;init=<string>
      *
-     * @param $fieldSchema array schema to pack
+     * @param $schema array schema to pack
      * @returns string the packed schema
      */
-    function _packFieldSchema ($fieldSchema)
+    function _packSchema ($schema)
     {
-        foreach ($fieldSchema as $fieldName => $fieldMeta)
+        foreach ($schema as $fieldName => $fieldMeta)
         {
             $buffer = $fieldName;
             foreach ($fieldMeta as $attribute => $value)
@@ -449,14 +475,14 @@ class DBA_Table
     }
 
     /**
-     * Unpacks a raw string as created by _packFieldSchema into an array
-     * structure for use as $this->_fieldSchema
+     * Unpacks a raw string as created by _packSchema into an array
+     * structure for use as $this->_schema
      *
      * @access private
      * @param $rawFieldString string data to be unpacked into the schema
      * @returns array
      */
-    function _unpackFieldSchema ($rawFieldString)
+    function _unpackSchema ($rawFieldString)
     {
         $rawFields = $this->_unpackRawRow($rawFieldString);
         foreach ($rawFields as $rawField)
@@ -478,11 +504,14 @@ class DBA_Table
         return $fields;
     }
 
+    /**
+     * @access private
+     */
     function _packRow ($data)
     {
         $buffer = array();
         $i = 0;
-        foreach ($this->_fieldSchema as $fieldName => $fieldMeta) {
+        foreach ($this->_schema as $fieldName => $fieldMeta) {
 
             if (isset($data[$fieldName])) {
 
@@ -499,10 +528,10 @@ class DBA_Table
                 // no data is supplied
                 if ($fieldMeta['autoincrement']) {
                     // get a value as well as increase the ceiling
-                    $c_value = ++$this->_fieldSchema[$fieldName]['ceiling'];
+                    $c_value = ++$this->_schema[$fieldName]['ceiling'];
                 } elseif ($fieldMeta['autodecrement']) {
                     // get a value and decrease the floor
-                    $c_value = --$this->_fieldSchema[$fieldName]['floor'];
+                    $c_value = --$this->_schema[$fieldName]['floor'];
                 } else {
                     // use the default value
                     $c_value = $this->_packField($fieldName,
@@ -515,22 +544,31 @@ class DBA_Table
         return $this->_packRawRow($buffer);
     }
 
+    /**
+     * @access private
+     */
     function _unpackRow ($packedData)
     {
         $data = $this->_unpackRawRow($packedData);
         $i = 0;
-        foreach ($this->_fieldSchema as $fieldName => $fieldMeta) {
+        foreach ($this->_schema as $fieldName => $fieldMeta) {
             $buffer[$fieldName] = $this->_unpackField($fieldName, $data[$i]);
             $i++;
         }
         return $buffer;
     }
 
+    /**
+     * @access private
+     */
     function _packRawRow ($unpackedData)
     {
         return implode('|', $unpackedData);
     }
 
+    /**
+     * @access private
+     */
     function _unpackRawRow ($packedData)
     {
         return explode('|', $packedData);
@@ -538,37 +576,55 @@ class DBA_Table
 
     /**
      * Inserts a new row in a database
+     * 
+     * @returns mixed PEAR_Error on failure, the row index on success
      */
     function insertRow ($data)
     {
-        if ($this->isOpen()) {
+        if ($this->isWritable()) {
             $key = $this->_getUniqueKey();
-            if ($this->_dba->insert($key, $this->_packRow($data))) {
+            $result = $this->_dba->insert($key, $this->_packRow($data));
+            if (PEAR::isError($result)) {
+                return $result;
+            } else {
                 return $key;
-            } else
-                return false;
+            }
         } else {
-            return false;
+            return $this->raiseError('DBA: table not open');
         }
     }
 
+    /**
+     * @access public
+     */
     function replaceRow ($key, $data)
     {
         if ($this->isOpen()) {
             return $this->_dba->replace($key, $this->_packRow($data));
+        } else {
+            return $this->raiseError('DBA: table not open');
         }
     }
 
+    /**
+     * @access public
+     */
     function deleteRow ($key)
     {
         return $this->_dba->delete($key);
     }
 
+    /**
+     * @access public
+     */
     function getRow ($key)
     {
         return $this->_unpackRow($this->_dba->fetch($key));
     }
 
+    /**
+     * @access public
+     */
     function finalizeRows ($rows=null)
     {
         if ($this->_dba->isOpen()) {
@@ -586,13 +642,16 @@ class DBA_Table
         }
     }
 
+    /**
+     * @access public
+     */
     function getRows ($rowKeys=null)
     {
         $rows = array();
         if ($this->_dba->isOpen()) {
             $key = $this->_dba->firstkey();
             while ($key) {
-                if ($key != DBA_TABLE_META) {
+                if ($key != DBA_SCHEMA_KEY) {
                     if (is_null($rowIDs)) {
                         $rows[$key] = $this->_unpackRow(
                                                    $this->_dba->fetch($key));
@@ -605,10 +664,15 @@ class DBA_Table
                 }
                 $key = $this->_dba->nextkey($key);
             }
+        } else {
+            return $this->raiseError('DBA: table not open');
         }
         return $rows;
     }
 
+    /**
+     * @access private
+     */
     function _addSpaces ($string)
     {
         foreach (array('(',')','==','!=','>','<','<=','>=') as $symbol) {
@@ -617,6 +681,9 @@ class DBA_Table
         return $string;
     }
 
+    /**
+     * @access private
+     */
     function _parsePHPQuery ($rawQuery, $fieldTokens)
     {
         // add spaces around symbols for strtok to work properly
@@ -640,12 +707,15 @@ class DBA_Table
         return $phpQuery;
     }
 
+    /**
+     * @access public
+     */
     function select ($rawQuery, $rows=null)
     {
         if ($this->_dba->isOpen()) {
 
             // get a list of valid field names
-            $fieldTokens = array_keys($this->_fieldSchema);
+            $fieldTokens = array_keys($this->_schema);
 
             // if we haven't passed any rows to select from, use the whole table
             if ($rows==null)
@@ -665,9 +735,15 @@ class DBA_Table
             eval ($PHPSelect);
 
             return $results;
+        } else {
+            return $this->raiseError('DBA: table not open');
         }
     }
 
+    /**
+     * Comparison function for sorting ascending order
+     * @access private
+     */
     function _sortCmpA ($a, $b)
     {
         foreach ($this->_sortFields as $field) {
@@ -677,6 +753,10 @@ class DBA_Table
         return 0;
     }
 
+    /**
+     * Comparison function for sorting descending order
+     * @access private
+     */
     function _sortCmpD ($a, $b)
     {
         foreach ($this->_sortFields as $field) {
@@ -686,6 +766,9 @@ class DBA_Table
         return 0;
     }
 
+    /**
+     * @access private
+     */
     function _parseFieldString ($fieldString)
     {
         $fields = array();
@@ -697,6 +780,9 @@ class DBA_Table
         return $fields;
     }
 
+    /**
+     * @access public
+     */
     function sort ($fields, $order='a', $rows=null)
     {
         if ($this->_dba->isOpen()) {
@@ -720,9 +806,14 @@ class DBA_Table
                 uasort($rows, array($this, '_sortCmpD'));
 
             return $rows;
+        } else {
+            return $this->raiseError('DBA: table not open');
         }
     }
 
+    /**
+     * @access public
+     */
     function project ($fields, $rows=null)
     {
         if ($this->_dba->isOpen()) {
@@ -745,9 +836,14 @@ class DBA_Table
                 }
             }
             return $projectedRows;
+        } else {
+            return $this->raiseError('DBA: table not open');
         }
     }
 
+    /**
+     * @access public
+     */
     function cmpRows ($a, $b)
     {
         $equal = true;
@@ -759,7 +855,10 @@ class DBA_Table
         return $equal;
     }
 
-    function unique ($rows=null)
+    /**
+     * @access public
+     */
+    function unique($rows=null)
     {
         if ($this->_dba->isOpen()) {
 
@@ -774,6 +873,8 @@ class DBA_Table
                 }
             }
             return $results;
+        } else {
+            return $this->raiseError('DBA: table not open');
         }
     }
 }
