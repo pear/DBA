@@ -137,14 +137,14 @@ function parseCreate($rawquery)
             exit;
         } else {
             while ($token && ($token != ')')) {
-                $fieldName = Sql::getToken();
+                $token = Sql::getToken();
 
-                if ($fieldName == ')') {
+                if ($token == ')') {
                     // we must have had a trailing comma in the field list
-                    $token = $fieldName;
                     break;
                 }
 
+                $fieldName = $token;
                 $fieldType = Sql::getTokenL();
                 $table[$fieldName]['type'] = $fieldType;
                 $token = Sql::getTokenL();
@@ -180,11 +180,7 @@ function parseCreate($rawquery)
                     }
                 } elseif (Sql::isStringType($fieldType)) {
                     if ($token == '(') {
-                        $table[$fieldName]['size'] = Sql::getToken();
-                        if (Sql::getToken() != ')') {
-                            return PEAR::raiseError(
-                                "expected ) on $fieldName, $fieldType");
-                        }
+                        $table[$fieldName]['size'] = strtok(')');
                         $token = Sql::getTokenL();
                     }
                 } elseif (Sql::isSetType($fieldType)) {
@@ -254,11 +250,15 @@ function parseCreate($rawquery)
                                 if (Sql::getToken() != '(') {
                                     PEAR::raiseError('expecting (');
                                 } else {
-                                    $table[$fieldName]['size']=Sql::getToken();
-                                    if (Sql::getToken() != ')') {
-                                        PEAR::raiseError('expecting )');
-                                    }
+                                    $table[$fieldName]['size']=strtok(')');
                                 }
+                            }
+                            break;
+                        case 'check':
+                            if (Sql::getToken() != '(') {
+                                PEAR::raiseError('expecting (');
+                            } else {
+                                $table[$fieldName]['check']=strtok(')');
                             }
                     }
                     // grab the next option

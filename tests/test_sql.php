@@ -61,7 +61,7 @@ $queries = array(
              CONSTRAINT production UNIQUE(date_prod)
 )",
 "CREATE TABLE distributors ( 
-             did      DECIMAL(3) PRIMARY KEY DEFAULT NEXTVAL('serial'), 
+             did      DECIMAL(3) PRIMARY KEY Auto_Increment, 
              name     VARCHAR(40) NOT NULL CHECK (name <> '') 
              CONSTRAINT con1 CHECK (did > 100 AND name > '') 
 )",
