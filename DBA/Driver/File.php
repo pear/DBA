@@ -149,11 +149,11 @@ class DBA_Driver_File extends DBA
     function open($dbName='', $mode='r', $persistent = false)
     {
         if ($persistent) {
-            return $this->raiseError('Cannot support persistent connections');
+            return $this->raiseError(DBA_ERROR_UNSUP_PERSISTENCE);
         }
 
         if ($dbName == '') {
-            return $this->raiseError('No database name specified');
+            return $this->raiseError(DBA_ERROR_NO_DBNAME);
         } else {
             $this->_dbName = $dbName;
             $dat_name = $dbName.'.dat';
@@ -187,7 +187,8 @@ class DBA_Driver_File extends DBA
                     $this->_readable = true;
                     break;
             default:
-                return $this->raiseError("Invalid file mode: $mode");
+                return $this->raiseError(DBA_ERROR_INVALID_MODE, NULL, NULL,
+                    'filemode: '.$mode);
         }
 
         // open the index file
@@ -195,8 +196,8 @@ class DBA_Driver_File extends DBA
         if ($this->_idxFP === false) {
             $this->_writable = false;
             $this->_readable = false;
-            return $this->raiseError('Could not open index file: '.$idx_name.
-                ' with mode '. $file_mode);
+            return $this->raiseError(DBA_ERROR_CANNOT_OPEN, NULL, NULL,
+                'could not open idx file '.$idx_name);
         }
 
         // open the data file
@@ -205,7 +206,8 @@ class DBA_Driver_File extends DBA
             fclose ($this->_idxFP);
             $this->_writable = false;
             $this->_readable = false;
-            return $this->raiseError('Could not open data file: '.$dat_name);
+            return $this->raiseError(DBA_ERROR_CANNOT_OPEN, NULL, NULL,
+                'could not open data file '.$dat_name);
         }
 
         // get a shared lock if read-only, otherwise get an exclusive lock
@@ -244,6 +246,8 @@ class DBA_Driver_File extends DBA
             $this->_writable = false;
             fclose($this->_idxFP);
             fclose($this->_datFP);
+        } else {
+            return $this->raiseError(DBA_ERROR_NOT_OPEN);
         }
     }
     // }}}
@@ -274,7 +278,7 @@ class DBA_Driver_File extends DBA
                 }
             }
         } else {
-            return $this->raiseError('No database was open');
+            return $this->raiseError(DBA_ERROR_NOT_OPEN);
         }
     }
     // }}}
@@ -354,12 +358,10 @@ class DBA_Driver_File extends DBA
             if (isset($this->_usedBlocks[$key])) {
                 $this->_freeUsedBlock($key);
             } else {
-                return $this->raiseError('Cannot delete key:'.$key.
-                    ', it does not exist');
+                return $this->raiseError(DBA_ERROR_NOT_FOUND, NULL, NULL, 'key: '.$key);
             }
         } else {
-            return $this->raiseError('Cannot delete key:'.$key.
-                ', DB not writable');
+            return $this->raiseError(DBA_ERROR_NOT_WRITEABLE);
         }
     }
     // }}}
@@ -376,15 +378,13 @@ class DBA_Driver_File extends DBA
     {
         if ($this->isReadable()) {
             if (!isset($this->_usedBlocks[$key])) {
-                return $this->raiseError('Cannot fetch key '.$key.
-                    ', it does not exist');
+                return $this->raiseError(DBA_ERROR_NOT_FOUND, NULL, NULL, 'key: '.$key);
             } else {
                 fseek($this->_datFP, $this->_usedBlocks[$key][DBA_SIMPLE_LOC]);
                 return fread($this->_datFP,$this->_usedBlocks[$key][DBA_SIMPLE_VSIZE]);
             }
         } else {
-            return $this->raiseError('Cannot fetch '.$key.' on '.
-                $this->_dbName. ', DB not readable');
+            return $this->raiseError(DBA_ERROR_NOT_READABLE);
         }
     }
     // }}}
@@ -455,8 +455,8 @@ class DBA_Driver_File extends DBA
     function insert($key, $value)
     {
         if ($this->exists($key)) {
-            return $this->raiseError('Cannot insert on key: '.
-                $key. ', it already exists');
+            return $this->raiseError(DBA_ERROR_ALREADY_EXISTS, NULL, NULL,
+                'key: '.$key);
         } else {
             return $this->replace($key, $value);
         }
@@ -510,8 +510,7 @@ class DBA_Driver_File extends DBA
                 }
             }
         } else {
-            return $this->raiseError('Cannot replace on '.
-                $this->_dbName. ', DB not writable');
+            return $this->raiseError(DBA_ERROR_NOT_WRITEABLE);
         }
     }
     // }}}
@@ -651,10 +650,12 @@ class DBA_Driver_File extends DBA
     {
         if (DBA_Driver_File::db_exists($dbName)) {
             if (!unlink($dbName.'.dat') || !unlink($dbName.'.idx')) {
-                return $this->raiseError('Could not unlink '.$dbName);
+                return $this->raiseError(DBA_ERROR_CANNOT_DROP, NULL, NULL,
+                    'dbname: '.$dbName);
             }
         } else {
-            return $this->raiseError($dbName.' does not exist');
+            return $this->raiseError(DBA_ERROR_NOSUCHDB, NULL, NULL,
+                'dbname: '.$dbName);
         }
     }
     // }}}

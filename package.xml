@@ -16,22 +16,23 @@ DBA is a wrapper for the php DBA functions. It includes a file-based emulator an
             <email>busterb@mail.utexas.edu</email>
             <role>lead</role>
         </maintainer>
+        <maintainer>
+            <user>undefined</user>
+            <name>Olaf Conradi</name>
+            <email>conradi@cs.utwente.nl</email>
+            <role>contributor</role>
+        </maintainer>
     </maintainers>
 
     <release>
         <license>LGPL</license>
-        <version>0.9.4</version>
-        <date>2002-09-29</date>
+        <version>0.9.5</version>
+        <date>2002-10-31</date>
         <state>beta</state>
         <notes>
-Several nice changes for this release:
- * The DBA::exists() function has been renamed to DBA::db_exists(). This is to not be confused with the driver method exists().
-
- * Added db2 support. Apparently, it just didn't work on my OS due to outdated db2 libraries (Slackware-current). Be sure to compile PHP with db2 2.7.7.
-
- * Added db_drop() and drop() methods to the drivers. db_drop() is static and takes a database name as an argument; drop() deletes the currently open or last open database.
-
-Many of the functions that were included with the earlier developer releases, such as the table manager and SQL parser, have been split into separate packages to be released soon.
+* Errors now return error codes in addition to messages. Thanks to Olaf Conradi
+for the work on this.
+* Minor updates to code comments
         </notes>
         <filelist>
             <dir name="/" baseinstalldir="/">
