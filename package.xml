@@ -20,24 +20,24 @@
 
     <release>
         <license>LGPL</license>
-        <version>0.16</version>
-        <date>2002-07-14</date>
+        <version>0.17</version>
+        <date>2002-07-17</date>
         <state>devel</state>
         <notes>
             <![CDATA[
-            More API changes to come, but so far, they're minimal. I'm getting
-            things cleaned up so that the upcoming SQL frontend will fit nicely.
+                Test and enjoy. Sequence and more SQL support coming soon.
             
-            * Schema format has changed; use DBA_* constants rather than
-              strings to organize meta data. See example schemas.
-            * Dropped support for autodecrement; initialize autoincrement by
-              supplying a default value rather than using the keyword 'init'
-            * Fixed-length char type support added, varchar preallocates
-              space in DBA driver if size is supplied
-            * Fixed some problems with inserting on tables when no primary
-              key was specified
-            * Added DBA_Toolbox.php to hold utility functions that are
-              not necessary for working with DBA, just useful.
+                * Fixed problem inserting onto a newly created table in
+                  DBA_Relational
+                * Added support for functions as default values in DBA_Table
+                  (currently only time() works)
+                * Added a SQL parser/lexer. It currently understands 'create
+                table', 'insert into' and much that goes with them.
+                * Added two system fields on rows; _rowid and _timestamp
+                * Primary keys can consist of more than one field
+                * Changed DBA_Sql; it now holds functions for interacting with
+                  a DBA database using SQL. See test_sql_dba.php for examples.
+                * General fixes/cleanups/messups
             ]]>
         </notes>
         <filelist>
@@ -49,13 +49,19 @@
                 <file role="php">DBA_Table.php</file>
                 <file role="php">DBA_Relational.php</file>
                 <file role="php">DBA_Toolbox.php</file>
+                <file role="php">DBA_Sql.php</file>
+                <file role="php">Sql_lex.php</file>
+                <file role="php">Sql_parse.php</file>
+                <file role="php">phptype.php</file>
                 <dir name="tests" role="test">
                     <file role="test">benchmark_drivers.php</file>
                     <file role="test">test_simple.php</file>
                     <file role="test">test_relational.php</file>
                     <file role="test">test_table.php</file>
+                    <file role="test">test_sql_dba.php</file>
                     <file role="test">empSchema.php</file>
                     <file role="test">hatSchema.php</file>
+                    <file role="test">employment.sql</file>
                 </dir>
                 <dir name="docs" role="doc">
                     <file role="doc">README.txt</file>

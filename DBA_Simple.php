@@ -69,7 +69,7 @@ define('DBA_SIMPLE_KEY',3);
  * The sync function calls fflush on the data and index files.
  *
  * @author  Brent Cook
- * @version 0.16
+ * @version 0.17
  * @access  public
  * @package DBA
  */
@@ -492,7 +492,7 @@ class DBA_Simple extends PEAR
             $loc = ftell($this->_datFP);
 
             // write to the data file
-            $size = $vsize + 10; // make size 5% larger
+            $size = $vsize + ceil($vsize / 20); // make size 5% larger
 
             // add a useless "\n" to new values. This makes the data file
             // readable in any text editor. Useful when things go wrong :P

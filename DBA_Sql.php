@@ -21,6 +21,13 @@
 // $Id$
 //
 
+/**
+ * Functions for executing SQL queries on a DBM database
+ * @author  Brent Cook <busterb@mail.utexas.edu>
+ * @version 0.17
+ * @access  public
+ * @package DBA
+ */
 require_once 'PEAR.php';
 require_once 'DB/DBA/Sql_parse.php';
 require_once 'DB/DBA/DBA_Relational.php';

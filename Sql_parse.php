@@ -113,6 +113,14 @@ define('SQL_SET',183);
 define('SQL_ENUM',184);
 // }}}
 
+/**
+ * A sql parser
+ *
+ * @author  Brent Cook <busterb@mail.utexas.edu>
+ * @version 0.17
+ * @access  public
+ * @package DBA
+ */
 class Sql_Parser
 {
     var $lexer;

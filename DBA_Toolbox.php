@@ -25,6 +25,11 @@ require_once 'PEAR.php';
 /**
  * Insert widgets into a quickform object suitable for updating a row in a DBA
  * table.
+ *
+ * @author  Brent Cook <busterb@mail.utexas.edu>
+ * @version 0.17
+ * @access  public
+ * @package DBA
  */
 function addQuickformDBA(&$form, $schema, $auxMeta)
 {
