@@ -22,15 +22,27 @@
 //
 // $Id$
 //
+
+/**
+ * DBA is a set of classes for handling and extending Berkeley DB style
+ * databases. It works around some of the quirks in the built-in dba
+ * functions in PHP (e.g. gdbm does not support dba_replace), has its own
+ * dbm engine for installations where dba support is not included in PHP.
+ *
+ * @author  Brent Cook <busterb@mail.utexas.edu>
+ * @version 0.0.14
+ * @access  public
+ * @package DBA
+ */
 class DBA
 {
     /**
-    * Return a DBA object
+    * Creates a new DBA object
     *
     * @static
-    * @version 0.0.14
-    * @param  string $driver  Type of storage object to return
-    * @return object          DBA storage object, returned by reference
+    * @param   string $driver type of storage object to return
+    * @return  object
+    * @returns DBA storage object, returned by reference
     */
     function &create($driver = 'simple')
     {

@@ -17,8 +17,6 @@
 // | License along with this library; if not, write to the Free Software  |
 // | Foundation, Inc., 59 Temple Place, Suite 330,Boston,MA 02111-1307 USA|
 // +----------------------------------------------------------------------+
-// | Author: Brent Cook <busterb@mail.utexas.edu>                         |
-// +----------------------------------------------------------------------+
 //
 // $Id$
 
@@ -30,10 +28,11 @@ require_once 'PEAR.php';
  * the DBA_Simple class.
  *
  * This class has been tested with DB3 and GDBM. Other drivers may have quirks
- * that this class does not address yet.
+ * that this class does not address yet. CDB is known to be unsuitable as a
+ * driver due to its lack of writes. DB2 apparently segfaults PHP?
  *
- * @author  Brent Cook
- * @version 0.0.12
+ * @author  Brent Cook <busterb@mail.utexas.edu>
+ * @version 0.0.14
  * @access  public
  * @package DBA
  */
@@ -91,7 +90,8 @@ class DBA_Builtin extends PEAR{
      *                   'c' creates a new database if the database does not
      *                      exist and opens read-write.
      * @param   string  $driver dba driver to use
-     * @returns object PEAR_Error on failure
+     * @return  object
+     * @returns PEAR_Error on failure
      */
     function open ($dbName='', $mode='r', $driver=NULL)
     {
@@ -129,7 +129,8 @@ class DBA_Builtin extends PEAR{
                     $this->_readable = true;
                     break;
             default:
-                return $this->raiseError("DBA: Invalid file mode: $mode", E_USER_ERROR);
+                return $this->raiseError("DBA: Invalid file mode: $mode",
+                                          E_USER_ERROR);
         }
 
         // open the index file
@@ -138,15 +139,16 @@ class DBA_Builtin extends PEAR{
             $this->_writable = false;
             $this->_readable = false;
             return $this->raiseError("DBA: Could not open database: $dbName"
-                          ." with mode $mode");
+                                     ." with mode $mode");
         }
     }
 
     /**
      * Closes an open database.
      *
-     * @access public
-     * @returns object PEAR_Error on failure
+     * @access  public
+     * @return  object
+     * @returns PEAR_Error on failure
      */
     function close ()
     {
@@ -165,9 +167,10 @@ class DBA_Builtin extends PEAR{
      * If the database is already in the requested mode, then this function
      * does nothing.
      *
-     * @access public
+     * @access  public
      * @param   string  $mode 'r' for read-only, 'w' for read/write
-     * @returns object PEAR_Error on failure
+     * @return  object
+     * @returns PEAR_Error on failure
      */
     function reopen ($mode)
     {
@@ -200,8 +203,8 @@ class DBA_Builtin extends PEAR{
     /**
      * Returns the current read status for the database
      *
-     * @access public
-     * @returns boolean
+     * @access  public
+     * @return  boolean
      */
     function isOpen()
     {
@@ -211,8 +214,8 @@ class DBA_Builtin extends PEAR{
     /**
      * Returns the current read status for the database
      *
-     * @access public
-     * @returns boolean
+     * @access  public
+     * @return  boolean
      */
     function isReadable()
     {
@@ -222,8 +225,8 @@ class DBA_Builtin extends PEAR{
     /**
      * Returns the current write status for the database
      *
-     * @access public
-     * @returns boolean
+     * @access  public
+     * @return  boolean
      */
      function isWritable()
      {
@@ -233,9 +236,10 @@ class DBA_Builtin extends PEAR{
     /**
      * Deletes the value at location $key
      *
-     * @access public
+     * @access  public
      * @param   string  $key key to delete
-     * @returns object PEAR_Error on failure
+     * @return  object
+     * @returns PEAR_Error on failure
      */
     function delete($key)
     {
@@ -254,9 +258,10 @@ class DBA_Builtin extends PEAR{
     /**
      * Returns the value that is stored at $key.
      *
-     * @access public
+     * @access  public
      * @param   string $key key to examine
-     * @returns mixed  the requested value on success, false on failure
+     * @return  mixed
+     * @returns the requested value on success, false on failure
      */
     function fetch($key)
     {
@@ -277,8 +282,9 @@ class DBA_Builtin extends PEAR{
     /**
      * Returns the first key in the database
      *
-     * @access public
-     * @returns mixed string on success, false on failure
+     * @access  public
+     * @return  mixed
+     * @returns string on success, false on failure
      */
     function firstkey()
     {
@@ -293,8 +299,9 @@ class DBA_Builtin extends PEAR{
     /**
      * Returns the next key in the database, false if there is a problem
      *
-     * @access public
-     * @returns mixed string on success, false on failure
+     * @access  public
+     * @return  mixed
+     * @returns string on success, false on failure
      */
     function nextkey()
     {
@@ -313,7 +320,8 @@ class DBA_Builtin extends PEAR{
      * @access public
      * @param   string  $key key to insert
      * @param   string  $value value to store
-     * @returns object PEAR_Error on failure
+     * @return  object
+     * @returns PEAR_Error on failure
      */
     function insert($key, $value)
     {
@@ -337,7 +345,8 @@ class DBA_Builtin extends PEAR{
      * @access public
      * @param   $key    string the key to insert
      * @param   $val    string the value to store
-     * @returns object PEAR_Error on failure
+     * @return  object
+     * @returns PEAR_Error on failure
      */
     function replace($key, $value)
     {
@@ -363,10 +372,11 @@ class DBA_Builtin extends PEAR{
      * Creates a new database file if one does not exist. If it already exists,
      * updates the last-updated timestamp on the database
      *
-     * @access public
+     * @access  public
      * @param   string  $dbName the database to create
      * @param   string  $driver the dba driver to use
-     * @returns object PEAR_Error on failure
+     * @return  object
+     * @returns PEAR_Error on failure
      */
     function create($dbName, $driver='gdbm')
     {
@@ -379,9 +389,9 @@ class DBA_Builtin extends PEAR{
     /**
      * Indicates whether a database with given name exists
      *
-     * @access public
+     * @access  public
      * @param   string  $dbName the database name to check for existence
-     * @returns boolean
+     * @return  boolean
      */
     function db_exists($dbName)
     {
@@ -391,9 +401,9 @@ class DBA_Builtin extends PEAR{
     /**
      * Check whether key exists
      *
-     * @access public
+     * @access  public
      * @param   string   $key
-     * @returns boolean
+     * @return  boolean
      */
     function exists($key)
     {

@@ -79,16 +79,5 @@ foreach ($queries as $query) {
 }
 
 $table->close();
-/*
-$sortField = 'quantity';
-$results = $table->unique(
-           $table->project('brand, quantity',
-           $table->sort('quantity', 'd',
-           $table->select($query))));
-echo "Sorting by: $sortField, descending order\n";
-echo "Query: $query\n\n";
-echo DBA_Table::formatTextResults($results, array('brand', 'quantity'), 'mysql');
-*/
-//$table->close();
 
 ?>

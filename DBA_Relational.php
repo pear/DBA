@@ -26,23 +26,44 @@ require_once 'PEAR.php';
 require_once 'DB/DBA/DBA_Table.php';
 
 /**
- * a relational database manager for DBM-style databases
+ * A relational database manager using DBA_Table as a storage object.
+ * DBA_Relational extends DBA_Table by providing uniform access to multiple
+ * tables, automatically opening, closing and locking tables as needed by
+ * various operations, and provides a join operation.
  *
- * @author Brent Cook <busterb@mail.utexas.edu>
+ * @author  Brent Cook <busterb@mail.utexas.edu>
+ * @package DBA
+ * @access  public
  * @version 0.0.14
  */
 class DBA_Relational extends PEAR
 {
-    // table handles
+    /**
+     * Handles to table objects
+     * @access private
+     * @var array
+     */
     var $_tables=array();
 
-    // handle to manager table; used for handling multi-table operations
+    /**
+     * Handle to manager table; used for handling multi-table operations
+     * @access private
+     * @var object
+     */
     var $_manager;
 
-    // location of table data files
+    /**
+     * Location of table data files
+     * @access private
+     * @var string
+     */
     var $_home;
 
-    // table driver to use
+    /**
+     * Table driver to use
+     * @access private
+     * @var string
+     */
     var $_driver;
 
     /**
@@ -50,7 +71,6 @@ class DBA_Relational extends PEAR
      *
      * @param string  $home path where data files are stored
      * @param string  $driver DBA driver to use
-     *
      */
     function DBA_Relational($home = '', $driver = 'simple')
     {
@@ -96,10 +116,11 @@ class DBA_Relational extends PEAR
      * Opens a table, keeps it in the list of tables. Can also reopen tables
      * to different file modes
      *
-     * @access private
-     * @param string $tableName name of the table to open
-     * @param char   $mode      mode to open the table; one of r,w,c,n
-     * @returns object PEAR_Error on failure
+     * @access  private
+     * @param   string $tableName name of the table to open
+     * @param   char   $mode      mode to open the table; one of r,w,c,n
+     * @return  object
+     * @returns PEAR_Error on failure
      */
     function _openTable($tableName, $mode = 'r')
     {
@@ -127,8 +148,8 @@ class DBA_Relational extends PEAR
     /**
      * Returns whether the specified table exists in the db home
      *
-     * @param string $tableName table to check existence of
-     * @returns boolean
+     * @param   string $tableName table to check existence of
+     * @return  boolean
      */
     function tableExists($tableName)
     {
@@ -138,10 +159,10 @@ class DBA_Relational extends PEAR
     /**
      * Generates a nice, ASCII table from a results set, a-la MySQL
      *
-     * @param array $results
-     * @param array $fields  list of fields to display
-     * @param string $style  style to display table in; 'oracle', 'mysql'
-     * @returns string
+     * @param   array $results
+     * @param   array $fields  list of fields to display
+     * @param   string $style  style to display table in; 'oracle', 'mysql'
+     * @return  string
      */
     function formatTextResults($results, $fields = null, $style = 'oracle')
     {
@@ -151,10 +172,11 @@ class DBA_Relational extends PEAR
     /**
      * Creates a new table
      *
-     * @access public
+     * @access  public
      * @param   string $tableName   name of the table to create
      * @param   array  $schema field schema for the table
-     * @returns object PEAR_Error on failure
+     * @return  object
+     * @returns PEAR_Error on failure
      */
     function createTable($tableName, $schema)
     {
@@ -175,7 +197,7 @@ class DBA_Relational extends PEAR
      * Returns an array with the stored schema for the table
      *
      * @param   string $tableName
-     * @returns array
+     * @return  array
      */
     function getSchema($tableName)
     {
@@ -190,7 +212,7 @@ class DBA_Relational extends PEAR
     /**
      * Returns the current read status for the database
      *
-     * @returns boolean
+     * @return  boolean
      */
     function isOpen($tableName)
     {
@@ -206,7 +228,8 @@ class DBA_Relational extends PEAR
      *
      * @param   string $tableName table on which to operate
      * @param   array  $data assoc array or ordered list of data to insert
-     * @returns mixed  PEAR_Error on failure, the row index on success
+     * @return  mixed
+     * @returns PEAR_Error on failure, the row index on success
      */
     function insert($tableName, $data)
     {
@@ -225,7 +248,8 @@ class DBA_Relational extends PEAR
      * @param   string $tableName table on which to operate
      * @param   string $key row id to replace
      * @param   array  $data assoc array or ordered list of data to insert
-     * @returns mixed  PEAR_Error on failure, the row index on success
+     * @return  mixed
+     * @returns PEAR_Error on failure, the row index on success
      */
     function replace($tableName, $key, $data)
     {
@@ -243,7 +267,8 @@ class DBA_Relational extends PEAR
      * @access  public
      * @param   string $tableName table on which to operate
      * @param   string $key row id to delete
-     * @returns object PEAR_Error on failure
+     * @return  object
+     * @returns PEAR_Error on failure
      */
     function delete($tableName, $key)
     {
@@ -261,7 +286,8 @@ class DBA_Relational extends PEAR
      * @access  public
      * @param   string $tableName table on which to operate
      * @param   string $key row id to fetch
-     * @returns mixed  PEAR_Error on failure, the row array on success
+     * @return  mixed
+     * @returns PEAR_Error on failure, the row array on success
      */
     function fetch($tableName, $key)
     {
@@ -284,7 +310,8 @@ class DBA_Relational extends PEAR
      * @param   string $tableName table on which to operate
      * @param   string $rawQuery query expression for performing the select
      * @param   array  $rows rows to select on
-     * @returns mixed  PEAR_Error on failure, the row array on success
+     * @return  mixed
+     * @returns PEAR_Error on failure, the row array on success
      */
     function select($tableName, $query, $rows=null)
     {
@@ -307,7 +334,8 @@ class DBA_Relational extends PEAR
      * @param   string $order 'a' for ascending, 'd' for descending
      * @param   array  $rows rows to sort, sorts the entire table if not
      *                       specified
-     * @returns mixed  PEAR_Error on failure, the row array on success
+     * @return  mixed
+     * @returns PEAR_Error on failure, the row array on success
      */
     function sort($fields, $order='a', $rows)
     {
@@ -322,7 +350,8 @@ class DBA_Relational extends PEAR
      * @param   array $fields fields to project
      * @param   array $rows rows to project, projects entire table if not
      *                      specified
-     * @returns mixed  PEAR_Error on failure, the row array on success
+     * @return  mixed
+     * @returns PEAR_Error on failure, the row array on success
      */
     function project($fields, $rows)
     {
@@ -335,7 +364,8 @@ class DBA_Relational extends PEAR
      * @access  public
      * @param   array  $rows rows to process, uses entire table if not
      *                     specified
-     * @returns mixed  PEAR_Error on failure, the row array on success
+     * @return  mixed
+     * @returns PEAR_Error on failure, the row array on success
      */
     function unique($rows)
     {
@@ -356,7 +386,8 @@ class DBA_Relational extends PEAR
      * @param   string $tableName table on which to operate
      * @param   array $rows rows to finalize, if none are specified, returns
      *                      the whole table
-     * @returns mixed  PEAR_Error on failure, the row array on success
+     * @return  mixed
+     * @returns PEAR_Error on failure, the row array on success
      */
     function finalize($tableName, $rows=null)
     {
@@ -432,10 +463,12 @@ class DBA_Relational extends PEAR
     /**
      * Joins rows between two tables based on a query.
      *
-     * @access public
-     * @param  string $tableA   name of table to join
-     * @param  string $tableB   name of table to join
-     * @param  string $rawQuery expression of how to join tableA and tableB
+     * @access  public
+     * @param   string $tableA   name of table to join
+     * @param   string $tableB   name of table to join
+     * @param   string $rawQuery expression of how to join tableA and tableB
+     * @return  mixed
+     * @returns PEAR_Error on failure, the row array on success
      */
     function join($tableA, $tableB, $rawQuery)
     {
