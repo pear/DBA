@@ -113,7 +113,7 @@ foreach ($testDrivers as $driver) {
         exit;
     }
 
-    if (PEAR::isError($result = DBA::drop('test_db'))) {
+    if (PEAR::isError($result = DBA::db_drop('test_db', $driver))) {
         echo $result->getMessage();
         exit;
     }

@@ -97,10 +97,18 @@ class DBA extends PEAR
      * @param   string $driver type of storage object to return
      * @return  object DBA storage object, returned by reference
      */
-    function drop($name, $driver = 'file')
+    function db_drop($name, $driver = 'file')
     {
-        $db = DBA::create($driver);
-        return $db->db_drop($name);
+        if (!function_exists('dba_open') || ($driver=='file')) {
+            require_once 'DBA/Driver/File.php';
+            return DBA_Driver_File::db_drop($name);
+        } elseif (in_array($driver, DBA::getDriverList())) {
+            require_once 'DBA/Driver/Builtin.php';
+            return DBA_Driver_Builtin::db_drop($name);
+        } else {
+            return DBA::raiseError(DBA_ERROR_UNSUP_DRIVER, NULL, NULL,
+                'driver: '.$driver);
+        }
     }
     
     /**
