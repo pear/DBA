@@ -124,8 +124,7 @@ class DBA_Table extends PEAR
      * @access  public
      * @param   string $tableName name of the table to open
      * @param   char   $mode      mode to open the table; one of r,w,c,n
-     * @returns PEAR_Error on failure
-     * @return  object
+     * @return  object PEAR_Error on failure
      */
     function open($tableName, $mode = 'r')
     {
@@ -159,8 +158,7 @@ class DBA_Table extends PEAR
      * Closes a table
      *
      * @access  public
-     * @returns PEAR_Error on failure
-     * @return  object
+     * @return  object PEAR_Error on failure
      */
     function close()
     {
@@ -178,8 +176,7 @@ class DBA_Table extends PEAR
      *
      * @param   string $tableName   name of the table to create
      * @param   array  $schema field schema for the table
-     * @returns PEAR_Error on failure
-     * @return  object
+     * @return  object PEAR_Error on failure
      */
     function create($tableName, $schema)
     {
@@ -209,9 +206,8 @@ class DBA_Table extends PEAR
     /**
      * Returns the stored schema for the table
      *
-     * @returns an array of the form 'fieldname'=>array(fieldmeta) on success,
-     *          PEAR_Error on failure
-     * @return  mixed
+     * @return  mixed an array of the form 'fieldname'=>array(fieldmeta) on
+     *          success, PEAR_Error on failure
      */
     function getSchema() {
         if ($this->isOpen()) {
@@ -226,8 +222,7 @@ class DBA_Table extends PEAR
      *
      * @access  public
      * @param   string $key
-     * @returns true if the table exists, false otherwise
-     * @return  boolean
+     * @return  boolean true if the table exists, false otherwise
      */
     function tableExists($tableName)
     {
@@ -235,10 +230,10 @@ class DBA_Table extends PEAR
     }
 
     /**
-     * Returns the current read status for the database
+     * Returns the current open status for the database
      *
      * @returns true if the table exists, false otherwise
-     * @return  boolean
+     * @return  boolean true if the table is open, false if it is closed
      */
     function isOpen()
     {
@@ -248,8 +243,7 @@ class DBA_Table extends PEAR
     /**
      * Returns the current read status for the database
      *
-     * @returns true if the table exists, false otherwise
-     * @return  boolean
+     * @return  boolean true if the table is readable, false otherwise
      */
     function isReadable()
     {
@@ -259,8 +253,7 @@ class DBA_Table extends PEAR
     /**
      * Returns the current write status for the database
      *
-     * @returns true if the table exists, false otherwise
-     * @return  boolean
+     * @return  boolean true if the table is writable, false otherwise
      */
     function isWritable()
     {
@@ -270,8 +263,7 @@ class DBA_Table extends PEAR
     /**
      * Returns whether a field exists in the current table's schema
      *
-     * @returns true if the table exists, false otherwise
-     * @return  boolean
+     * @return  boolean true if the field exists, false otherwise
      */
     function fieldExists($fieldName)
     {
@@ -281,8 +273,7 @@ class DBA_Table extends PEAR
     /**
      * Aquire an exclusive lock on the table
      *
-     * @returns PEAR_Error on failure
-     * @return  object
+     * @return  object PEAR_Error on failure
      */
     function lockEx()
     {
@@ -292,8 +283,7 @@ class DBA_Table extends PEAR
     /**
      * Aquire a shared lock on the table
      *
-     * @returns PEAR_Error on failure
-     * @return  object
+     * @return  object PEAR_Error on failure
      */
     function lockSh($table_name)
     {
@@ -305,8 +295,7 @@ class DBA_Table extends PEAR
      * This function returns the highest row index
      *
      * @access  private
-     * @returns an integer or false if there are no keys
-     * @return  mixed
+     * @return  mixed an integer or false if there are no keys
      */
     function _findMaxKey()
     {
@@ -325,8 +314,7 @@ class DBA_Table extends PEAR
      * Returns a unique key to be used as a row index
      *
      * @access  private
-     * @returns a new key
-     * @return  integer
+     * @return  integer a new key
      */
     function _getUniqueKey()
     {
@@ -351,8 +339,7 @@ class DBA_Table extends PEAR
      * @access  private
      * @param   array   $field field to pack
      * @param   string  $value value of this field to pack
-     * @returns packed version of value, as per $field spec
-     * @return  string
+     * @return  string  packed version of value, as per $field spec
      */
     function _packField($field, $value)
     {
@@ -441,8 +428,7 @@ class DBA_Table extends PEAR
      *
      * @access  private
      * @param   string $field field to convert
-     * @param   string $field packed value
-     * @return  mixed
+     * @return  mixed  string $field packed value
      */
     function _unpackField($field, $value)
     {
@@ -486,8 +472,7 @@ class DBA_Table extends PEAR
      *
      * @access  private
      * @param   array  $schema schema to pack
-     * @returns the packed schema
-     * @return  string
+     * @return  string the packed schema
      */
     function _packSchema($schema)
     {
@@ -661,8 +646,7 @@ class DBA_Table extends PEAR
      *
      * @access  private
      * @param   array packedData row data to unpack
-     * @return  array
-     * @returns field=>value pairs
+     * @return  array field=>value pairs
      */
     function _unpackRow($packedData)
     {
@@ -680,8 +664,7 @@ class DBA_Table extends PEAR
      * 
      * @access  public
      * @param   array $data assoc array or ordered list of data to insert
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row index on success
+     * @return  mixed PEAR_Error on failure, the row index on success
      */
     function insert($data)
     {
@@ -721,8 +704,7 @@ class DBA_Table extends PEAR
      * @access  public
      * @param   string $key row id to replace
      * @param   array  $data assoc array or ordered list of data to insert
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row index on success
+     * @return  mixed  PEAR_Error on failure, the row index on success
      */
     function replace($key, $data)
     {
@@ -738,8 +720,7 @@ class DBA_Table extends PEAR
      *
      * @access  public
      * @param   string $key row id to remove
-     * @return  object
-     * @returns PEAR_Error on failure
+     * @return  object PEAR_Error on failure
      */
     function remove($key)
     {
@@ -751,8 +732,7 @@ class DBA_Table extends PEAR
      *
      * @access  public
      * @param   string $key row id to fetch
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row array on success
+     * @return  mixed  PEAR_Error on failure, the row array on success
      */
     function fetch($key)
     {
@@ -773,7 +753,7 @@ class DBA_Table extends PEAR
      * @access  private
      * @param   mixed   $field
      * @param   string  $value
-     * @return  string
+     * @return  string  the string representation of $field
      */
     function _finalizeField($field, $value)
     {
@@ -808,8 +788,7 @@ class DBA_Table extends PEAR
      * @access  public
      * @param   array  $rows rows to finalize, if none are specified, returns
      *                      the whole table
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row array on success
+     * @return  mixed PEAR_Error on failure, the row array on success
      */
     function finalize($rows=null)
     {
@@ -837,8 +816,7 @@ class DBA_Table extends PEAR
      * @access  public
      * @param   array  $rowKeys keys of rows to get, if none are specified,
      *                        returns the whole table
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row array on success
+     * @return  mixed PEAR_Error on failure, the row array on success
      */
     function getRows($rowKeys=null)
     {
@@ -869,7 +847,7 @@ class DBA_Table extends PEAR
      * Returns an array of the defined field names in the table
      *
      * @access  public
-     * @return  array
+     * @return  array the field names in an array
      */
     function getFieldNames()
     {
@@ -883,7 +861,7 @@ class DBA_Table extends PEAR
      *
      * @access  private
      * @param   string  $string
-     * @return  string
+     * @return  string  the cooked query
      */
     function _cookQuery($query)
     {
@@ -914,8 +892,7 @@ class DBA_Table extends PEAR
      * @param   string  $rawQuery the incoming query
      * @param   array   $fieldTokens list of tokens that should be treated as
      *                               field names
-     * @return  string
-     * @returns PHP code for performing a select
+     * @return  string  PHP code for performing a select
      */
     function _parsePHPQuery($rawQuery, $fieldTokens)
     {
@@ -952,8 +929,7 @@ class DBA_Table extends PEAR
      * @access  public
      * @param   string $rawQuery query expression for performing the select
      * @param   array  $rows rows to select on
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row array on success
+     * @return  mixed  PEAR_Error on failure, the row array on success
      */
     function select($rawQuery, $rows=null)
     {
@@ -1043,8 +1019,7 @@ class DBA_Table extends PEAR
      *                         array of fields to sort by in order of preference
      * @param   string $order 'a' for ascending, 'd' for descending
      * @param   array  $rows rows to sort
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row array on success
+     * @return  mixed  PEAR_Error on failure, the row array on success
      */
     function sort($fields, $order, $rows)
     {
@@ -1084,8 +1059,7 @@ class DBA_Table extends PEAR
      * @access  public
      * @param   array  $fields fields to project
      * @param   array  $rows rows to project
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row array on success
+     * @return  mixed  PEAR_Error on failure, the row array on success
      */
     function project($fields, $rows)
     {
@@ -1118,8 +1092,7 @@ class DBA_Table extends PEAR
      * @access  public
      * @param   array  $a row a
      * @param   array  $b row b
-     * @return  bool
-     * @returns true if they are the same, false if they are not
+     * @return  bool   true if they are the same, false if they are not
      */
     function cmpRows($a, $b)
     {
@@ -1137,8 +1110,7 @@ class DBA_Table extends PEAR
      * 
      * @access  public
      * @param   array  $rows rows to process
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row array on success
+     * @return  mixed  PEAR_Error on failure, the row array on success
      */
     function unique($rows)
     {

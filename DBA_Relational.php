@@ -119,8 +119,7 @@ class DBA_Relational extends PEAR
      * @access  private
      * @param   string $tableName name of the table to open
      * @param   char   $mode      mode to open the table; one of r,w,c,n
-     * @return  object
-     * @returns PEAR_Error on failure
+     * @return  object PEAR_Error on failure
      */
     function _openTable($tableName, $mode = 'r')
     {
@@ -149,7 +148,7 @@ class DBA_Relational extends PEAR
      * Returns whether the specified table exists in the db home
      *
      * @param   string $tableName table to check existence of
-     * @return  boolean
+     * @return  boolean true if the table exists, false if it doesn't
      */
     function tableExists($tableName)
     {
@@ -157,12 +156,13 @@ class DBA_Relational extends PEAR
     }
 
     /**
-     * Generates a nice, ASCII table from a results set, a-la MySQL
+     * Generates a nice, text table from a results set, a-la MySQL
      *
      * @param   array $results
      * @param   array $fields  list of fields to display
      * @param   string $style  style to display table in; 'oracle', 'mysql'
-     * @return  string
+     *                    oracle is plain lists, mysql is boxy lists
+     * @return  string 
      */
     function formatTextResults($results, $fields = null, $style = 'oracle')
     {
@@ -175,8 +175,7 @@ class DBA_Relational extends PEAR
      * @access  public
      * @param   string $tableName   name of the table to create
      * @param   array  $schema field schema for the table
-     * @return  object
-     * @returns PEAR_Error on failure
+     * @return  object PEAR_Error on failure
      */
     function createTable($tableName, $schema)
     {
@@ -228,8 +227,7 @@ class DBA_Relational extends PEAR
      *
      * @param   string $tableName table on which to operate
      * @param   array  $data assoc array or ordered list of data to insert
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row index on success
+     * @return  mixed  PEAR_Error on failure, the row index on success
      */
     function insert($tableName, $data)
     {
@@ -248,8 +246,7 @@ class DBA_Relational extends PEAR
      * @param   string $tableName table on which to operate
      * @param   string $key row id to replace
      * @param   array  $data assoc array or ordered list of data to insert
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row index on success
+     * @return  mixed  PEAR_Error on failure, the row index on success
      */
     function replace($tableName, $key, $data)
     {
@@ -267,8 +264,7 @@ class DBA_Relational extends PEAR
      * @access  public
      * @param   string $tableName table on which to operate
      * @param   string $key row id to remove
-     * @return  object
-     * @returns PEAR_Error on failure
+     * @return  object PEAR_Error on failure
      */
     function remove($tableName, $key)
     {
@@ -286,8 +282,7 @@ class DBA_Relational extends PEAR
      * @access  public
      * @param   string $tableName table on which to operate
      * @param   string $key row id to fetch
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row array on success
+     * @return  mixed  PEAR_Error on failure, the row array on success
      */
     function fetch($tableName, $key)
     {
@@ -310,8 +305,7 @@ class DBA_Relational extends PEAR
      * @param   string $tableName table on which to operate
      * @param   string $rawQuery query expression for performing the select
      * @param   array  $rows rows to select on
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row array on success
+     * @return  mixed  PEAR_Error on failure, the row array on success
      */
     function select($tableName, $query, $rows=null)
     {
@@ -334,8 +328,7 @@ class DBA_Relational extends PEAR
      * @param   string $order 'a' for ascending, 'd' for descending
      * @param   array  $rows rows to sort, sorts the entire table if not
      *                       specified
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row array on success
+     * @return  mixed  PEAR_Error on failure, the row array on success
      */
     function sort($fields, $order='a', $rows)
     {
@@ -347,11 +340,10 @@ class DBA_Relational extends PEAR
      * are in the resulting rows. The SQL analog is 'select fields from table'
      *
      * @access  public
-     * @param   array $fields fields to project
-     * @param   array $rows rows to project, projects entire table if not
-     *                      specified
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row array on success
+     * @param   array  $fields fields to project
+     * @param   array  $rows rows to project, projects entire table if not
+     *                       specified
+     * @return  mixed  PEAR_Error on failure, the row array on success
      */
     function project($fields, $rows)
     {
@@ -364,8 +356,7 @@ class DBA_Relational extends PEAR
      * @access  public
      * @param   array  $rows rows to process, uses entire table if not
      *                     specified
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row array on success
+     * @return  mixed  PEAR_Error on failure, the row array on success
      */
     function unique($rows)
     {
@@ -384,10 +375,9 @@ class DBA_Relational extends PEAR
      *
      * @access  public
      * @param   string $tableName table on which to operate
-     * @param   array $rows rows to finalize, if none are specified, returns
+     * @param   array  $rows rows to finalize, if none are specified, returns
      *                      the whole table
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row array on success
+     * @return  mixed  PEAR_Error on failure, the row array on success
      */
     function finalize($tableName, $rows=null)
     {
@@ -400,6 +390,7 @@ class DBA_Relational extends PEAR
     }
 
     /**
+     * Verifies that the fields submitted exist in $table
      * @access private
      */
     function _validateTable(&$table, &$rows, &$fields, $altName)
@@ -425,6 +416,7 @@ class DBA_Relational extends PEAR
     }
 
     /**
+     * Constructs a PHP query based on $rawQuery
      * @access private
      */
     function _parsePHPQuery($rawQuery, $fieldsA, $fieldsB, $tableA, $tableB)
@@ -467,8 +459,7 @@ class DBA_Relational extends PEAR
      * @param   string $tableA   name of table to join
      * @param   string $tableB   name of table to join
      * @param   string $rawQuery expression of how to join tableA and tableB
-     * @return  mixed
-     * @returns PEAR_Error on failure, the row array on success
+     * @return  mixed  PEAR_Error on failure, the row array on success
      */
     function join($tableA, $tableB, $rawQuery)
     {

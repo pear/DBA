@@ -39,8 +39,7 @@ class DBA
     *
     * @static
     * @param   string $driver type of storage object to return
-    * @return  object
-    * @returns DBA storage object, returned by reference
+    * @return  object DBA storage object, returned by reference
     */
     function &create($driver = 'simple')
     {

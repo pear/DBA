@@ -116,8 +116,7 @@ class DBA_Simple extends PEAR
      *                   'n' creates a new database and opens read-write.
      *                   'c' creates a new database if the database does not
      *                      exist and opens read-write.
-     * @return  object
-     * @returns PEAR_Error on failure
+     * @return  object  PEAR_Error on failure
      */
     function open($dbName='', $mode='r')
     {
@@ -198,8 +197,7 @@ class DBA_Simple extends PEAR
      * Closes an open database.
      *
      * @access  public
-     * @return  object
-     * @returns PEAR_Error on failure
+     * @return  object  PEAR_Error on failure
      */
     function close()
     {
@@ -225,8 +223,7 @@ class DBA_Simple extends PEAR
      *
      * @access  public
      * @param   string  $mode 'r' for read-only, 'w' for read/write
-     * @return  object
-     * @returns PEAR_Error on failure
+     * @return  object  PEAR_Error on failure
      */
     function reopen($mode)
     {
@@ -259,7 +256,7 @@ class DBA_Simple extends PEAR
 
     /**
      * Returns the name of the opened database. Assumes database is open
-     * @returns string
+     * @returns string the name of the opened database
      */
     function getName()
     {
@@ -267,10 +264,10 @@ class DBA_Simple extends PEAR
     }
 
     /**
-     * Returns the current read status for the database
+     * Returns the current open status for the database
      *
      * @access  public
-     * @return  boolean
+     * @return  boolean true if the database is open, false if it is closed
      */
     function isOpen()
     {
@@ -281,7 +278,7 @@ class DBA_Simple extends PEAR
      * Returns the current read status for the database
      *
      * @access  public
-     * @return  boolean
+     * @return  boolean true if the database is readable, false if it is not
      */
     function isReadable()
     {
@@ -292,7 +289,7 @@ class DBA_Simple extends PEAR
      * Returns the current write status for the database
      *
      * @access  public
-     * @return  boolean
+     * @return  boolean true if the database is writable, false if it is not
      */
      function isWritable()
      {
@@ -304,8 +301,7 @@ class DBA_Simple extends PEAR
      *
      * @access  public
      * @param   string  $key key to remove
-     * @return  object
-     * @returns PEAR_Error on failure
+     * @return  object  PEAR_Error on failure
      */
     function remove($key)
     {
@@ -327,8 +323,7 @@ class DBA_Simple extends PEAR
      *
      * @access  public
      * @param   string $key key to examine
-     * @return  mixed
-     * @returns the requested value on success, false on failure
+     * @return  mixed  the requested value on success, false on failure
      */
     function fetch($key)
     {
@@ -350,8 +345,7 @@ class DBA_Simple extends PEAR
      * Returns the first key in the database
      *
      * @access  public
-     * @return  mixed
-     * @returns string on success, false on failure
+     * @return  mixed  string on success, false on failure
      */
     function firstkey()
     {
@@ -367,8 +361,7 @@ class DBA_Simple extends PEAR
      * Returns the next key in the database, false if there is a problem
      *
      * @access  public
-     * @return  mixed
-     * @returns string on success, false on failure
+     * @return  mixed  string on success, false on failure
      */
     function nextkey()
     {
@@ -381,10 +374,10 @@ class DBA_Simple extends PEAR
     }
 
     /**
-     * Returns ths number of keys in the database
+     * Calculates the size of the database
      *
      * @access  public
-     * @return  int
+     * @return  int    number of keys in the database
      */
     function size()
     {
@@ -402,8 +395,7 @@ class DBA_Simple extends PEAR
      * @access  public
      * @param   string  $key key to insert
      * @param   string  $value value to store
-     * @return  object
-     * @returns PEAR_Error on failure
+     * @return  object  PEAR_Error on failure
      */
     function insert($key, $value)
     {
@@ -422,8 +414,7 @@ class DBA_Simple extends PEAR
      * @access  public
      * @param   $key    string the key to insert
      * @param   $val    string the value to store
-     * @return  object
-     * @returns PEAR_Error on failure
+     * @return  object  PEAR_Error on failure
      */
     function replace($key, $value)
     {
@@ -471,10 +462,10 @@ class DBA_Simple extends PEAR
      * Allocates a new block of at least $vsize and writes $key=>$val
      * to the database
      *
+     * @access  private
      * @param   string $key
      * @param   string $value
      * @param   int    $vsize
-     * @access private
      */
     function _writeNewBlock($key, $value, $vsize)
     {
@@ -515,9 +506,9 @@ class DBA_Simple extends PEAR
     /**
      * Returns a block location from the free list
      *
-     * @access private
-     * @param   int   $reqsize Requested size
-     * @returns mixed location of free block, false if there are no free blocks
+     * @access  private
+     * @param   int     $reqsize Requested size
+     * @returns mixed   location of free block, false if there are no free blocks
      */
     function _getFreeBlock($reqsize)
     {
@@ -539,7 +530,7 @@ class DBA_Simple extends PEAR
      * Places a used block on the free list, updates indicies accordingly
      *
      * @access  private
-     * @param    string $key
+     * @param   string $key
      * @returns mixed
      */
     function _freeUsedBlock($key)
@@ -558,8 +549,7 @@ class DBA_Simple extends PEAR
      *
      * @access  public
      * @param   string  $dbName the database to create
-     * @return  object
-     * @returns PEAR_Error on failure
+     * @return  object  PEAR_Error on failure
      */
     function create($dbName)
     {
@@ -572,8 +562,8 @@ class DBA_Simple extends PEAR
      * Indicates whether a database with given name exists
      *
      * @access  public
-     * @param   string  $dbName the database name to check for existence
-     * @return  boolean
+     * @param   string   $dbName the database name to check for existence
+     * @return  boolean true if the database exists, false if it doesn't
      */
     function db_exists($dbName)
     {
@@ -585,7 +575,7 @@ class DBA_Simple extends PEAR
      *
      * @access  public
      * @param   string   $key
-     * @return  boolean
+     * @return  boolean true if the key exists, false if it doesn't
      */
     function exists($key)
     {
