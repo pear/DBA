@@ -34,7 +34,7 @@ $table =& new DBA_Table();
 
 $table->_dateFormat = "M j, Y";
 
-$result = $table->create('hats', $hatTableStruct);
+$result = DBA_Table::create('hats', $hatTableStruct, 'simple');
 if (PEAR::isError($result)) {
     echo $result->getMessage()."\n";
     exit;

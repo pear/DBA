@@ -12,6 +12,6 @@ if (PEAR::isError($results)) {
 } else {
     echo $results;
 }
-//$db->close();
+$db->close();
 
 ?>
