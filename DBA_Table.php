@@ -215,7 +215,7 @@ class DBA_Table extends PEAR
                 $schema = $this->_packSchema($this->_schema);
                 $this->_dba->replace(DBA_SCHEMA_KEY, $schema);
             } else {
-                echo "No schema ;P\n";
+                echo "No schema, what's the point :P\n";
             }
         }
         $this->_maxKey = null;
@@ -234,7 +234,6 @@ class DBA_Table extends PEAR
      */
     function create($tableName, $schema, $driver)
     {
-        echo "$tableName, $schema, $driver\n";
         // pack the schema
         $packedSchema = DBA_Table::_packSchema($schema +
             array('_rowid'=>array(DBA_TYPE => DBA_INTEGER,
@@ -880,20 +879,18 @@ class DBA_Table extends PEAR
     {
         $rows = array();
         if ($this->_dba->isOpen()) {
-            $key = $this->_dba->firstkey();
-            while ($key !== false) {
-                if ($key != DBA_SCHEMA_KEY) {
-                    if (is_null($rowKeys)) {
-                        $rows[$key] = $this->_unpackRow(
-                                                   $this->_dba->fetch($key));
-                    } else {
-                        if (in_array($key, $rowKeys)) {
-                            $rows[$key] = $this->_unpackRow(
-                                                   $this->_dba->fetch($key));
-                        }
+            if (is_null($rowKeys)) {
+                $key = $this->_dba->firstkey();
+                while ($key !== false) {
+                    if ($key !== DBA_SCHEMA_KEY) {
+                      $rows[$key] = $this->_unpackRow($this->_dba->fetch($key));
                     }
+                    $key = $this->_dba->nextkey($key);
                 }
-                $key = $this->_dba->nextkey($key);
+            } else {
+                foreach ($rowKeys as $key) {
+                    $rows[$key] = $this->unpackRow($this->_dba->fetch($key));
+                }
             }
         } else {
             return $this->raiseError('table not open');

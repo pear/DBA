@@ -353,14 +353,14 @@ class DBA_Simple extends PEAR
         if ($this->isReadable()) {
             if (!isset($this->_usedBlocks[$key])) {
                 return $this->raiseError('DBA: cannot fetch key '.$key.
-                              ', it does not exist');
+                                         ', it does not exist');
             } else {
                 fseek($this->_datFP, $this->_usedBlocks[$key][DBA_SIMPLE_LOC]);
                 return fread($this->_datFP,$this->_usedBlocks[$key][DBA_SIMPLE_VSIZE]);
             }
         } else {
             return $this->raiseError('DBA: cannot fetch '.$key.' on '.
-                          $this->_dbName. ', DB not readable');
+                                     $this->_dbName. ', DB not readable');
         }
     }
     // }}}
