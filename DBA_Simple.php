@@ -636,12 +636,8 @@ class DBA_Simple extends PEAR
         $usedBlocks = array(); // temporary used index
         $key = '';            // reset key
 
-//      while (fscanf($this->_idxFP, '%u|%u|%u|%s', $loc, $size, $vsize, $key)){
-        while($record = fgets($this->_idxFP)) {
-            list($loc, $size, $vsize, $key) = explode('|', trim($record));
-            $loc = intval($loc);
-            $size = intval($size);
-            $vsize = intval($vsize);
+        while (fscanf($this->_idxFP, '%u|%u|%u|%s', $loc, $size, $vsize, $key))
+        {
             // is this an free block?
             if ($key == '') {
                 // check if this block had been previously marked as used
