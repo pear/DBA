@@ -73,6 +73,7 @@ $queries = array(
             did      DECIMAL(3) PRIMARY KEY, 
             name     VARCHAR(40) 
 );",
+"insert into dogmeat ('horse', 'hair') values (2, 4);"
 );
 
 $lexer = new Lexer();

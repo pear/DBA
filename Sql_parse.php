@@ -219,7 +219,7 @@ class Sql_Parser
                 $values[] = $this->lexer->tokText;
                 $types[] = $this->token;
             } elseif ($this->token == ')') {
-                return;
+                return false;
             } else {
                 return $this->raiseError('Expected a value');
             }
@@ -275,7 +275,7 @@ class Sql_Parser
                         $nextConstraint = true;
                         $haveValue = false;
                     } else {
-                        return $this->raiseError('Expected SQL_IDENT');
+                        return $this->raiseError('Expected TOK_IDENT');
                     }
                     break;
                 case (SQL_DEFAULT):
@@ -414,7 +414,7 @@ class Sql_Parser
                         $fields[$i][SQL_SIZE] = $values[0];
                         break;
                     case SQL_ENUM: case SQL_SET:
-                        if (!sizeof($values)) {
+                        if (!$results) {
                             return $this->raiseError('Expected a domain');
                         }
                         $fields[$i][SQL_DOMAIN][] = $values;
@@ -478,7 +478,7 @@ class Sql_Parser
                             }
                             $tree[SQL_FIELDS] = $fields;
                         } else {
-                            return $this->raiseError('Expected identifier');
+                            return $this->raiseError('Expected table name');
                         }
                         break;
                 }
@@ -488,8 +488,41 @@ class Sql_Parser
                 if ($this->token == SQL_INTO) {
                     $tree[SQL_COMMAND] = SQL_CREATE_TABLE;
                     $this->getTok();
-                    if ($this->token == SQL_IDENT) {
+                    if ($this->token == TOK_IDENT) {
                         $tree[SQL_NAME] = $this->lexer->tokText;
+                    } else {
+                        return $this->raiseError('Expected table name');
+                    }
+                    $this->getTok();
+                    if ($this->token == '(') {
+                        $results = $this->getParams($values, $types);
+                        if (PEAR::isError($results)) {
+                            return $results;
+                        } else {
+                            if (sizeof($values)) {
+                                $tree[SQL_FIELDS] = $values;
+                            }
+                        }
+                        $this->getTok();
+                    }
+                    if ($this->token == SQL_VALUES) {
+                        $this->getTok();
+                        $results = $this->getParams($values, $types);
+                        if (PEAR::isError($results)) {
+                            return $results;
+                        } else {
+                            if ($tree[SQL_FIELDS] && 
+                               (sizeof($tree[SQL_FIELDS]) != sizeof($values))) {
+                               return $this->raiseError('field/value mismatch');
+                            }
+                            if (sizeof($values)) {
+                                $tree[SQL_VALUES] = $values;
+                            } else {
+                               return $this->raiseError('No fields to insert');
+                            }
+                        }
+                    } else {
+                        return $this->raiseError('Expected "values"');
                     }
                 } else {
                     return $this->raiseError('Expected "into"');
