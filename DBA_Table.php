@@ -143,6 +143,19 @@ class DBA_Table extends PEAR
     }
 
     /**
+     * Returns an array with the stored schema for the table
+     *
+     * @returns array
+     */
+    function getSchema() {
+        if (!$this->isOpen()) {
+            return $this->_schema;
+        } else {
+            return $this->raiseError('DBA: table not open, no schema available');
+        }
+    }  
+
+    /**
      * Check whether table exists
      *
      * @access  public

@@ -182,6 +182,22 @@ class DBA_Relational extends PEAR
     }
 
     /**
+     * Returns an array with the stored schema for the table
+     *
+     * @param   string $tableName
+     * @returns array
+     */
+    function getSchema($tableName)
+    {
+        $result = $this->_openTable($tableName, 'w');
+        if (PEAR::isError($result)) {
+            return $result;
+        } else {
+            return $this->_tables[$tableName]->getSchema();
+        }
+    }
+
+    /**
      * Returns the current read status for the database
      *
      * @returns boolean
