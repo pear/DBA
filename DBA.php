@@ -57,11 +57,11 @@ class DBA extends PEAR
         if (!function_exists('dba_open') || ($driver=='file')) {
             require_once 'DBA/Driver/File.php';
             return new DBA_Driver_File();
-        } elseif (($driver == 'db3') || ($driver == 'gdbm')) {
+        } elseif (in_array($driver, DBA::getDriverList()) {
             require_once 'DBA/Driver/Builtin.php';
             return new DBA_Driver_Builtin($driver);
         } else {
-            return PEAR::raiseError('Unknown DBA driver, '.$driver);
+            return PEAR::raiseError('Unsupported DBA driver, '.$driver);
         }
     }
 
@@ -94,7 +94,7 @@ class DBA extends PEAR
      */
     function getDriverList()
     {
-        return array('gdbm', 'db3', 'file');
+        return array('gdbm', 'db3', 'db2', 'file');
     }
 }
 ?>
