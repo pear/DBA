@@ -280,12 +280,12 @@ function lex()
                 while (!$bail) {
                     switch ($this->get()) {
                         case '':
-                            $this->tokText = '';
+                            $this->tokText = null;
                             $bail = true;
                             break;
                         case "\\":
                             if (!$this->get()) {
-                                $this->tokText = '';
+                                $this->tokText = null;
                                 $bail = true;
                             }
                                 //$bail = true;
@@ -297,7 +297,7 @@ function lex()
                             break;
                     }
                 }
-                if ($this->tokText) {
+                if (!is_null($this->tokText)) {
                     $state = 13;
                     break;
                 }

@@ -67,8 +67,8 @@ $queries = array(
 "CREATE TABLE distributors ( 
              did      DECIMAL(3) PRIMARY KEY DEFAULT NEXTVAL('serial'), 
              name     VARCHAR(40) NOT NULL CHECK (name <> '') 
-             CONSTRAINT con1 CHECK (did > 100 AND name > '') 
 )",
+//             CONSTRAINT con1 CHECK (did > 100 AND name > '') 
 "CREATE TABLE distributors ( 
             did      DECIMAL(3) PRIMARY KEY, 
             name     VARCHAR(40) 

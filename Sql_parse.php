@@ -185,8 +185,8 @@ class Sql_Parser
                 case 'default':
                     $this->getTok();
                     if ($this->isVal()) {
-                        $constraintOpts['type'] = 'default_value';
-                        $constraintOpts['value'] = $this->lexer->tokText;
+                        $constraintOpts = array('type'=>'default_value',
+                                                'value'=>$this->lexer->tokText);
                     } elseif ($this->isFunc()) {
                         $results =& $this->parseFunctionOpts();
                         if (PEAR::isError($results)) {
@@ -201,8 +201,8 @@ class Sql_Parser
                 case 'primary':
                     $this->getTok();
                     if ($this->token == 'key') {
-                        $constraintType = 'primary_key';
-                        $constraintValue = true;
+                        $constraintOpts = array('type'=>'primary_key',
+                                                'value'=>true);
                     } else {
                         return $this->raiseError('Expected "key"');
                     }
@@ -210,21 +210,38 @@ class Sql_Parser
                 case 'not':
                     $this->getTok();
                     if ($this->token == 'null') {
-                        $constraintType = 'not_null';
-                        $constraintValue = true;
+                        $constraintOpts = array('type'=>'not_null',
+                                                'value' => true);
                     } else {
                         return $this->raiseError('Expected "null"');
                     }
                     break;
-                case 'check': case 'varying': case 'unique':
+                case 'check':
+                    $this->getTok();
+                    if ($this->token != '(') {
+                        return $this->raiseError('Expected (');
+                    }
+                    $results =& $this->parseSearchClause();
+                    if (PEAR::isError($results)) {
+                        return $results;
+                    }
+                    $results['type'] = 'check_function';
+                    $constraintOpts =& $results;
+                    $this->getTok();
+                    if ($this->token != ')') {
+                        return $this->raiseError('Expected )');
+                    }
+                    //print_r($results);
+                    break;
+                case 'varying': case 'unique':
                     $this->getTok();
                     if ($this->token != '(') {
                         return $this->raiseError('Expected (');
                     }
                     $this->getTok();
                     if ($this->isVal()) {
-                        $constraintType = $option;
-                        $constraintValue = $this->lexer->tokText;
+                        $constraintOpts = array('type' => $option,
+                                                'value' =>$this->lexer->tokText);
                     } else {
                         return $this->raiseError('Expected value');
                     }
@@ -242,14 +259,10 @@ class Sql_Parser
             }
             if ($haveValue) {
                 if ($namedConstraint) {
-                    $options['constraints'][$constraintName] = array(
-                        'type' => $constraintType,
-                        'value' => $constraintValue);
+                    $options['constraints'][$constraintName] = $constraintOpts;
                     $namedConstraint = false;
                 } else {
-                    $options['constraints'][] = array(
-                        'type' => $constraintType,
-                        'value' => $constraintValue);
+                    $options['constraints'][] = $constraintOpts;
                 }
             }
             $this->getTok();
@@ -290,15 +303,17 @@ class Sql_Parser
         $clause['arg_2']['type'] = $this->token;
         $this->getTok();
         if (($this->token == 'and') || ($this->token == 'or')) {
+            $op = $this->token;
             $subClause = $this->parseSearchClause();
             if (PEAR::isError($subClause)) {
                 return $subClause;
             } else {
                 return array('arg_1' => $clause,
-                            'op' => $this->token,
+                            'op' => $op,
                             'arg_2' => $subClause);
             }
         } else {
+            echo $this->token;
             $this->lexer->unget();
             return $clause;
         }
