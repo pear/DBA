@@ -30,7 +30,7 @@ require_once('PEAR.php');
  * dbm engine for installations where dba support is not included in PHP.
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.9.3
+ * @version 0.9.4
  * @access  public
  * @package DBA
  */
@@ -76,14 +76,12 @@ class DBA extends PEAR
      * @param  string @driver driver to test for
      * @return boolean true if the database exists
      */
-    function exists($name, $driver = 'file')
+    function db_exists($name, $driver = 'file')
     {
         if (!function_exists('dba_open') || ($driver=='file')) {
-            require_once 'DBA/Driver/File.php';
-            return DBA_Driver_File::exists($name);
+            return (file_exists($name.'.dat') && file_exists($name.'.idx'));
         } elseif (($driver == 'db3') || ($driver == 'gdbm')){
-            require_once 'DBA/Driver/Builtin.php';
-            return DBA_Driver_Builtin::exists($name);
+            return file_exists($name);
         } else {
             return PEAR::raiseError('Unknown DBA driver, '.$driver);
         }
