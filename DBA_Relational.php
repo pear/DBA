@@ -258,13 +258,13 @@ class DBA_Relational extends PEAR
     }
     // }}}
 
-    // {{{ replace($rawQuery, $data, $rows=null)
+    // {{{ replace($tableName, $rawQuery, $data, $rows=null)
     /**
-     * Replaces rows that match $rawQuery with $
+     * Replaces rows that match $rawQuery
      *
      * @access  public
-     * @param   string $rawQuery query expression for performing the remove
-     * @param   array  $rows rows to select on
+     * @param   string $rawQuery query expression for performing the replace
+     * @param   array  $rows subset of rows to choose from
      * @return  object PEAR_Error on failure
      */
     function replace($tableName, $rawQuery, $data, $rows=null)
@@ -299,7 +299,27 @@ class DBA_Relational extends PEAR
     }
     // }}}
 
-    // {{{ remove($tableName, $key)
+    // {{{ remove($tableName, $rawQuery, $rows=null)
+    /**
+     * Removes rows that match $rawQuery with $
+     *
+     * @access  public
+     * @param   string $rawQuery query expression for performing the remove
+     * @param   array  $rows subset of rows to choose from
+     * @return  object PEAR_Error on failure
+     */
+    function remove($tableName, $rawQuery, $rows=null)
+    {
+        $result = $this->_openTable($tableName, 'w');
+        if (PEAR::isError($result)) {
+            return $result;
+        } else {
+            return $this->_tables[$tableName]->remove($rawQuery, $rows);
+        } 
+    }
+    // }}}
+
+    // {{{ removeKey($tableName, $key)
     /**
      * Remove an existing row in a table
      *
@@ -308,7 +328,7 @@ class DBA_Relational extends PEAR
      * @param   string $key row id to remove
      * @return  object PEAR_Error on failure
      */
-    function remove($tableName, $key)
+    function removeKey($tableName, $key)
     {
         $result = $this->_openTable($tableName, 'w');
         if (PEAR::isError($result)) {
