@@ -26,9 +26,9 @@ class DBA
     * @static
     * @version 0.0.12
     * @param  string $driver  Type of storage object to return
-    * @return object Object   DBA storage object
+    * @return object DBA storage object by reference
     */
-    function create($driver = 'simple')
+    function &create($driver = 'simple')
     {
         if (!function_exists('dba_open') || ($driver=='simple')) {
             require_once 'DB/DBA/DBA_Simple.php';

@@ -27,7 +27,7 @@ require_once 'DB/DBA/DBA_Relational.php';
 require_once 'empSchema.php';
 
 // set the working directory and driver
-$db=new DBA_Relational('./', 'simple');
+$db =& new DBA_Relational('./', 'simple');
 
 // generate and populate the tables
 foreach ($empSchema as $tableName=>$tableSchema) {
@@ -82,5 +82,5 @@ foreach ($queries as $query) {
     echo "------------------------------------------------\n\n";
 }
 	
-	$db->close();
+//	$db->close();
 ?>

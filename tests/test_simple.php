@@ -29,7 +29,7 @@ $testDataArray = array ('1', '22', '333', '4444', '55555', '6666666', '7777777',
 
 $maxDataIndex = sizeof ($testDataArray)-1;
 
-$testDB = new DBA_Simple();
+$testDB =& new DBA_Simple();
 
 if (PEAR::isError($error=$testDB->open('test', 'c')))
 {
@@ -71,6 +71,6 @@ while ($key !== FALSE) {
     $key = $testDB->nextkey($key);
 }
 
-$testDB->close();
+//$testDB->close();
 
 ?>

@@ -67,22 +67,27 @@ function printQueryResults($results, $fields=null)
         
 }
 
-$table=new DBA_Table();
+$table =& new DBA_Table();
 
-$result = $table->create ('hats', $hatTableStruct);
+$result = $table->create('hats', $hatTableStruct);
 if (PEAR::isError($result)) {
     echo $result->getMessage()."\n";
     exit;
 }
 
 // open and close table multiple times while inserting
+$result = $table->open('hats', 'w');
+if (PEAR::isError($result)) {
+    echo $result->getMessage()."\n";
+    exit;
+}
+
 for ($i=0; $i < 2; ++$i) {
-    $table->open ('hats', 'w');
     foreach ($new_hats as $hat) {
         $table->insert($hat);
     }
-    $table->close();
 }
+//$table->close();
 
 $table->open ('hats', 'r');
 
@@ -120,6 +125,6 @@ echo "Sorting by: $sortField, descending order\n";
 echo "Query: $query\n\n";
 printQueryResults ($results, array('brand', 'quantity'));
 
-$table->close();
+//$table->close();
 
 ?>

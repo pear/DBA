@@ -75,8 +75,8 @@ define('DBA_KEY',3);
  * @access  public
  * @package DBA
  */
-class DBA_Simple extends PEAR {
-
+class DBA_Simple extends PEAR 
+{
     /**
      * Name of the database
      * @access private
@@ -257,6 +257,7 @@ class DBA_Simple extends PEAR {
      */
     function _DBA_Simple()
     {
+        echo "DBA_Simple {$this->_dbName} melting!\n";
         $this->close();
     }
 
@@ -635,7 +636,13 @@ class DBA_Simple extends PEAR {
         $usedBlocks = array(); // temporary used index
         $key = '';            // reset key
 
-        while (fscanf($this->_idxFP, '%u|%u|%u|%s', $loc, $size, $vsize, $key)){
+//      while (fscanf($this->_idxFP, '%u|%u|%u|%s', $loc, $size, $vsize, $key)){
+        while($record = fgets($this->_idxFP)) {
+            list($loc, $size, $vsize, $key) = explode('|', trim($record));
+            $loc = intval($loc);
+            $size = intval($size);
+            $vsize = intval($vsize);
+            echo strlen($loc).', ';
             // is this an free block?
             if ($key == '') {
                 // check if this block had been previously marked as used
@@ -666,11 +673,11 @@ class DBA_Simple extends PEAR {
      */
     function _writeIdx ()
     {
-        // clear the index
-        ftruncate($this->_idxFP, 0);
-
         // move the file pointer to the beginning; ftruncate does not do this
         fseek($this->_idxFP, 0);
+
+        // clear the index
+        ftruncate($this->_idxFP, 0);
 
         // write the free blocks
         if (isset($this->_freeBlocks)) {
@@ -707,4 +714,5 @@ class DBA_Simple extends PEAR {
         }
     }
 }
+
 ?>

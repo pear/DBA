@@ -59,7 +59,7 @@ class DBA_Table extends PEAR
     function DBA_Table($driver = 'simple')
     {
         // initialize the internal dba object
-        $this->_dba = DBA::create($driver);
+        $this->_dba =& DBA::create($driver);
     }
 
     /**
@@ -68,6 +68,7 @@ class DBA_Table extends PEAR
      */
     function _DBA_Table()
     {
+        echo "DBA_Table {$this->_dba->_dbName} is melting!\n";
         $this->close();
     }
 
@@ -81,6 +82,10 @@ class DBA_Table extends PEAR
      */
     function open($tableName, $mode = 'r')
     {
+        if (($mode != 'w') && ($mode != 'r')) {
+            return $this->raiseError("DBA: table open mode '$mode' is invalid");
+        }
+
         $result = $this->_dba->open($tableName, $mode);
         if (PEAR::isError($result)) {
             return $result;

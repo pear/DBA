@@ -69,11 +69,25 @@ class DBA_Relational extends PEAR
      */
     function close()
     {
-        foreach ($this->_tables as $table) {
-            $table->close();
+        if (sizeof($this->_tables)) {
+            reset($this->_tables);
+            $this->_tables[key($this->_tables)]->close();
+            while(next($this->_tables)) {
+                $this->_tables[key($this->_tables)]->close();
+            }
         }
     }
-    
+
+    /**
+     * PEAR emulated destructor calls close on PHP shutdown
+     * @access  private
+     */
+    function _DBA_Relational()
+    {
+        echo "I'm Melting!\n";
+        $this->close();
+    }
+
     /**
      * Opens a table, keeps it in the list of tables. Can also reopen tables
      * to different file modes
@@ -86,12 +100,10 @@ class DBA_Relational extends PEAR
     function _openTable($tableName, $mode = 'r')
     {
         if (!isset($this->_tables[$tableName])) {
-
-            $this->_tables[$tableName] =& new DBA_Table($this->_driver);
-
-            if (!$this->_tables[$tableName]->tableExists($this->_home.$tableName)) {
-                unset($this->_tables[$tableName]);
-                return $this->raiseError("Table: '$tableName' does not exist");
+            if (!$this->_manager->tableExists($this->_home.$tableName)) {
+                return $this->raiseError("DBA: table '$tableName' does not exist");
+            } else {
+                $this->_tables[$tableName] =& new DBA_Table($this->_driver);
             }
         }
 
