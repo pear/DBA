@@ -21,7 +21,7 @@
 // $Id$
 //
 
-include 'DB/DBA/phptype.php';
+include 'DB/DBA/ctype.php';
 
 // {{{ token definitions
 // variables
@@ -98,10 +98,10 @@ function lex()
 
     $state = 0;
     while (1) {
-        //echo "State: $state, Char: $c\n";
+        echo "State: $state, Char: $c\n";
         switch($state) {
             // {{{ State 0 : Start of token
-            CASE(0):
+            case 0:
                 $this->tokPtr = $this->tokStart;
                 $this->tokText = '';
                 $this->tokLen = 0;
@@ -123,17 +123,17 @@ function lex()
                     $state = 18;
                     break;
                 }
-                if (isAlpha($c)) {
+                if (strlen($c) && ctype_alpha($c)) {
                     $state = 1;
                     break;
                 }
-                if (isDigit($c)) {
+                if (strlen($c) && ctype_digit($c)) {
                     $state = 5;
                     break;
                 }
                 if ($c == '.') {
                     $t = $this->get();
-                    if (isDigit($t)) {
+                    if (strlen($c) && ctype_digit($t)) {
                         $this->unget();
                         $state = 7;
                         break;
@@ -162,9 +162,9 @@ function lex()
             // }}}
 
             // {{{ State 1 : Incomplete keyword or ident
-            CASE(1):
+            case 1:
                 $c = $this->get();
-                if (isAlnum($c) || ($c == '_')) {
+                if (strlen($c) && ctype_alnum($c) || ($c == '_')) {
                     $state = 1;
                     break;
                 }
@@ -173,7 +173,7 @@ function lex()
             // }}}
 
             /* {{{ State 2 : Complete keyword or ident */
-            CASE(2):
+            case 2:
                 $this->unget();
                 $this->tokText = substr($this->string, $this->tokStart,
                                         $this->tokLen);
@@ -189,9 +189,9 @@ function lex()
             // }}}
 
             // {{{ State 5: Incomplete real or int number
-            CASE(5):
+            case 5:
                 $c = $this->get();
-                if (isDigit($c)) {
+                if (strlen($c) && ctype_digit($c)) {
                     $state = 5;
                     break;
                 }
@@ -204,7 +204,7 @@ function lex()
             // }}}
 
             // {{{ State 6: Complete integer number
-            CASE(6):
+            case 6:
                 $this->unget();
                 $this->tokText = substr($this->string,$this->tokStart,$this->tokLen);
                 $this->tokStart = $this->tokPtr;
@@ -213,7 +213,7 @@ function lex()
             // }}}
 
             // {{{ State 7: Incomplete real number
-            CASE(7):
+            case 7:
                 $c = $this->get();
 
                 /* Analogy Start */
@@ -223,7 +223,7 @@ function lex()
                 }
                 /* Analogy End   */
 
-                if (isDigit($c)) {
+                if (strlen($c) && ctype_digit($c)) {
                     $state = 7;
                     break;
                 }
@@ -232,7 +232,7 @@ function lex()
             // }}}
 
             // {{{ State 8: Complete real number */
-            CASE(8):
+            case 8:
                 $this->unget();
                 $this->tokText = substr($this->string, $this->tokStart, $this->tokLen);
                 $this->tokStart = $this->tokPtr;
@@ -240,9 +240,9 @@ function lex()
             // }}}
 
             // {{{ State 9: Incomplete signed number
-            CASE(9):
+            case 9:
                 $c = $this->get();
-                if (isDigit($c)) {
+                if (strlen($c) && ctype_digit($c)) {
                     $state = 5;
                     break;
                 }
@@ -255,7 +255,7 @@ function lex()
             // }}}
 
             // {{{ State 10: Incomplete comparison operator
-            CASE(10):
+            case 10:
                 $c = $this->get();
                 if ($this->isCompop($c))
                 {
@@ -267,7 +267,7 @@ function lex()
             // }}}
 
             // {{{ State 11: Complete comparison operator
-            CASE(11):
+            case 11:
                 $this->unget();
                 $tokval = $this->symtab[
                         substr($this->string,$this->tokStart,$this->tokLen)];
@@ -281,7 +281,7 @@ function lex()
             // }}}
 
             // {{{ State 12: Incomplete text string
-            CASE(12):
+            case 12:
                 $bail = false;
                 while (!$bail) {
                     switch ($this->get()) {
@@ -312,14 +312,14 @@ function lex()
             // }}}
 
             // {{{ State 13: Complete text string
-            CASE(13):
+            case 13:
                 $this->tokStart = $this->tokPtr;
                 return (TOK_TEXT_VAL);
                 break;
             // }}}
 
             // {{{ State 14: Comment
-            CASE(14):
+            case 14:
                 $c = $this->skip();
                 if ($c == '\n') {
                     $state = 0;
@@ -331,7 +331,7 @@ function lex()
 
     // Analogy Start
             // {{{ State 15: Exponent Sign in Scientific Notation
-            CASE(15):
+            case 15:
                     $c = $this->get();
                     if($c == '-' || $c == '+') {
                             $state = 16;
@@ -342,9 +342,9 @@ function lex()
             // }}}
 
             // {{{ state 16: Exponent Value-first digit in Scientific Notation
-            CASE(16):
+            case 16:
                     $c = $this->get();
-                    if (isDigit($c)) {
+                    if (strlen($c) && ctype_digit($c)) {
                             $state = 17;
                             break;
                     }
@@ -353,9 +353,9 @@ function lex()
             // }}}
 
             // {{{ State 17: Exponent Value in Scientific Notation
-            CASE(17):
+            case 17:
                     $c = $this->get();
-                    if (isDigit($c)) {
+                    if (strlen($c) && ctype_digit($c)) {
                             $state = 17;
                             break;
                     }
@@ -365,9 +365,9 @@ function lex()
     // Analogy End
 
             // {{{ State 18 : Incomplete System Variable
-            CASE(18):
+            case 18:
                 $c = $this->get();
-                if (isalnum($c) || $c == '_') {
+                if (strlen($c) && ctype_alnum($c) || $c == '_') {
                     $state = 18;
                     break;
                 }
@@ -376,7 +376,7 @@ function lex()
             // }}}
 
             // {{{ State 19: Complete Sys Var
-            CASE(19):
+            case 19:
                 $this->unget();
                 $this->tokText = substr($this->tokStart,$this->tokLen);
                 $this->tokStart = $this->tokPtr;
@@ -384,7 +384,7 @@ function lex()
             // }}}
 
             // {{{ State 999 : Unknown token.  Revert to single char
-            CASE(999):
+            case 999:
                 $this->revert();
                 $this->tokText = $this->get();
                 $this->tokStart = $this->tokPtr;
@@ -392,7 +392,7 @@ function lex()
             // }}}
 
             // {{{ State 1000 : End Of Input
-            CASE(1000):
+            case 1000:
                 $this->tokText = '*end of input*';
                 $this->tokStart = $this->tokPtr;
                 return (TOK_END_OF_INPUT);
