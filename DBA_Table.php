@@ -200,8 +200,10 @@ class DBA_Table extends PEAR
     {
         if ($this->_dba->isWritable()) {
             // pack up the field structure and store it back in the table
-            $schema = $this->_packSchema($this->_schema);
-            $this->_dba->replace(DBA_SCHEMA_KEY, $schema);
+            if (isset($this->_schema)) {
+                $schema = $this->_packSchema($this->_schema);
+                $this->_dba->replace(DBA_SCHEMA_KEY, $schema);
+            }
         }
         $this->_maxKey = null;
         return $this->_dba->close();
@@ -218,7 +220,6 @@ class DBA_Table extends PEAR
     {
         // pack the schema
         $packedSchema = $this->_packSchema($schema + $this->_systemVariables);
-        
         if (PEAR::isError($packedSchema)) {
             return $packedSchema;
         }
@@ -537,7 +538,7 @@ class DBA_Table extends PEAR
         $buffer = array();
         $key = array();
         $i = 0;
-        foreach ($this->_schema as $fieldName => $fieldMeta) {
+        foreach ($this->_schema as $fieldName=>$fieldMeta) {
 
             if (isset($data[$fieldName])) {
 
@@ -599,7 +600,7 @@ class DBA_Table extends PEAR
     {
         $data = explode(DBA_FIELD_SEPARATOR, $packedData);
         $i = 0;
-        foreach ($this->_schema as $fieldName => $fieldMeta) {
+        foreach ($this->_schema as $fieldName=>$fieldMeta) {
             $buffer[$fieldName] = $this->_unpackField($fieldName, $data[$i]);
             $i++;
         }
