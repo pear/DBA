@@ -42,16 +42,19 @@ class Sql_Parser
     var $types = array();
     var $symbols = array();
     var $operators = array();
-    var $typeMap = array();
+    var $synonyms = array();
 
 // {{{ function Sql_Parser($string = null)
     function Sql_Parser($string = null) {
         include 'DB/DBA/Sql_dialect_ansi.php';
-        $this->symbols = array_flip(explode(' ', implode(' ', $dialect)));
-        $this->types = array_flip(explode(' ',$dialect['types']));
-        $this->functions = array_flip(explode(' ',$dialect['functions']));
-        $this->operators = array_flip(explode(' ',$dialect['operators']));
-        $this->typeMap = $typeMap;
+        $this->types = array_flip($dialect['types']);
+        $this->functions = array_flip($dialect['functions']);
+        $this->operators = array_flip($dialect['operators']);
+        $this->symbols = array_merge(array_flip($dialect['reserved']),
+            $this->types, $this->functions, $this->operators,
+            array_flip($dialect['commands']),
+            array_flip($dialect['conjunctions']));
+        $this->synonyms = $dialect['synonyms'];
         if (is_string($string)) {
             $this->lexer = new Lexer($string);
             $this->lexer->symbols =& $this->symbols;
@@ -162,7 +165,7 @@ class Sql_Parser
     // }}}
 
     // {{{ &parseFieldOptions()
-    function &parseFieldOptions()
+    function parseFieldOptions()
     {
         // parse field options
         $nextConstraint = false;
@@ -188,12 +191,12 @@ class Sql_Parser
                         $constraintOpts = array('type'=>'default_value',
                                                 'value'=>$this->lexer->tokText);
                     } elseif ($this->isFunc()) {
-                        $results =& $this->parseFunctionOpts();
+                        $results = $this->parseFunctionOpts();
                         if (PEAR::isError($results)) {
                             return $results;
                         }
                         $results['type'] = 'default_function';
-                        $constraintOpts =& $results;
+                        $constraintOpts = $results;
                     } else {
                         return $this->raiseError('Expected default value');
                     }
@@ -221,29 +224,33 @@ class Sql_Parser
                     if ($this->token != '(') {
                         return $this->raiseError('Expected (');
                     }
-                    $results =& $this->parseSearchClause();
+                    $results = $this->parseSearchClause();
                     if (PEAR::isError($results)) {
                         return $results;
                     }
                     $results['type'] = 'check';
-                    $constraintOpts =& $results;
+                    $constraintOpts = $results;
                     if ($this->token != ')') {
                         return $this->raiseError('Expected )');
                     }
                     break;
-                case 'varying': case 'unique':
+                case 'unique':
                     $this->getTok();
                     if ($this->token != '(') {
                         return $this->raiseError('Expected (');
                     }
+                    $constraintOpts = array('type'=>'unique');
                     $this->getTok();
-                    if ($this->isVal()) {
-                        $constraintOpts = array('type' => $option,
-                                                'value' =>$this->lexer->tokText);
-                    } else {
-                        return $this->raiseError('Expected value');
+                    while ($this->token != ')') {
+                        if ($this->token != 'ident') {
+                            return $this->raiseError('Expected an identifier');
+                        }
+                        $constraintOpts['column_names'][] = $this->lexer->tokText;
+                        $this->getTok();
+                        if (($this->token != ')') && ($this->token != ',')) {
+                            return $this->raiseError('Expected ) or ,');
+                        }
                     }
-                    $this->getTok();
                     if ($this->token != ')') {
                         return $this->raiseError('Expected )');
                     }
@@ -302,8 +309,8 @@ class Sql_Parser
     }
     // }}}
 
-    // {{{ &parseSearchClause()
-    function &parseSearchClause()
+    // {{{ parseSearchClause()
+    function parseSearchClause()
     {
         $clause = array();
         $this->getTok();
@@ -350,8 +357,8 @@ class Sql_Parser
     }
     // }}}
 
-    // {{{ &parseFieldList()
-    function &parseFieldList()
+    // {{{ parseFieldList()
+    function parseFieldList()
     {
         $this->getTok();
         if ($this->token != '(') {
@@ -390,11 +397,12 @@ class Sql_Parser
                 // character varying() == varchar()
                 if ($type == 'character') {
                     $type == 'varchar';
+                    $this->getTok();
                 } else {
                     return $this->raiseError('Unexpected token');
                 }
             }
-            $fields[$name]['type'] = $this->typeMap[$type];
+            $fields[$name]['type'] = $this->synonyms[$type];
             // parse type parameters
             if ($this->token == '(') {
                 $results = $this->getParams($values, $types);
@@ -416,13 +424,8 @@ class Sql_Parser
                         $fields[$name]['length'] = $values[0];
                         break;
                     case 'char': case 'varchar':
-                        if ($types[0] != 'int_val') {
-                            return $this->raiseError('Expected an integer');
-                        }
-                        $fields[$name]['length'] = $values[0];
-                        break;
                     case 'integer': case 'int':
-                        if (sizeof($values) > 1) {
+                        if (sizeof($values) != 1) {
                             return $this->raiseError('Expected 1 parameter');
                         }
                         if ($types[0] != 'int_val') {
@@ -444,7 +447,7 @@ class Sql_Parser
                 $this->getTok();
             }
 
-            $options =& $this->parseFieldOptions();
+            $options = $this->parseFieldOptions();
             if (PEAR::isError($options)) {
                 return $options;
             }
@@ -460,8 +463,8 @@ class Sql_Parser
     }
     // }}}
 
-    // {{{ &parseFunctionOpts()
-    function &parseFunctionOpts()
+    // {{{ parseFunctionOpts()
+    function parseFunctionOpts()
     {
         $function = $this->token;
         $opts['name'] = $function;
@@ -500,8 +503,8 @@ class Sql_Parser
     }
     // }}}
 
-    // {{{ &parseCreate()
-    function &parseCreate() {
+    // {{{ parseCreate()
+    function parseCreate() {
         $this->getTok();
         switch ($this->token) {
             case 'table':
@@ -509,12 +512,12 @@ class Sql_Parser
                 $this->getTok();
                 if ($this->token == 'ident') {
                     $tree['table_name'] = $this->lexer->tokText;
-                    $fields =& $this->parseFieldList();
+                    $fields = $this->parseFieldList();
                     if (PEAR::isError($fields)) {
                         return $fields;
                     }
                     $tree['column_defs'] = $fields;
-                    $tree['column_names'] = array_keys($fields);
+//                    $tree['column_names'] = array_keys($fields);
                 } else {
                     return $this->raiseError('Expected table name');
                 }
@@ -535,8 +538,8 @@ class Sql_Parser
     }
     // }}}
 
-    // {{{ &parseInsert()
-    function &parseInsert() {
+    // {{{ parseInsert()
+    function parseInsert() {
         $this->getTok();
         if ($this->token == 'into') {
             $tree = array('command' => 'insert');
@@ -588,8 +591,8 @@ class Sql_Parser
     }
     // }}}
 
-    // {{{ &parseUpdate()
-    function &parseUpdate() {
+    // {{{ parseUpdate()
+    function parseUpdate() {
         $this->getTok();
         if ($this->token == 'ident') {
             $tree = array('command' => 'update',
@@ -619,11 +622,11 @@ class Sql_Parser
                                       'type'=>$this->token);
             $this->getTok();
             if ($this->token == 'where') {
-                $clause =& $this->parseSearchClause();
+                $clause = $this->parseSearchClause();
                 if (PEAR::isError($clause)) {
                     return $clause;
                 }
-                $tree['where_clause'] =& $clause;
+                $tree['where_clause'] = $clause;
                 break;
             } elseif ($this->token != ',') {
                 return $this->raiseError('Expected "where" or ","');
@@ -633,15 +636,15 @@ class Sql_Parser
     }
     // }}}
 
-    // {{{ &parseDelete()
-    function &parseDelete() {
+    // {{{ parseDelete()
+    function parseDelete() {
         $tree = array('command' => 'delete');
         return $tree;
     }
     // }}}
 
-    // {{{ &parseSelect()
-    function &parseSelect() {
+    // {{{ parseSelect()
+    function parseSelect() {
         $tree = array('command' => 'select');
         $this->getTok();
         if (($this->token == 'distinct') || ($this->token == 'all')) {
@@ -661,11 +664,11 @@ class Sql_Parser
             }
         } elseif ($this->isFunc()) {
             if (!isset($tree['set_quantifier'])) {
-                $result =& $this->parseFunctionOpts();
+                $result = $this->parseFunctionOpts();
                 if (PEAR::isError($result)) {
                     return $result;
                 }
-                $tree['set_function'] =& $result;
+                $tree['set_function'] = $result;
                 $this->getTok();
             } else {
                 return $this->raiseError('Cannot use "'.
@@ -693,14 +696,28 @@ class Sql_Parser
         while (!is_null($this->token)) {
             switch ($this->token) {
                 case 'where':
-                    $clause =& $this->parseSearchClause();
+                    $clause = $this->parseSearchClause();
                     if (PEAR::isError($clause)) {
                         return $clause;
                     }
-                    $tree['where_clause'] =& $clause;
+                    $tree['where_clause'] = $clause;
                     break;
                 case 'order':
+                    $this->getTok();
+                    if ($this->token != 'by') {
+                        return $this->raiseError('Expected "by"');
+                    }
+                    $this->getTok();
+                    while ($this->token == 'ident') {
+                        $this->getTok();
+/*
+                        if ($this->token == 'asc') ||
+                        $tree['sort_spec']
+*/
+                    }
+                    break;
                 case 'limit':
+                    break;
                 default:
                     return $this->raiseError('Unexpected clause');
             }
