@@ -395,14 +395,14 @@ class DBA_Relational extends PEAR
     function _parsePHPQuery($rawQuery, $fieldsA, $fieldsB, $tableA, $tableB)
     {
         // add spaces around symbols for explode to work properly
-        $rawQuery = DBA_Table::_addSpaces($rawQuery);
+        $cookedQuery = DBA_Table::_cookSpaces($rawQuery);
 
         // begin building the php query for a row
         $phpQuery = '';
 
         // scan the tokens in the raw query to build a new query
         // if the token is a field name, use it as a key in $rowN[]
-        $tokens = explode(' ', $rawQuery);
+        $tokens = explode(' ', $cookedQuery);
         foreach ($tokens as $token) {
             // is this token a field name?
             if ($i = strpos($token, '.')) {

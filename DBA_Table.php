@@ -35,26 +35,52 @@ class DBA_Table extends PEAR
 {
     /**
      * DBA object handle
+     * @var     object
      * @access  private
      */
     var $_dba;
 
     /**
      * Describes the types of fields in a table
+     * @var     array
      * @access  private
      */
     var $_schema;
 
     /**
      * Default date format
+     * @var     string
      * @access  private
      */
     var $_dateFormat = 'D M j G:i:s T Y';
 
     /**
+     * When no primary key is specified, this is used to generate a unique
+     * key; like a row ID
+     * @var    int
+     * @access private
+     */
+    var $_maxKey;
+
+    /**
+     * The field name to be used as the primary key
+     * @var    string
+     * @access private
+     */
+    var $_primaryKey;
+
+    /**
+     * Data types understood by DBA_Table
+     * @var    array
+     * @access private
+     */
+    var $_types = array('integer', 'numeric', 'float', 'varchar', 'text',
+                       'boolean', 'enum', 'set', 'timestamp');
+
+    /**
      * Constructor
      *
-     * @param object $dba dba object to use for storage, you need this sometime
+     * @param string $driver dba driver to use for storage
      */
     function DBA_Table($driver = 'simple')
     {
@@ -121,6 +147,8 @@ class DBA_Table extends PEAR
             $schema = $this->_packSchema($this->_schema);
             $this->_dba->replace(DBA_SCHEMA_KEY, $schema);
         }
+        unset($this->_primaryKey);
+        unset($this->_maxKey);
         return $this->_dba->close();
     }
 
@@ -338,7 +366,7 @@ class DBA_Table extends PEAR
                     }
                 }
                 break;
-            case 'boolean': case 'bool':
+            case 'boolean':
                 if (is_bool ($value)) {
                     $c_value = strval ($value);
                 } else {
@@ -412,41 +440,6 @@ class DBA_Table extends PEAR
     }
 
     /**
-     * Converts a field from its native value to a value, that is
-     * sets are converted to strings, bools are converted to 'true' and 'false'
-     * timestamps are converted to a readable date. No more operations
-     * should be performed on a field after this though.
-     *
-     * @access  private
-     * @param   mixed   $field
-     * @param   string  $value
-     * @returns string
-     */
-    function _finalizeField($field, $value)
-    {
-        switch ($this->_schema[$field]['type'])
-        {
-            case 'set':
-                $buffer = '';
-                foreach ($value as $element) {
-                    $buffer .= "$element, ";
-                }
-                return substr($buffer,0 ,-2);
-            case 'boolean':
-                if ($value) return "true";
-                return "false";
-            case 'timestamp':
-                if ($format = $this->_schema[$field]['format']) {
-                    return date($format, $value);
-                } else {
-                    return date($this->_dateFormat, $value);
-                }
-            default:
-                return $value;
-        }
-    }
-
-    /**
      * Returns a string for a field structure
      *
      * This function uses the following is the grammar to pack elements:
@@ -481,6 +474,11 @@ class DBA_Table extends PEAR
                         $value = strtolower($value);
                         if ($value == 'int') $value = 'integer';
                         elseif ($value == 'bool') $value = 'boolean';
+
+                        // is this a valid type?
+                        if (!in_array($value, $this->_types)) {
+                            return $this->raiseError("DBA: $value is not a valid type");
+                        }
                         $buffer .= $value;
                         break;
                     case 'init': //handle this with auto[increment/decrement]
@@ -541,11 +539,18 @@ class DBA_Table extends PEAR
             foreach ($rawMeta as $rawAttribute)
             {
                 list($attribute,$rawValue) = explode('=',$rawAttribute);
-                if ($attribute == 'domain')
-                {
-                    $value = explode(',',$rawValue);
-                } else {
-                    $value = $rawValue;
+                switch ($attribute) {
+                    case 'domain':
+                        $value = explode(',',$rawValue);
+                        break;
+                    case 'primarykey':
+                        if (isset($this->_primaryKey)) {
+                            return $this->raiseError('DBA: schema has two '.
+                                                     'primary keys');
+                        }
+                        $this->_primaryKey = $rawValue;
+                    default:
+                        $value = $rawValue;
                 }
                 $fields[$name][$attribute] = $value;
             }
@@ -716,6 +721,41 @@ class DBA_Table extends PEAR
     }
 
     /**
+     * Converts a field from its native value to a value, that is
+     * sets are converted to strings, bools are converted to 'true' and 'false'
+     * timestamps are converted to a readable date. No more operations
+     * should be performed on a field after this though.
+     *
+     * @access  private
+     * @param   mixed   $field
+     * @param   string  $value
+     * @returns string
+     */
+    function _finalizeField($field, $value)
+    {
+        switch ($this->_schema[$field]['type'])
+        {
+            case 'set':
+                $buffer = '';
+                foreach ($value as $element) {
+                    $buffer .= "$element, ";
+                }
+                return substr($buffer,0 ,-2);
+            case 'boolean':
+                if ($value) return "true";
+                return "false";
+            case 'timestamp':
+                if ($format = $this->_schema[$field]['format']) {
+                    return date($format, $value);
+                } else {
+                    return date($this->_dateFormat, $value);
+                }
+            default:
+                return $value;
+        }
+    }
+
+    /**
      * Converts the results from any of the row operations to a 'finalized'
      * display-ready form. That means that timestamps, sets and enums are
      * converted into strings. This obviously has some consequences if you plan
@@ -793,17 +833,29 @@ class DBA_Table extends PEAR
 
     /**
      * Adds spaces around special symbols so that explode will separate them
-     * properly from other tokens.
+     * properly from other tokens. Replace spaces within strings with pipe
+     * characters so that explode will not separate string tokens.
      *
      * @access  private
      * @param   string  $string
      * @returns string
      */
-    function _addSpaces($string)
+    function _cookSpaces($string)
     {
         foreach (array('(',')','==','!=','>','<','<=','>=') as $symbol) {
             $string = str_replace($symbol, " $symbol ", $string);
         }
+
+        $inString = false;
+        for ($i=0; $i < strlen($string); ++$i) {
+            $chr = $rawQuery[$i];
+            if (($chr == '"') || ($chr =='\'')) {
+                $inString = !$inString;
+            } elseif ($inString && ($chr == ' ')) {
+                $string[$i] = '|';
+            }
+        }
+
         return $string;
     }
 
@@ -819,18 +871,21 @@ class DBA_Table extends PEAR
     function _parsePHPQuery($rawQuery, $fieldTokens)
     {
         // add spaces around symbols for explode to work properly
-        $rawQuery = $this->_addSpaces($rawQuery);
-
+        $cookedQuery = $this->_cookSpaces($rawQuery);
+        
         // begin building the php query for a row
         $phpQuery = '';
 
         // scan the tokens in the raw query to build a new query
         // if the token is a field name, use it as a key in $row[]
-        $tokens = explode(' ', $rawQuery);
+        $tokens = explode(' ', $cookedQuery);
         foreach ($tokens as $token) {
             // is this token a field name?
             if (in_array($token, $fieldTokens)) {
                 $phpQuery .= "\$row['$token']";
+            } elseif ($token != '||') {
+                // restore spaces in a string token
+                $phpQuery .= str_replace('|', ' ', $token);
             } else {
                 $phpQuery .= $token;
             }
@@ -869,6 +924,8 @@ class DBA_Table extends PEAR
             $PHPSelect = 'foreach ($rows as $key=>$row) if ('.
                          $this->_parsePHPQuery($rawQuery, $fieldTokens).
                         ') $results[$key] = $row;';
+
+            echo $this->_parsePHPQuery($rawQuery, $fieldTokens)."\n";
 
             // perform the select
             $results = array();

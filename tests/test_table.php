@@ -40,40 +40,42 @@ if (PEAR::isError($result)) {
     exit;
 }
 
+echo "Created table 'hats'\n";
+
 for ($i=0; $i < 2; ++$i) {
     foreach ($new_hats as $hat) {
-        $table->insert($hat);
+        $result = $table->insert($hat);
+        if (PEAR::isError($result)) {
+            echo $result->getMessage()."\n";
+        }
     }
 }
-//$table->close();
 
-$table->open ('hats', 'r');
+$queries = array(
+                '$table->select("(type != bowler) and (type != fedora)")',
+                '$table->select("quantity<=60")',
+                '$table->select("quantity>=50")',
+                '$table->sort("quantity, hat_id", "a", $table->select("*"))',
+                '$table->sort(array("quantity", "hat_id"), "a", $table->getRows())',
+                '$table->sort("lastshipment", "d", $table->select("*"))',
+                '$table->unique($table->project("brand,quantity",$table->sort("quantity", "d", $table->select("type != \'top hat\'"))))'
+                );
 
-$query = '(type != bowler) and (type != fedora)';
-$results = $table->select($query);
-echo "Query: $query\n\n";
-echo $table->formatTextResults($results, array('brand', 'quantity', 'type'));
+foreach ($queries as $query) {
+    echo "Query: $query\n";
+    eval ('$results = '.$query.';');
 
-$query = 'quantity <= 50';
-$results = $table->select($query);
-echo "Query: $query\n\n";
-echo DBA_Table::formatTextResults($results, array('brand', 'quantity'));
+    if (PEAR::isError($results)) {
+        echo " Query failed.\n";
+        echo $results->getMessage()."\n";
+    } else {
+        echo DBA_Table::formatTextResults($table->finalize($results));
+    }
+    echo "------------------------------------------------\n\n";
+}
 
-$query = 'quantity >= 50';
-$results = $table->select($query);
-echo "Query: $query\n\n";
-echo DBA_Table::formatTextResults($results, array('brand', 'quantity'));
-
-$sortFields = 'quantity, hat_id';
-$results = $table->sort($sortFields, 'a', $table->getRows());
-echo "Sorting by quantity, hat_id, ascending order\n";
-echo DBA_Table::formatTextResults($results, array('brand', 'quantity', 'hat_id'));
-
-$sortField = 'quantity';
-$results = $table->sort($sortField, 'd', $table->select('*'));
-echo "Sorting by $sortField, descending order\n";
-echo DBA_Table::formatTextResults($results, array('brand', 'quantity'));
-
+$table->close();
+/*
 $sortField = 'quantity';
 $results = $table->unique(
            $table->project('brand, quantity',
@@ -82,7 +84,7 @@ $results = $table->unique(
 echo "Sorting by: $sortField, descending order\n";
 echo "Query: $query\n\n";
 echo DBA_Table::formatTextResults($results, array('brand', 'quantity'), 'mysql');
-
+*/
 //$table->close();
 
 ?>
