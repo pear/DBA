@@ -78,7 +78,7 @@ class DBA_Table extends PEAR
      * @var    int
      * @access private
      */
-    var $_maxKey=0;
+    var $_maxKey=null;
 
     /**
      * Field name to use as a primary key. Null indicates that there is no
@@ -167,7 +167,7 @@ class DBA_Table extends PEAR
             $schema = $this->_packSchema($this->_schema);
             $this->_dba->replace(DBA_SCHEMA_KEY, $schema);
         }
-        unset($this->_maxKey);
+        $this->_maxKey = null;
         return $this->_dba->close();
     }
 
@@ -301,11 +301,11 @@ class DBA_Table extends PEAR
     {
         $maxKey = 0;
         $key = $this->_dba->firstkey();
-        while ($key) {
-            $key = $this->_dba->nextkey($key);
+        while ($key !== false) {
             if (is_numeric ($key) && ($key > $maxKey)) {
                 $maxKey = $key;
             }
+            $key = $this->_dba->nextkey($key);
         }
         return $maxKey;
     }
@@ -319,7 +319,7 @@ class DBA_Table extends PEAR
     function _getUniqueKey()
     {
         // find the maxKey if necessary
-        if (!isset ($this->_maxKey)) {
+        if (is_null($this->_maxKey)) {
             $this->_maxKey = $this->_findMaxKey();
         }
 
@@ -630,7 +630,7 @@ class DBA_Table extends PEAR
             }
 
             // if this field is the primary key, set $primaryKey
-            if ($fieldMeta['primarykey']) {
+            if (isset($fieldMeta['primarykey'])) {
                 $primaryKey = $c_value;
             }
 
@@ -676,7 +676,7 @@ class DBA_Table extends PEAR
                 return $packedRow;
             }
 
-            if ($this->_primaryKey) {
+            if (!isset($this->_primaryKey)) {
                 if (!is_null($primaryKey)) {
                     $key = $primaryKey;
                 } else {

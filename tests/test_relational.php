@@ -49,6 +49,8 @@ foreach ($empSchema as $tableName=>$tableSchema) {
             if (PEAR::isError($result)) {
                 echo $result->getMessage()."\n";
             }
+            // exercise sequences (autoincrement)
+            $db->close();
         }
     }
 }
