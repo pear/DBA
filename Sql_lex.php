@@ -2,228 +2,224 @@
 include 'phptype.php';
 
 // {{{ token definitions
-define('END_OF_INPUT',257);
-define('GE',258);
-define('LE',259);
-define('NE',260);
-define('EQ',261);
-define('GT',262);
-define('LT',263);
-define('BETWEEN',264);
-define('SLQ_CREATE',265);
-define('SLQ_DROP',266);
-define('SLQ_INSERT',267);
-define('SLQ_DELETE',268);
-define('SLQ_SELECT',269);
-define('SLQ_UPDATE',270);
-define('ALL',271);
-define('DISTINCT',272);
+define('SQL_END_OF_INPUT',257);
+define('SQL_GE',258);
+define('SQL_LE',259);
+define('SQL_NE',260);
+define('SQL_EQ',261);
+define('SQL_GT',262);
+define('SQL_LT',263);
+define('SQL_BETWEEN',264);
+define('SQL_CREATE',265);
+define('SQL_DROP',266);
+define('SQL_INSERT',267);
+define('SQL_DELETE',268);
+define('SQL_SELECT',269);
+define('SQL_UPDATE',270);
+define('SQL_ALL',271);
+define('SQL_DISTINCT',272);
 define('SQL_AS',273);
-define('WHERE',274);
-define('ORDER',275);
-define('FROM',276);
-define('INTO',277);
-define('TABLE',278);
-define('BY',279);
-define('ASC',280);
-define('DESC',281);
-define('LIKE',282);
-define('RLIKE',283);
-define('CLIKE',284);
-define('SLIKE',285);
+define('SQL_WHERE',274);
+define('SQL_ORDER',275);
+define('SQL_FROM',276);
+define('SQL_INTO',277);
+define('SQL_TABLE',278);
+define('SQL_BY',279);
+define('SQL_ASC',280);
+define('SQL_DESC',281);
+define('SQL_LIKE',282);
+define('SQL_RLIKE',283);
+define('SQL_CLIKE',284);
+define('SQL_SLIKE',285);
 define('SQL_AND',286);
 define('SQL_OR',287);
-define('VALUES',288);
-define('SET',289);
-define('NOT',290);
-define('NULLSYM',291);
-define('PRIMARY',292);
+define('SQL_VALUES',288);
+define('SQL_SET',289);
+define('SQL_NOT',290);
+define('SQL_NULLSYM',291);
+define('SQL_PRIMARY',292);
 define('SQL_KEY',293);
-define('INDEX',294);
-define('UNIQUE',295);
-define('ON',296);
-define('IDENT',297);
-define('SET_FUNCT',298);
-define('SYS_VAR',299);
-define('NUM',300);
-define('REAL_NUM',301);
-define('SLQ_INT',302);
-define('SLQ_INT8',303);
-define('SLQ_INT16',304);
-define('SLQ_INT32',305);
-define('SLQ_INT64',306);
-define('SLQ_UINT',307);
-define('SLQ_UINT8',308);
-define('SLQ_UINT16',309);
-define('SLQ_UINT32',310);
-define('SLQ_UINT64',311);
-define('SLQ_BOOL',312);
-define('SLQ_CHAR',313);
-define('SLQ_TEXT',314);
-define('SLQ_REAL',315);
-define('SLQ_DATE',316);
-define('SLQ_MONEY',317);
-define('SLQ_TIME',318);
-define('SLQ_IPV4',319);
-define('LIMIT',320);
-define('CREATE_TABLE',321);
-define('CREATE_INDEX',322);
-define('CREATE_SEQUENCE',323);
-define('DROP_TABLE',324);
-define('DROP_INDEX',325);
-define('DROP_SEQUENCE',326);
-define('SEQUENCE',327);
-define('VALUE',328);
-define('STEP',329);
-define('AVL_INDEX',330);
+define('SQL_INDEX',294);
+define('SQL_UNIQUE',295);
+define('SQL_ON',296);
+define('SQL_IDENT',297);
+define('SQL_SET_FUNCT',298);
+define('SQL_SYS_VAR',299);
+define('SQL_NUM',300);
+define('SQL_REAL_NUM',301);
+define('SQL_INT',302);
+define('SQL_INT8',303);
+define('SQL_INT16',304);
+define('SQL_INT32',305);
+define('SQL_INT64',306);
+define('SQL_UINT',307);
+define('SQL_UINT8',308);
+define('SQL_UINT16',309);
+define('SQL_UINT32',310);
+define('SQL_UINT64',311);
+define('SQL_BOOL',312);
+define('SQL_CHAR',313);
+define('SQL_TEXT',314);
+define('SQL_REAL',315);
+define('SQL_DATE',316);
+define('SQL_MONEY',317);
+define('SQL_TIME',318);
+define('SQL_IPV4',319);
+define('SQL_LIMIT',320);
+define('SQL_CREATE_TABLE',321);
+define('SQL_CREATE_INDEX',322);
+define('SQL_CREATE_SEQUENCE',323);
+define('SQL_DROP_TABLE',324);
+define('SQL_DROP_INDEX',325);
+define('SQL_DROP_SEQUENCE',326);
+define('SQL_SEQUENCE',327);
+define('SQL_VALUE',328);
+define('SQL_STEP',329);
+define('SQL_AVL_INDEX',330);
 // }}}
 
-// {{{ array $symtab
-$symtab = array(
-    'select'=>  SQL_SELECT,
-    'values'=>  VALUES,
-    'uint'=>    SQL_UINT,
-    'int32'=>   SQL_INT,
-    'or'=>      SQL_OR,
-    'not'=>     NOT,
-    'distinct'=>DISTINCT,
-    'int16'=>   SQL_INT16,
-    'and'=>     SQL_AND,
-    'delete'=>  SQL_DELETE,
-    'update'=>  SQL_UPDATE,
-    'avl'=>     AVL_INDEX,
-    'ipv4'=>    SQL_IPV4,
-    'int8'=>    SQL_INT8,
-    'from'=>    FROM,
-    'create'=>  SQL_CREATE,
-    'primary'=> PRIMARY,
-    'smallint'=>SQL_INT,
-    'real'=>    SQL_REAL,
-    'as'=>      SQL_AS,
-    'min'=>     SET_FUNCT,
-    'ipaddr'=>  SQL_IPV4,
-    'drop'=>    SQL_DROP,
-    'insert'=>  SQL_INSERT,
-    'like'=>    LIKE,
-    'text'=>    SQL_TEXT,
-    'sum'=>     SET_FUNCT,
-    'int64'=>   SQL_INT64,
-    'uint32'=>  SQL_UINT,
-    'NULL'=>    NULLSYM,
-    'max'=>     SET_FUNCT,
-    'float'=>   SQL_REAL,
-    'asc'=>     ASC,
-    'unique'=>  UNIQUE,
-    'rlike'=>   RLIKE,
-    'uint16'=>  SQL_UINT16,
-    'table'=>   TABLE,
-    'index'=>   INDEX,
-    'clike'=>   CLIKE,
-    'money'=>   SQL_MONEY,
-    'slike'=>   SLIKE,
-    'uint8'=>   SQL_UINT8,
-    '<='=>      LE,
-    'all'=>     ALL,
-    'key'=>     SQL_KEY,
-    'count'=>   SET_FUNCT,
-    'sequence'=>SEQUENCE,
-    '<>'=>      NE,
-    'into'=>    INTO,
-    'between'=> BETWEEN,
-    'uint64'=>  SQL_UINT64,
-    'where'=>   WHERE,
-    '>='=>      GE,
-    'by'=>      BY,
-    'null'=>    NULLSYM,
-    'int'=>     SQL_INT,
-    'double'=>  SQL_REAL,
-    '<'=>       LT,
-    'order'=>   ORDER,
-    'set'=>     SET,
-    'step'=>    STEP,
-    '='=>       EQ,
-    'on'=>      ON,
-    'value'=>   VALUE,
-    'character'=>SQL_CHAR,
-    'bigint'=>  SQL_INT,
-    '>'=>       GT,
-    'integer'=> SQL_INT,
-    'char'=>    SQL_CHAR,
-    'avg'=>     SET_FUNCT,
-    'date'=>    SQL_DATE,
-    'float8'=>  SQL_REAL,
-    'desc'=>    DESC,
-    'limit'=>   LIMIT,
-    'time'=>    SQL_TIME,
-    'tinyint'=> SQL_INT,
-    'int4'=>    SQL_INT,
-);
-// }}}
-
-$tokPtr = 0;
-$tokStart = 0;
-$prev = null;
-$rep = null;
-$text = null;
-$state = 0;
-$lineno = 0;
-
-// {{{ lex($string)
-function lex($string)
+class Lexer
 {
-    global $tokPtr, $tokStart, $prev, $rep, $text, $state, $lineno, $symtab;
+// {{{ array $symtab
+    var $symtab = array(
+        'select'=>  SQL_SELECT,
+        'values'=>  SQL_VALUES,
+        'uint'=>    SQL_UINT,
+        'int32'=>   SQL_INT,
+        'or'=>      SQL_OR,
+        'not'=>     SQL_NOT,
+        'distinct'=>SQL_DISTINCT,
+        'int16'=>   SQL_INT16,
+        'and'=>     SQL_AND,
+        'delete'=>  SQL_DELETE,
+        'update'=>  SQL_UPDATE,
+        'avl'=>     SQL_AVL_INDEX,
+        'ipv4'=>    SQL_IPV4,
+        'int8'=>    SQL_INT8,
+        'from'=>    SQL_FROM,
+        'create'=>  SQL_CREATE,
+        'primary'=> SQL_PRIMARY,
+        'smallint'=>SQL_INT,
+        'real'=>    SQL_REAL,
+        'as'=>      SQL_AS,
+        'min'=>     SQL_SET_FUNCT,
+        'ipaddr'=>  SQL_IPV4,
+        'drop'=>    SQL_DROP,
+        'insert'=>  SQL_INSERT,
+        'like'=>    SQL_LIKE,
+        'text'=>    SQL_TEXT,
+        'sum'=>     SQL_SET_FUNCT,
+        'int64'=>   SQL_INT64,
+        'uint32'=>  SQL_UINT,
+        'NULL'=>    SQL_NULLSYM,
+        'max'=>     SQL_SET_FUNCT,
+        'float'=>   SQL_REAL,
+        'asc'=>     SQL_ASC,
+        'unique'=>  SQL_UNIQUE,
+        'rlike'=>   SQL_RLIKE,
+        'uint16'=>  SQL_UINT16,
+        'table'=>   SQL_TABLE,
+        'index'=>   SQL_INDEX,
+        'clike'=>   SQL_CLIKE,
+        'money'=>   SQL_MONEY,
+        'slike'=>   SQL_SLIKE,
+        'uint8'=>   SQL_UINT8,
+        '<='=>      SQL_LE,
+        'all'=>     SQL_ALL,
+        'key'=>     SQL_KEY,
+        'count'=>   SQL_SET_FUNCT,
+        'sequence'=>SQL_SEQUENCE,
+        '<>'=>      SQL_NE,
+        'into'=>    SQL_INTO,
+        'between'=> SQL_BETWEEN,
+        'uint64'=>  SQL_UINT64,
+        'where'=>   SQL_WHERE,
+        '>='=>      SQL_GE,
+        'by'=>      SQL_BY,
+        'null'=>    SQL_NULLSYM,
+        'int'=>     SQL_INT,
+        'double'=>  SQL_REAL,
+        '<'=>       SQL_LT,
+        'order'=>   SQL_ORDER,
+        'set'=>     SQL_SET,
+        'step'=>    SQL_STEP,
+        '='=>       SQL_EQ,
+        'on'=>      SQL_ON,
+        'value'=>   SQL_VALUE,
+        'character'=>SQL_CHAR,
+        'bigint'=>  SQL_INT,
+        '>'=>       SQL_GT,
+        'integer'=> SQL_INT,
+        'char'=>    SQL_CHAR,
+        'avg'=>     SQL_SET_FUNCT,
+        'date'=>    SQL_DATE,
+        'float8'=>  SQL_REAL,
+        'desc'=>    SQL_DESC,
+        'limit'=>   SQL_LIMIT,
+        'time'=>    SQL_TIME,
+        'tinyint'=> SQL_INT,
+        'int4'=>    SQL_INT,
+    );
+// }}}
+
+    var $tokPtr = 0;
+    var $tokStart = 0;
+    var $prev = null;
+    var $rep = null;
+    var $text = null;
+    var $tokLen = 0;
+    var $lineno = 0;
+    var $string;
 
     function get() {
-        global $string, $tokPtr, $tokLen;
-        ++$tokLen;
-        return $string[$tokPtr++];
+        ++$this->tokLen;
+        return $this->string[$this->tokPtr++];
     }
 
     function unget() {
-        global $tokPtr, $tokLen;
-        --$tokPtr;
-        --$tokLen;
+        --$this->tokPtr;
+        --$this->tokLen;
     }
 
     function skip() {
-        global $string, $tokPtr, $tokStart;
-        ++$tokStart;
-        return $string[$tokPtr++];
+        ++$this->tokStart;
+        return $this->string[$this->tokPtr++];
     }
 
     function revert() {
-        global $tokPtr, $tokStart, $tokLen;
-        $tokPtr = $tokStart;
-        $tokLen = 0;
+        $this->tokPtr = $this->tokStart;
+        $this->tokLen = 0;
     }
 
     function isCompop($c) {
         return ($c == '<' || $c == '>' || $c == '=');
     }
 
-    $prev = $rep;
+// {{{ lex($this->string)
+function lex()
+{
+    $this->prev = $this->rep;
     if ($state == 1000) {
-        $prev = null;
+        $this->prev = null;
         return 0;
     }
 
     $state = 0;
     while (1) {
-        usleep(250000);
-        echo "State $state, $string[$tokPtr]\n";
+        //echo 'State '.$state.', '.$this->string[$this->tokPtr]."\n";
         switch($state) {
             // {{{ State 0 : Start of token
             CASE(0):
-                $tokPtr = $tokStart;
-                $text = NULL;
-                $tokLen = 0;
-                $c = get();
+                $this->tokPtr = $this->tokStart;
+                $this->text = NULL;
+                $this->tokLen = 0;
+                $c = $this->get();
                 while ($c == ' ' || $c == '\t' || $c == '\n') {
                     if ($c == '\n') {
-                        ++$lineno;
+                        ++$this->lineno;
                     }
-                    $c = skip();
-                    $tokLen = 1;
+                    $c = $this->skip();
+                    $this->tokLen = 1;
                 }
                 if ($c == '\'') {
                     $state = 12;
@@ -242,20 +238,20 @@ function lex($string)
                     break;
                 }
                 if ($c == '.') {
-                    $t = get();
+                    $t = $this->get();
                     if (isDigit($t)) {
-                        unget();
+                        $this->unget();
                         $state = 7;
                         break;
                     } else {
-                        unget();
+                        $this->unget();
                     }
                 }
                 if ($c == '-' || $c == '+') {
                     $state = 9;
                     break;
                 }
-                if (isCompop($c)) {
+                if ($this->isCompop($c)) {
                     $state = 10;
                     break;
                 }
@@ -273,14 +269,12 @@ function lex($string)
 
             // {{{ State 1 : Incomplete keyword or ident
             CASE(1):
-                $c = get();
+                $c = $this->get();
                 if (isAlnum($c)) {
-                    echo "'$c' is Alnum\n";
                     $state = 1;
                     break;
                 }
-                if ($c == ' ') {
-                    echo "'$c' is a space\n";
+                if ($c == '_') {
                     $state = 3;
                     break;
                 }
@@ -290,25 +284,28 @@ function lex($string)
 
             /* {{{ State 2 : Complete keyword or ident */
             CASE(2):
-                unget();
-                $tokval = $symtab[substr($string,$tokStart,$tokLen)];
-//                $tokval = _findKeyword($tokStart,$tokLen);
+                $this->unget();
+                //echo "$this->tokStart, $this->tokLen\n";
+                //echo substr($this->string,$this->tokStart,$this->tokLen)."\n";
+                $tokval = $this->symtab[
+                        substr($this->string,$this->tokStart,$this->tokLen)];
+//                $tokval = _findKeyword($this->tokStart,$this->tokLen);
                 if ($tokval) {
-                    $tokStart = $tokPtr;
+                    $this->tokStart = $this->tokPtr;
                     return ($tokval);
                 } else {
-                    $text = substr($string, $tokStart, $tokLen);
-                    $lval = $text;
-                    $tokStart = $tokPtr;
-                    return (IDENT);
+                    $this->text = substr($this->string, $this->tokStart, $this->tokLen);
+                    $lval = $this->text;
+                    $this->tokStart = $this->tokPtr;
+                    return (SQL_IDENT);
                 }
                 break; 
             // }}}
 
             // {{{ State 3 : Incomplete ident
             CASE(3):
-                $c = get();
-                if (isAlnum($c) || $c == ' ')
+                $c = $this->get();
+                if (isAlnum($c) || $c == '_')
                 {
                     $state = 3;
                     break;
@@ -319,16 +316,16 @@ function lex($string)
 
             // {{{ State 4: Complete ident
             CASE(4):
-                unget();
-                $text = substr($string, $tokStart, $tokLen);
-                $lval = $text;
-                $tokStart = $tokPtr;
-                return (IDENT);
+                $this->unget();
+                $this->text = substr($this->string, $this->tokStart, $this->tokLen);
+                $lval = $this->text;
+                $this->tokStart = $this->tokPtr;
+                return (SQL_IDENT);
             // }}}
 
             // {{{ State 5: Incomplete real or int number
             CASE(5):
-                $c = get();
+                $c = $this->get();
                 if (isDigit($c)) {
                     $state = 5;
                     break;
@@ -343,17 +340,17 @@ function lex($string)
 
             // {{{ State 6: Complete integer number
             CASE(6):
-                unget();
-                $text = substr($string,$tokStart,$tokLen);
-                $lval = $text;
-                $tokStart = $tokPtr;
-                return (NUM);
+                $this->unget();
+                $this->text = substr($this->string,$this->tokStart,$this->tokLen);
+                $lval = $this->text;
+                $this->tokStart = $this->tokPtr;
+                return (SQL_NUM);
                 break;
             // }}}
 
             // {{{ State 7: Incomplete real number
             CASE(7):
-                $c = get();
+                $c = $this->get();
 
                 /* Analogy Start */
                 if ($c == 'e' || $c == 'E') {
@@ -372,16 +369,16 @@ function lex($string)
 
             // {{{ State 8: Complete real number */
             CASE(8):
-                unget();
-                $text = substr($string, $tokStart, $tokLen);
-                $lval = $text;
-                $tokStart = $tokPtr;
-                return (REAL_NUM);
+                $this->unget();
+                $this->text = substr($this->string, $this->tokStart, $this->tokLen);
+                $lval = $this->text;
+                $this->tokStart = $this->tokPtr;
+                return (SQL_REAL_NUM);
             // }}}
 
             // {{{ State 9: Incomplete signed number
             CASE(9):
-                $c = get();
+                $c = $this->get();
                 if (isDigit($c)) {
                     $state = 5;
                     break;
@@ -396,8 +393,8 @@ function lex($string)
  
             // {{{ State 10: Incomplete comparison operator
             CASE(10):
-                $c = get();
-                if (isCompop($c))
+                $c = $this->get();
+                if ($this->isCompop($c))
                 {
                     $state = 10;
                     break;
@@ -408,12 +405,13 @@ function lex($string)
 
             // {{{ State 11: Complete comparison operator
             CASE(11):
-                unget();
-                $tokval = $symtab[substr($string,$tokStart,$tokLen)];
-//                $tokval = _findKeyword(tokStart,$tokLen);
+                $this->unget();
+                $tokval = $this->symtab[
+                        substr($this->string,$this->tokStart,$this->tokLen)];
+//                $tokval = _findKeyword(tokStart,$this->tokLen);
                 if ($tokval)
                 {
-                    $tokStart = $tokPtr;
+                    $this->tokStart = $this->tokPtr;
                     return ($tokval);
                 }
                 $state = 999;
@@ -424,26 +422,26 @@ function lex($string)
             CASE(12):
                 $bail = false;
                 while (!$bail) {
-                    switch (get()) {
+                    switch ($this->get()) {
                         case null:
-                            $text = false;
+                            $this->text = false;
                             $bail = true;
                             break;
                         case '\\':
-                            if (get()) {
-                                $text = false;
+                            if ($this->get()) {
+                                $this->text = false;
                                 $bail = true;
                             }
                             break;
                         case '\'':
-                            $text = substr($string,$tok, $tokLen);
+                            $this->text = substr($this->string,$tok, $this->tokLen);
                             $bail = true;
                             break;
                     }
                 }
-//                $text = _readTextLiteral($tokStart);
-                $lval = $text;
-                if ($text) {
+//                $this->text = _readTextLiteral($this->tokStart);
+                $lval = $this->text;
+                if ($this->text) {
                     $state = 13;
                     break;
                 }
@@ -453,14 +451,14 @@ function lex($string)
 
             // {{{ State 13: Complete text string
             CASE(13):
-                $tokStart = $tokPtr;
-                return (MSQL_TEXT);
+                $this->tokStart = $this->tokPtr;
+                return (SQL_TEXT);
                 break;
             // }}}
 
             // {{{ State 14: Comment
             CASE(14):
-                $c = skip();
+                $c = $this->skip();
                 if ($c == '\n') {
                     $state = 0;
                 } else {
@@ -472,7 +470,7 @@ function lex($string)
     // Analogy Start
             // {{{ State 15: Exponent Sign in Scientific Notation
             CASE(15):
-                    $c = get();
+                    $c = $this->get();
                     if($c == '-' || $c == '+') {
                             $state = 16;
                             break;
@@ -483,7 +481,7 @@ function lex($string)
 
             // {{{ state 16: Exponent Value-first digit in Scientific Notation
             CASE(16):
-                    $c = get();
+                    $c = $this->get();
                     if (isDigit($c)) {
                             $state = 17;
                             break;
@@ -494,7 +492,7 @@ function lex($string)
 
             // {{{ State 17: Exponent Value in Scientific Notation
             CASE(17):
-                    $c = get();
+                    $c = $this->get();
                     if (isDigit($c)) {
                             $state = 17;
                             break;
@@ -506,8 +504,8 @@ function lex($string)
 
             // {{{ State 18 : Incomplete System Variable
             CASE(18):
-                $c = get();
-                if (isalnum($c) || $c == ' ') {
+                $c = $this->get();
+                if (isalnum($c) || $c == '_') {
                     $state = 18;
                     break;
                 }
@@ -517,28 +515,28 @@ function lex($string)
 
             // {{{ State 19: Complete Sys Var
             CASE(19):
-                unget();
-                $text = substr($tokStart,$tokLen);
-                $lval = $text;
-                $tokStart = $tokPtr;
-                return (SYS_VAR);
+                $this->unget();
+                $this->text = substr($this->tokStart,$this->tokLen);
+                $lval = $this->text;
+                $this->tokStart = $this->tokPtr;
+                return (SQL_SYS_VAR);
             // }}}
 
             // {{{ State 999 : Unknown token.  Revert to single char
             CASE(999):
-                revert();
-                $c = get();
-                $text = $c;
-                $lval = $text;
-                $tokStart = $tokPtr;
-                return ($text[0]);
+                $this->revert();
+                $c = $this->get();
+                $this->text = $c;
+                $lval = $this->text;
+                $this->tokStart = $this->tokPtr;
+                return ($this->text[0]);
             // }}}
 
             // {{{ State 1000 : End Of Input
             CASE(1000):
-                $text = $lval = '*end of input*';
-                $tokStart = $tokPtr;
-                return (END_OF_INPUT);
+                $this->text = $lval = '*end of input*';
+                $this->tokStart = $this->tokPtr;
+                return (SQL_END_OF_INPUT);
             // }}}
 
         }
@@ -546,6 +544,13 @@ function lex($string)
 // }}}
 
 }
-$string = "create";
-echo lex($string);
+}
+
+$lexer = new Lexer();
+$lexer->string = "create table dogfood int 23.4 99";
+$token = $lexer->lex();
+while ($token != SQL_END_OF_INPUT) {
+    echo $token."\n";
+    $token = $lexer->lex();
+}
 ?>
