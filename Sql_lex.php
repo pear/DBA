@@ -24,21 +24,15 @@
 include 'DB/DBA/ctype.php';
 
 // {{{ token definitions
-// variables
-define('TOK_IDENT',1);
-define('TOK_SYS_VAR',2);
-// values
-define('TOK_REAL_VAL',3);
-define('TOK_TEXT_VAL',4);
-define('TOK_INT_VAL',5);
-define('TOK_END_OF_INPUT',6);
+// variables: 'ident', 'sys_var'
+// values:    'real_val', 'text_val', 'int_val', null
 // }}}
 
 /**
  * A lexigraphical analyser inspired by the msql lexer
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.18
+ * @version 0.19
  * @access  public
  * @package DBA
  */
@@ -181,7 +175,7 @@ function lex()
                     return $this->symtab[strtolower($this->tokText)];
                 } else {
                     $this->tokStart = $this->tokPtr;
-                    return TOK_IDENT;
+                    return 'ident';
                 }
                 break;
             // }}}
@@ -207,7 +201,7 @@ function lex()
                 $this->tokText = substr($this->string, $this->tokStart,
                                         $this->tokLen);
                 $this->tokStart = $this->tokPtr;
-                return (TOK_INT_VAL);
+                return ('int_val');
                 break;
             // }}}
 
@@ -236,7 +230,7 @@ function lex()
                 $this->tokText = substr($this->string, $this->tokStart,
                                         $this->tokLen);
                 $this->tokStart = $this->tokPtr;
-                return (TOK_REAL_VAL);
+                return ('real_val');
             // }}}
 
             // {{{ State 9: Incomplete signed number
@@ -314,7 +308,7 @@ function lex()
             // {{{ State 13: Complete text string
             case 13:
                 $this->tokStart = $this->tokPtr;
-                return (TOK_TEXT_VAL);
+                return ('text_val');
                 break;
             // }}}
 
@@ -380,7 +374,7 @@ function lex()
                 $this->unget();
                 $this->tokText = substr($this->tokStart,$this->tokLen);
                 $this->tokStart = $this->tokPtr;
-                return (TOK_SYS_VAR);
+                return ('sys_var');
             // }}}
 
             // {{{ State 999 : Unknown token.  Revert to single char
@@ -395,7 +389,7 @@ function lex()
             case 1000:
                 $this->tokText = '*end of input*';
                 $this->tokStart = $this->tokPtr;
-                return (TOK_END_OF_INPUT);
+                return (null);
             // }}}
 
         }

@@ -24,114 +24,30 @@
 require_once 'PEAR.php';
 require_once 'DB/DBA/Sql_lex.php';
 
-// {{{ action constants
-define('SQL_COMMAND',30);
-define('SQL_NAME',31);
-define('SQL_TYPE',32);
-define('SQL_FIELDS',33);
-define('SQL_SIZE',34);
-define('SQL_DOMAIN',35);
-define('SQL_OPTIONS',36);
-define('SQL_DECIMALS',37);
+// action constants: 'size', 'domain', 'options', 'decimals', 'drop_table'
+//                   'drop_index', 'drop_sequence'
 
-define('SQL_CREATE_TABLE',40);
-define('SQL_CREATE_INDEX',41);
-define('SQL_CREATE_SEQUENCE',42);
-define('SQL_DROP_TABLE',43);
-define('SQL_DROP_INDEX',44);
-define('SQL_DROP_SEQUENCE',45);
-// }}}
-
-// {{{ token definitions
-// logical operators
-define('SQL_GE',100);
-define('SQL_LE',101);
-define('SQL_NE',102);
-define('SQL_EQ',103);
-define('SQL_GT',104);
-define('SQL_LT',105);
-define('SQL_AND',106);
-define('SQL_OR',107);
-define('SQL_NOT',108);
-// verbs
-define('SQL_CREATE',110);
-define('SQL_DROP',111);
-define('SQL_INSERT',112);
-define('SQL_DELETE',113);
-define('SQL_SELECT',114);
-define('SQL_UPDATE',115);
-define('SQL_ALTER',116);
-// conjunctions
-define('SQL_BY',120);
-define('SQL_AS',121);
-define('SQL_ON',122);
-define('SQL_BETWEEN',123);
-define('SQL_INTO',124);
-define('SQL_FROM',125);
-define('SQL_WHERE',126);
-// modifiers
-define('SQL_ASC',130);
-define('SQL_DESC',131);
-define('SQL_LIKE',132);
-define('SQL_RLIKE',133);
-define('SQL_CLIKE',134);
-define('SQL_SLIKE',135);
-define('SQL_STEP',136);
-//define('SQL_SET_MOD',137);
-define('SQL_PRIMARY',138);
-define('SQL_KEY',139);
-define('SQL_UNIQUE',140);
-define('SQL_LIMIT',141);
-define('SQL_DISTINCT',142);
-define('SQL_ORDER',143);
-define('SQL_CHECK',144);
-define('SQL_VARYING',145);
-define('SQL_AUTOINCREMENT',146);
-// nouns
-define('SQL_ALL',150);
-define('SQL_TABLE',151);
-define('SQL_SEQUENCE',152);
-define('SQL_VALUE',153);
-define('SQL_VALUES',154);
-define('SQL_NULL',155);
-define('SQL_INDEX',156);
-//define('SQL_SET_FUNCT',157);
-define('SQL_CONSTRAINT',158);
-define('SQL_DEFAULT',159);
-define('SQL_NOTNULL',160);
-// types
-//define('SQL_NUM',170);
-define('SQL_FLOAT',171);
-define('SQL_FIXED',172);
-define('SQL_INT',173);
-define('SQL_UINT',174);
-define('SQL_BOOL',175);
-define('SQL_CHAR',176);
-define('SQL_VARCHAR',177);
-define('SQL_TEXT',178);
-define('SQL_DATE',179);
-define('SQL_MONEY',180);
-define('SQL_TIME',181);
-define('SQL_IPV4',182);
-define('SQL_SET',183);
-define('SQL_ENUM',184);
-define('SQL_TIMESTAMP',185);
-// functions
-define('SQL_AVG_FUNC',190);
-define('SQL_COUNT_FUNC',191);
-define('SQL_MAX_FUNC',192);
-define('SQL_MIN_FUNC',193);
-define('SQL_SUM_FUNC',194);
-define('SQL_NEXTVAL_FUNC',195);
-define('SQL_CURRVAL_FUNC',196);
-define('SQL_SETVAL_FUNC',197);
-// }}}
+// token definitions
+// operators:    'ge', 'le', 'ne', 'eq', 'gt', 'lt', 'and', 'or', 'not'
+// verbs:        'create', 'drop', 'insert', 'delete', 'select', 'update',
+//               'alter'
+// conjunctions: 'by', 'as', 'on', 'between', 'into', 'from', 'where'
+// modifiers:    'asc', 'desc', 'like', 'rlike', 'clike', 'slike', 'step',
+//               'primary', 'key', 'unique', 'limit', 'distinct', 'order',
+//               'check', 'varying', 'autoincrement'
+// nouns:        'all', 'table', 'sequence', 'value', 'values', 'null',
+//               'index', 'constraint', 'default', 'notnull'
+// types:        'float', 'fixed', 'int', 'uint', 'bool', 'char', 'varchar',
+//               'text', 'date', 'money', 'time', 'ipv4', 'set', 'enum',
+//               'timestamp'
+// functions:    'avg_func', 'count_func', 'max_func', 'min_func', 'sun_func',
+//               'nextval_func', 'currval_func', 'setval_func'
 
 /**
  * A sql parser
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.18
+ * @version 0.19
  * @access  public
  * @package DBA
  */
@@ -142,85 +58,86 @@ class Sql_Parser
 
 // {{{ symbol definitions
     var $symtab = array(
-        '<='=>       SQL_LE,
-        '>='=>       SQL_GE,
-        '<>'=>       SQL_NE,
-        '<'=>        SQL_LT,
-        '='=>        SQL_EQ,
-        '>'=>        SQL_GT,
-        'or'=>       SQL_OR,
-        'not'=>      SQL_NOT,
-        'and'=>      SQL_AND,
-        'insert'=>   SQL_INSERT,
-        'select'=>   SQL_SELECT,
-        'delete'=>   SQL_DELETE,
-        'create'=>   SQL_CREATE,
-        'update'=>   SQL_UPDATE,
-        'drop'=>     SQL_DROP,
-        'as'=>       SQL_AS,
-        'into'=>     SQL_INTO,
-        'on'=>       SQL_ON,
-        'between'=>  SQL_BETWEEN,
-        'where'=>    SQL_WHERE,
-        'from'=>     SQL_FROM,
-        'by'=>       SQL_BY,
-        'distinct'=> SQL_DISTINCT,
-        'primary'=>  SQL_PRIMARY,
-        'like'=>     SQL_LIKE,
-        'null'=>     SQL_NULL,
-        'asc'=>      SQL_ASC,
-        'desc'=>     SQL_DESC,
-        'unique'=>   SQL_UNIQUE,
-        'table'=>    SQL_TABLE,
-        'index'=>    SQL_INDEX,
-        'clike'=>    SQL_CLIKE,
-        'slike'=>    SQL_SLIKE,
-        'rlike'=>    SQL_RLIKE,
-        'all'=>      SQL_ALL,
-        'key'=>      SQL_KEY,
-        'sequence'=> SQL_SEQUENCE,
-        'default'=>  SQL_DEFAULT,
-        'order'=>    SQL_ORDER,
-        'check'=>    SQL_CHECK,
-        'step'=>     SQL_STEP,
-        'auto_increment'=> SQL_AUTOINCREMENT,
-        'value'=>    SQL_VALUE,
-        'values'=>   SQL_VALUES,
-        'constraint'=> SQL_CONSTRAINT,
-        'varying'=>  SQL_VARYING,
-        'avg'=>      SQL_AVG_FUNC,
-        'count'=>    SQL_COUNT_FUNC,
-        'max'=>      SQL_MAX_FUNC,
-        'min'=>      SQL_MIN_FUNC,
-        'sum'=>      SQL_SUM_FUNC,
-        'nextval'=>  SQL_NEXTVAL_FUNC,
-        'currval'=>  SQL_CURRVAL_FUNC,
-        'setval'=>   SQL_SETVAL_FUNC,
-        'limit'=>    SQL_LIMIT,
-        'time'=>     SQL_TIME,
-        'tinyint'=>  SQL_INT,
-        'integer'=>  SQL_INT,
-        'bigint'=>   SQL_INT,
-        'int'=>      SQL_INT,
-        'smallint'=> SQL_INT,
-        'uint'=>     SQL_UINT,
-        'float'=>    SQL_FLOAT,
-        'real'=>     SQL_FLOAT,
-        'double'=>   SQL_FLOAT,
-        'numeric'=>  SQL_FIXED,
-        'decimal'=>  SQL_FIXED,
-        'character'=>SQL_CHAR,
-        'char'=>     SQL_CHAR,
-        'varchar'=>  SQL_VARCHAR,
-        'money'=>    SQL_MONEY,
-        'date'=>     SQL_DATE,
-        'text'=>     SQL_TEXT,
-        'ipv4'=>     SQL_IPV4,
-        'ipaddr'=>   SQL_IPV4,
-        'set'=>      SQL_SET,
-        'enum'=>     SQL_ENUM,
-        'bool'=>     SQL_BOOL,
-        'boolean'=>  SQL_BOOL,
+        '<='=>       'le',
+        '>='=>       'ge',
+        '<>'=>       'ne',
+        '<'=>        'lt',
+        '='=>        'eq',
+        '>'=>        'gt',
+        'or'=>       'or',
+        'not'=>      'not',
+        'and'=>      'and',
+        'insert'=>   'insert',
+        'select'=>   'select',
+        'delete'=>   'delete',
+        'create'=>   'create',
+        'update'=>   'update',
+        'drop'=>     'drop',
+        'as'=>       'as',
+        'into'=>     'into',
+        'on'=>       'on',
+        'between'=>  'between',
+        'where'=>    'where',
+        'from'=>     'from',
+        'by'=>       'by',
+        'distinct'=> 'distinct',
+        'primary'=>  'primary',
+        'like'=>     'like',
+        'null'=>     'null',
+        'asc'=>      'asc',
+        'desc'=>     'desc',
+        'unique'=>   'unique',
+        'table'=>    'table',
+        'index'=>    'index',
+        'clike'=>    'clike',
+        'slike'=>    'slike',
+        'rlike'=>    'rlike',
+        'all'=>      'all',
+        'key'=>      'key',
+        'sequence'=> 'sequence',
+        'default'=>  'default',
+        'order'=>    'order',
+        'check'=>    'check',
+        'step'=>     'step',
+        'auto_increment'=> 'autoincrement',
+        'value'=>    'value',
+        'values'=>   'values',
+        'constraint'=> 'constraint',
+        'varying'=>  'varying',
+        'avg'=>      'avg_func',
+        'count'=>    'count_func',
+        'max'=>      'max_func',
+        'min'=>      'min_func',
+        'sum'=>      'sun_func',
+        'nextval'=>  'nextval_func',
+        'currval'=>  'currval_func',
+        'setval'=>   'setval_func',
+        'limit'=>    'limit',
+        'time'=>     'time',
+        'timestamp'=>'timestamp',
+        'tinyint'=>  'int',
+        'integer'=>  'int',
+        'bigint'=>   'int',
+        'int'=>      'int',
+        'smallint'=> 'int',
+        'uint'=>     'uint',
+        'float'=>    'float',
+        'real'=>     'float',
+        'double'=>   'float',
+        'numeric'=>  'fixed',
+        'decimal'=>  'fixed',
+        'character'=>'char',
+        'char'=>     'char',
+        'varchar'=>  'varchar',
+        'money'=>    'money',
+        'date'=>     'date',
+        'text'=>     'text',
+        'ipv4'=>     'ipv4',
+        'ipaddr'=>   'ipv4',
+        'set'=>      'set',
+        'enum'=>     'enum',
+        'bool'=>     'bool',
+        'boolean'=>  'bool',
     );
 // }}}
 
@@ -239,7 +156,7 @@ class Sql_Parser
         $types = array();
         while ($this->token != ')') {
             $this->getTok();
-            if ($this->isVal() || ($this->token == TOK_IDENT)) {
+            if ($this->isVal() || ($this->token == 'ident')) {
                 $values[] = $this->lexer->tokText;
                 $types[] = $this->token;
             } elseif ($this->token == ')') {
@@ -277,13 +194,32 @@ class Sql_Parser
 
     // {{{ isType()
     function isType() {
-        return (($this->token >= SQL_FLOAT) && ($this->token <= SQL_ENUM));
+        $types = array(
+            'time'=>true,
+            'timestamp'=>true,
+            'int'=>true,
+            'uint'=>true,
+            'float'=>true,
+            'fixed'=>true,
+            'char'=>true,
+            'varchar'=>true,
+            'money'=>true,
+            'date'=>true,
+            'text'=>true,
+            'ipv4'=>true,
+            'set'=>true,
+            'enum'=>true,
+            'bool'=>true,
+        );
+        return isset($types[$this->token]);
     }
     // }}}
 
     // {{{ isVal()
     function isVal() {
-       return (($this->token >= TOK_REAL_VAL) && ($this->token <= TOK_INT_VAL));
+       return (($this->token == 'real_val') ||
+               ($this->token == 'int_val') ||
+               ($this->token == 'text_val'));
     }
     // }}}
 
@@ -304,21 +240,21 @@ class Sql_Parser
         $nextConstraint = false;
         $options = array();
         while (($this->token != ',') && ($this->token != ')') &&
-                ($this->token != TOK_END_OF_INPUT)) {
+                ($this->token != null)) {
             $option = $this->token;
             $haveValue = true;
             switch ($option) {
-                case (SQL_CONSTRAINT):
+                case ('constraint'):
                     $this->getTok();
-                    if ($this->token = TOK_IDENT) {
-                        $options[SQL_CONSTRAINT][SQL_NAME] = $this->lexer->tokText;
+                    if ($this->token = 'ident') {
+                        $options['constraint']['name'] = $this->lexer->tokText;
                         $nextConstraint = true;
                         $haveValue = false;
                     } else {
-                        return $this->raiseError('Expected TOK_IDENT');
+                        return $this->raiseError('Expected "ident"');
                     }
                     break;
-                case (SQL_DEFAULT):
+                case ('default'):
                     $this->getTok();
                     if ($this->isVal()) {
                         $value = $this->lexer->tokText;
@@ -326,23 +262,23 @@ class Sql_Parser
                         return $this->raiseError('Expected default value');
                     }
                     break;
-                case (SQL_PRIMARY):
+                case ('primary'):
                     $this->getTok();
-                    if ($this->token == SQL_KEY) {
+                    if ($this->token == 'key') {
                         $value = true;
                     } else {
                         return $this->raiseError('Expected "key"');
                     }
                     break;
-                case (SQL_NOT):
+                case ('not'):
                     $this->getTok();
-                    if ($this->token == SQL_NULL) {
+                    if ($this->token == 'null') {
                         $value = true;
                     } else {
                         return $this->raiseError('Expected "null"');
                     }
                     break;
-                case (SQL_CHECK): case (SQL_VARYING): case (SQL_UNIQUE):
+                case ('check'): case ('varying'): case ('unique'):
                     $this->getTok();
                     if ($this->token != '(') {
                         return $this->raiseError('Expected (');
@@ -358,10 +294,10 @@ class Sql_Parser
                         return $this->raiseError('Expected )');
                     }
                     break;
-                case (SQL_AUTOINCREMENT):
+                case ('autoincrement'):
                     $value = true;
                     break;
-                case (SQL_NULL):
+                case ('null'):
                     $haveValue = false;
                     break;
                 default:
@@ -370,7 +306,7 @@ class Sql_Parser
             }
             if ($haveValue) {
                 if ($nextConstraint) {
-                    $options[SQL_CONSTRAINT][$option] = $value;
+                    $options['constraint'][$option] = $value;
                     $nextConstraint = false;
                 } else {
                     $options[$option] = $value;
@@ -399,8 +335,8 @@ class Sql_Parser
                 return $fields;
             }
 
-            if ($this->token == TOK_IDENT) {
-                $fields[$i][SQL_NAME] = $this->lexer->tokText;
+            if ($this->token == 'ident') {
+                $fields[$i]['name'] = $this->lexer->tokText;
             } else {
                 return $this->raiseError('Expected identifier');
             }
@@ -408,7 +344,7 @@ class Sql_Parser
             // parse field type
             $this->getTok();
             if ($this->isType($this->token)) {
-                $fields[$i][SQL_TYPE] = $this->token;
+                $fields[$i]['type'] = $this->token;
             } else {
                 return $this->raiseError('Expected a valid type');
             }
@@ -420,14 +356,14 @@ class Sql_Parser
                 if (PEAR::isError($results)) {
                     return $results;
                 }
-                switch ($fields[$i][SQL_TYPE]) {
-                    case SQL_FIXED: case SQL_FLOAT:
+                switch ($fields[$i]['type']) {
+                    case 'fixed': case 'float':
                         if (isset($values[0])) {
-                        if ($types[0] == TOK_INT_VAL) {
-                            $fields[$i][SQL_SIZE] = $values[0];
+                        if ($types[0] == 'int_val') {
+                            $fields[$i]['size'] = $values[0];
                             if (isset($types[1])) {
-                            if ($types[1] == TOK_INT_VAL) {
-                                $fields[$i][SQL_DECIMALS] = $values[1];
+                            if ($types[1] == 'int_val') {
+                                $fields[$i]['decimals'] = $values[1];
                             } else { 
                                 return $this->raiseError('Expected an integer '.
                                                             'for second parameter');
@@ -437,29 +373,29 @@ class Sql_Parser
                                                      'for second parameter');
                         }}
                         break;
-                    case SQL_CHAR: case SQL_VARCHAR:
+                    case 'char': case 'varchar':
                         if (sizeof($values) != 1) {
                             return $this->raiseError('Expected 1 parameter');
                         }
-                        if ($types[0] != TOK_INT_VAL) {
+                        if ($types[0] != 'int_val') {
                             return $this->raiseError('Expected an integer');
                         }
-                        $fields[$i][SQL_SIZE] = $values[0];
+                        $fields[$i]['size'] = $values[0];
                         break;
-                    case SQL_INTEGER:
+                    case 'int':
                         if (sizeof($values) > 1) {
                             return $this->raiseError('Expected 1 parameter');
                         }
-                        if ($types[0] != TOK_INT_VAL) {
+                        if ($types[0] != 'int_val') {
                             return $this->raiseError('Expected an integer');
                         }
-                        $fields[$i][SQL_SIZE] = $values[0];
+                        $fields[$i]['size'] = $values[0];
                         break;
-                    case SQL_ENUM: case SQL_SET:
+                    case 'enum': case 'set':
                         if (!sizeof($values)) {
                             return $this->raiseError('Expected a domain');
                         }
-                        $fields[$i][SQL_DOMAIN] = $values;
+                        $fields[$i]['domain'] = $values;
                         break;
                     default:
                         if (sizeof($values)) {
@@ -478,7 +414,7 @@ class Sql_Parser
 
             if ($this->token == ')') {
                 return $fields;
-            } elseif ($this->token == TOK_END_OF_INPUT) {
+            } elseif ($this->token == null) {
                 return $this->raiseError('Expected )');
             }
 
@@ -503,22 +439,22 @@ class Sql_Parser
         // query
         $this->getTok();
         switch ($this->token) {
-            case TOK_END_OF_INPUT:
+            case null:
                 return;
-            // {{{ SQL_CREATE
-            case SQL_CREATE:
+            // {{{ 'create'
+            case 'create':
                 $this->getTok();
                 switch ($this->token) {
-                    case SQL_TABLE:
-                        $tree[SQL_COMMAND] = SQL_CREATE_TABLE;
+                    case 'table':
+                        $tree['command'] = 'create_table';
                         $this->getTok();
-                        if ($this->token == TOK_IDENT) {
-                            $tree[SQL_NAME] = $this->lexer->tokText;
+                        if ($this->token == 'ident') {
+                            $tree['name'] = $this->lexer->tokText;
                             $fields =& $this->parseFieldList();
                             if (PEAR::isError($fields)) {
                                 return $fields;
                             }
-                            $tree[SQL_FIELDS] = $fields;
+                            $tree['fields'] = $fields;
                         } else {
                             return $this->raiseError('Expected table name');
                         }
@@ -526,14 +462,14 @@ class Sql_Parser
                 }
                 break;
             // }}}
-            // {{{ SQL_INSERT
-            case SQL_INSERT:
+            // {{{ 'insert'
+            case 'insert':
                 $this->getTok();
-                if ($this->token == SQL_INTO) {
-                    $tree[SQL_COMMAND] = SQL_INSERT;
+                if ($this->token == 'into') {
+                    $tree['command'] = 'insert';
                     $this->getTok();
-                    if ($this->token == TOK_IDENT) {
-                        $tree[SQL_NAME] = $this->lexer->tokText;
+                    if ($this->token == 'ident') {
+                        $tree['name'] = $this->lexer->tokText;
                     } else {
                         return $this->raiseError('Expected table name');
                     }
@@ -544,23 +480,23 @@ class Sql_Parser
                             return $results;
                         } else {
                             if (sizeof($values)) {
-                                $tree[SQL_FIELDS] = $values;
+                                $tree['fields'] = $values;
                             }
                         }
                         $this->getTok();
                     }
-                    if ($this->token == SQL_VALUES) {
+                    if ($this->token == 'values') {
                         $this->getTok();
                         $results = $this->getParams($values, $types);
                         if (PEAR::isError($results)) {
                             return $results;
                         } else {
-                            if ($tree[SQL_FIELDS] && 
-                               (sizeof($tree[SQL_FIELDS]) != sizeof($values))) {
+                            if ($tree['fields'] && 
+                               (sizeof($tree['fields']) != sizeof($values))) {
                                return $this->raiseError('field/value mismatch');
                             }
                             if (sizeof($values)) {
-                                $tree[SQL_VALUES] = $values;
+                                $tree['values'] = $values;
                             } else {
                                return $this->raiseError('No fields to insert');
                             }
@@ -573,10 +509,10 @@ class Sql_Parser
                 }
                 break;
             // }}}
-            case SQL_UPDATE:
-            case SQL_DELETE:
-            case SQL_SELECT:
-            case SQL_ALTER:
+            case 'update':
+            case 'delete':
+            case 'select':
+            case 'alter':
         }
         $this->getTok();
         if ($this->token == ';') {
