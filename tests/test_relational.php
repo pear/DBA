@@ -28,6 +28,7 @@
 ini_set('include_path',ini_get('include_path').':../../');
 require_once 'PEAR.php';
 require_once 'DB/DBA/DBA_Relational.php';
+require_once 'DB/DBA/DBA_Toolbox.php';
 require_once 'empSchema.php';
 
 // set the working directory and driver
@@ -142,7 +143,7 @@ foreach ($queries as $key=>$query) {
         echo $results->getMessage()."\n";
     } else {
         echo "Results:\n";
-        echo $db->formatTextResults($results);
+        echo formatTextTable($results);
     }
 
     echo "\n************************************************\n\n";

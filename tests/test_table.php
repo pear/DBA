@@ -27,6 +27,7 @@
 
 ini_set('include_path',ini_get('include_path').':../../');
 require_once 'DB/DBA/DBA_Table.php';
+require_once 'DB/DBA/DBA_Toolbox.php';
 require_once 'hatSchema.php';
 
 $table =& new DBA_Table();
@@ -76,7 +77,7 @@ foreach ($queries as $query) {
         echo " Query failed.\n";
         echo $results->getMessage()."\n";
     } else {
-        echo DBA_Table::formatTextResults($table->finalize($results));
+        echo formatTextTable($table->finalize($results), null, 'mysql');
     }
     echo "------------------------------------------------\n\n";
 }

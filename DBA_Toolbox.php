@@ -1,7 +1,32 @@
 <?php
+/* vim: set expandtab tabstop=4 shiftwidth=4: */
+// +----------------------------------------------------------------------+
+// | Copyright (c) 2002 Brent Cook                                        |
+// +----------------------------------------------------------------------+
+// | This library is free software; you can redistribute it and/or        |
+// | modify it under the terms of the GNU Lesser General Public           |
+// | License as published by the Free Software Foundation; either         |
+// | version 2.1 of the License, or (at your option) any later version.   |
+// |                                                                      |
+// | This library is distributed in the hope that it will be useful,      |
+// | but WITHOUT ANY WARRANTY; without even the implied warranty of       |
+// | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU    |
+// | Lesser General Public License for more details.                      |
+// |                                                                      |
+// | You should have received a copy of the GNU Lesser General Public     |
+// | License along with this library; if not, write to the Free Software  |
+// | Foundation, Inc., 59 Temple Place, Suite 330,Boston,MA 02111-1307 USA|
+// +----------------------------------------------------------------------+
+//
+// $Id$
+//
 require_once 'DBA_Table.php';
 
-function quickform_dba_add(&$form, $schema, $auxMeta)
+/**
+ * Insert widgets into a quickform object suitable for updating a row in a DBA
+ * table.
+ */
+function addQuickformDBA(&$form, $schema, $auxMeta)
 {
     foreach ($schema as $name=>$meta) {
         if (isset($auxMeta['default'])) {
@@ -38,7 +63,11 @@ function quickform_dba_add(&$form, $schema, $auxMeta)
     }
 }
 
-function quickform_dba_post(&$form, $schema, $auxMeta)
+/**
+ * Postprocess $_POST variables that were left by a form using addQuickformDBA
+ * @return array DBA row suitable for inserting into a DBA table
+ */
+function processQuickformDBA(&$form, $schema, $auxMeta)
 {
     foreach ($schema as $name=>$meta) {
         if ($isset($auxMeta[$name]) && isset($_POST[$name])) {
@@ -52,4 +81,62 @@ function quickform_dba_post(&$form, $schema, $auxMeta)
     }
     return $data;
 }
+
+/**
+ * Generates a text table from a results set, a-la MySQL
+ *
+ * @param   array $rows
+ * @param   array $fields list of fields to display
+ * @param   string $style style to display table in; 'oracle', 'mysql'
+ * @return  string
+ */
+function formatTextTable($rows, $fields = null, $style = 'oracle')
+{
+    $corner = ($style == 'oracle') ? ' ' : '+';
+    $wall = ($style == 'oracle') ? ' ' : '|';
+
+    if (is_array($rows) && sizeof($rows)) {
+
+        if (is_null($fields)) {
+            $fields = array_keys(current($rows));
+        }
+
+        // get the maximum length of each field
+        foreach ($fields as $key=>$field) {
+            $longest[$key] = strlen($field) + 1;
+            foreach ($rows as $row) {
+                $rowLen = strlen($row[$field]) + 1;
+                if ($rowLen > $longest[$key]) {
+                    $longest[$key] = $rowLen;
+                }
+            }
+        }
+
+        // generate separator line
+        foreach ($longest as $length) {
+            $separator .= "$corner-".str_repeat('-',$length);
+        }
+        $separator .= "$corner\n";
+
+        $buffer = ($style == 'oracle') ? '' : $separator;
+
+        // print fields
+        foreach ($fields as $key=>$field) {
+            $buffer .= "$wall ".str_pad($field, $longest[$key]);
+        }
+        $buffer .= "$wall\n$separator";
+
+        // print rows
+        foreach ($rows as $row) {
+            foreach ($fields as $key=>$field) {
+                $buffer .= "$wall ".str_pad($row[$field],
+                        $longest[$key]);
+            }
+            $buffer .= "$wall\n";
+            $buffer .= ($style == 'oracle') ? '' : $separator;
+        }
+    }
+    return $buffer;
+}
+
 ?>

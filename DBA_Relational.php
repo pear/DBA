@@ -165,20 +165,6 @@ class DBA_Relational extends PEAR
     }
 
     /**
-     * Generates a nice, text table from a results set, a-la MySQL
-     *
-     * @param   array $results
-     * @param   array $fields  list of fields to display
-     * @param   string $style  style to display table in; 'oracle', 'mysql'
-     *                    oracle is plain lists, mysql is boxy lists
-     * @return  string 
-     */
-    function formatTextResults($results, $fields = null, $style = 'oracle')
-    {
-        return DBA_Table::formatTextResults($results, $fields);
-    }
-
-    /**
      * Creates a new table
      *
      * @access  public
