@@ -50,7 +50,7 @@ foreach ($empSchema as $tableName=>$tableSchema) {
         $results = $db->select($tableName, '*');
 
         echo "Query: \$db->select($tableName, '*');\n";
-        echo $db->formatResults($db->finalize($tableName, $results));
+        echo $db->formatTextResults($db->finalize($tableName, $results));
         echo "------------------------------------------------\n\n";
     }
 }
@@ -76,7 +76,7 @@ foreach ($queries as $query) {
         echo " Query failed.\n";
         echo $results->getMessage()."\n";
     } else {
-        echo $db->formatResults ($results);
+        echo $db->formatTextResults ($results);
     }
 
     echo "------------------------------------------------\n\n";

@@ -135,46 +135,13 @@ class DBA_Relational extends PEAR
      * Generates a nice, ASCII table from a results set, a-la MySQL
      *
      * @param array $results
-     * @param array $fields  list of fields to cull from results and display
+     * @param array $fields  list of fields to display
+     * @param string $style  style to display table in; 'oracle', 'mysql'
      * @returns string
      */
-    function formatResults($results, $fields = null)
+    function formatTextResults($results, $fields = null, $style = 'oracle')
     {
-        if (is_array($results) && sizeof($results)) {
-
-            if (is_null($fields))
-                $fields = array_keys(current($results));
-
-            // get the maximum length of each field
-            foreach ($fields as $key=>$field) {
-                $longest[$key] = strlen($field) + 1;
-                foreach ($results as $result) {
-                    $resultLen = strlen($result[$field]) + 1;
-                    if ($resultLen > $longest[$key])
-                        $longest[$key] = $resultLen;
-                }
-            }
-
-            // generate separator line
-            foreach ($longest as $length)
-                $separator .= '+-'.str_repeat('-',$length);
-            $separator .= "+\n";
-
-            $buffer = $separator;
-            
-            // print fields
-            foreach ($fields as $key=>$field)
-                $buffer .= '| '.str_pad($field, $longest[$key]);
-            $buffer .= "|\n$separator";
-
-            // print rows
-            foreach ($results as $result) {
-                foreach ($fields as $key=>$field)
-                    $buffer .= '| '.str_pad($result[$field], $longest[$key]);
-                $buffer .= "|\n$separator";
-            }
-        }
-        return $buffer;
+        return DBA_Table::formatTextResults($results, $fields);
     }
 
     /**

@@ -24,7 +24,6 @@
 
 	                   'lastshipment' => array ('type' => 'TIMESTAMP',
 	                                            'format' => 'D M j, Y'),
-
 	                   'hat_id' => array ('type' => 'integer',
 	                                      'autoincrement' => True,
 	                                      'primarykey' => True)

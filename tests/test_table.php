@@ -25,48 +25,6 @@ ini_set('include_path',ini_get('include_path').':../../');
 require_once 'DB/DBA/DBA_Table.php';
 require_once 'hatSchema.php';
 
-function printQueryResults($results, $fields=null)
-{
-    if (is_array($results) && sizeof($results)) {
-
-        if (is_null($fields))
-            $fields = array_keys(current($results));
-
-        // get the maximum length of each field
-        foreach ($fields as $key=>$field) {
-            $longest[$key] = strlen($field);
-            foreach ($results as $result) {
-                $resultLen = strlen($result[$field]);
-                if ($resultLen > $longest[$key])
-                    $longest[$key] = $resultLen;
-            }
-        }
-
-        // print fields
-        foreach ($fields as $key=>$field)
-            echo str_pad($field, $longest[$key]).' ';
-        echo "\n";
-        
-        // print dividers
-        foreach ($longest as $length)
-            echo str_repeat('-',$length).' ';
-        echo "\n";
-
-        // print rows
-        foreach ($results as $result) {
-            foreach ($fields as $key=>$field)
-                echo str_pad($result[$field], $longest[$key]).' ';
-            echo "\n";
-        }
-
-    } else {
-        echo "\tEmpty!\n";
-    }
-    echo "\n";
-    echo "------------------------------------------\n";
-        
-}
-
 $table =& new DBA_Table();
 
 $result = $table->create('hats', $hatTableStruct);
@@ -94,27 +52,27 @@ $table->open ('hats', 'r');
 $query = '(type != bowler) and (type != fedora)';
 $results = $table->select($query);
 echo "Query: $query\n\n";
-printQueryResults ($results, array('brand', 'quantity', 'type'));
+echo $table->formatTextResults($results, array('brand', 'quantity', 'type'));
 
 $query = 'quantity <= 50';
 $results = $table->select($query);
 echo "Query: $query\n\n";
-printQueryResults ($results, array('brand', 'quantity'));
+echo DBA_Table::formatTextResults($results, array('brand', 'quantity'));
 
 $query = 'quantity >= 50';
 $results = $table->select($query);
 echo "Query: $query\n\n";
-printQueryResults ($results, array('brand', 'quantity'));
+echo DBA_Table::formatTextResults($results, array('brand', 'quantity'));
 
 $sortFields = 'quantity, hat_id';
 $results = $table->sort($sortFields, 'a', $table->getRows());
 echo "Sorting by quantity, hat_id, ascending order\n";
-printQueryResults ($results, array('brand', 'quantity', 'hat_id'));
+echo DBA_Table::formatTextResults($results, array('brand', 'quantity', 'hat_id'));
 
 $sortField = 'quantity';
 $results = $table->sort($sortField, 'd', $table->select('*'));
 echo "Sorting by $sortField, descending order\n";
-printQueryResults ($results, array('brand', 'quantity'));
+echo DBA_Table::formatTextResults($results, array('brand', 'quantity'));
 
 $sortField = 'quantity';
 $results = $table->unique(
@@ -123,7 +81,7 @@ $results = $table->unique(
            $table->select($query))));
 echo "Sorting by: $sortField, descending order\n";
 echo "Query: $query\n\n";
-printQueryResults ($results, array('brand', 'quantity'));
+echo DBA_Table::formatTextResults($results, array('brand', 'quantity'), 'mysql');
 
 //$table->close();
 

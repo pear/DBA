@@ -97,10 +97,15 @@ class DBA_Table extends PEAR
             // unpack the field schema into an array
             $this->_schema = $this->_unpackSchema($schema);
 
+            if (PEAR::isError($this->_schema)) {
+                $this->close();
+            }
+
         } else {
-            $this->raiseError('DBA: Table is missing field descriptor at key, '.
+            return $this->raiseError('DBA: Table is missing field descriptor at key, '.
                                DBA_SCHEMA_KEY);
         }
+        return $this->_schema;
     }
 
     /**
@@ -130,6 +135,10 @@ class DBA_Table extends PEAR
     {
         // pack the schema
         $packedSchema = $this->_packSchema($schema);
+
+        if (PEAR::isError($packedSchema)) {
+            return $packedSchema;
+        }
 
         $r = $this->_dba->open($tableName, 'n');
         if (PEAR::isError($r)) {
@@ -498,6 +507,13 @@ class DBA_Table extends PEAR
                             }
                         }
                         break;
+                    case 'primarykey':
+                        if (isset($primarykey)) {
+                            return $this->raiseError('DBA: cannot have two '.
+                                                     'primary keys in schema');
+                        } else {
+                            $primarykey = true;
+                        }
                     default:
                         $buffer .= $value;
                 }
@@ -614,7 +630,7 @@ class DBA_Table extends PEAR
      * @param   array   $unpackedData
      * @returns string
      */
-    function _packRawRow($unpackedData)
+    function _packRawRow(&$unpackedData)
     {
         return implode('|', $unpackedData);
     }
@@ -626,7 +642,7 @@ class DBA_Table extends PEAR
      * @param   string  $packedData
      * @returns array
      */
-    function _unpackRawRow($packedData)
+    function _unpackRawRow(&$packedData)
     {
         return explode('|', $packedData);
     }
@@ -717,8 +733,8 @@ class DBA_Table extends PEAR
             if ($this->_dba->isOpen()) {
                 $rows = $this->getRows();
             } else {
-                return $this->raiseError('DBA: table not open and no rows
-specified');
+                return $this->raiseError('DBA: table not open and no rows'.
+                                         'specified');
             }
         }
 
@@ -1029,5 +1045,56 @@ specified');
         } else {
             return $this->raiseError('DBA: no rows to sort specified');
         }
+    }
+
+    /**
+     * Generates a text table from a results set, a-la MySQL
+     *
+     * @param array $results
+     * @param array $fields  list of fields to display
+     * @param string $style  style to display table in; 'oracle', 'mysql'
+     * @returns string
+     */
+    function formatTextResults($results, $fields = null, $style = 'oracle')
+    {
+        $corner = ($style == 'oracle') ? ' ' : '+';
+        $wall = ($style == 'oracle') ? ' ' : '|';
+
+        if (is_array($results) && sizeof($results)) {
+
+            if (is_null($fields))
+                $fields = array_keys(current($results));
+
+            // get the maximum length of each field
+            foreach ($fields as $key=>$field) {
+                $longest[$key] = strlen($field) + 1;
+                foreach ($results as $result) {
+                    $resultLen = strlen($result[$field]) + 1;
+                    if ($resultLen > $longest[$key])
+                        $longest[$key] = $resultLen;
+                }
+            }
+
+            // generate separator line
+            foreach ($longest as $length)
+                $separator .= "$corner-".str_repeat('-',$length);
+            $separator .= "$corner\n";
+
+            $buffer = ($style == 'oracle') ? '' : $separator;
+
+            // print fields
+            foreach ($fields as $key=>$field)
+                $buffer .= "$wall ".str_pad($field, $longest[$key]);
+            $buffer .= "$wall\n$separator";
+
+            // print rows
+            foreach ($results as $result) {
+                foreach ($fields as $key=>$field)
+                    $buffer .= "$wall ".str_pad($result[$field], $longest[$key]);
+                $buffer .= "$wall\n";
+                $buffer .= ($style == 'oracle') ? '' : $separator;
+            }
+        }
+        return $buffer;
     }
 }
