@@ -38,7 +38,7 @@
 if (!function_exists('dba_open')) {
 
     require_once 'PEAR.php';
-    require_once 'DB_DBA/DBA_Simple.php';
+    require_once 'DBA/Driver/Simple.php';
 
     function dba_close(&$dba)
     {

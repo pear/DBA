@@ -24,7 +24,7 @@
 //
 
 ini_set('include_path',ini_get('include_path').':../../');
-require_once 'DB/DBA/DBA.php';
+require_once 'DBA.php';
 require_once 'PEAR.php';
 
 $testDataArray = array ('11111111111111111111',
@@ -47,9 +47,9 @@ $maxTransactions = $transactionsInterval * 8;
 
 // These drivers are known to work. cdbm and db2 have problems that prevent
 // them from being suitable drivers
-$drivers = array('db3', 'gdbm', 'simple');
+$drivers = array('db3', 'gdbm', 'file');
 
-$prefix = './data/';
+$prefix = './';
 
 function getmicrotime(){ 
     list($usec, $sec) = explode(" ",microtime()); 
@@ -67,7 +67,7 @@ foreach ($drivers as $driver) {
             $transactions <= $maxTransactions;
             $transactions+=$transactionsInterval) {
 
-            $result = $testDB->open($prefix.'benchmark_db', 'n');
+            $result = $testDB->open($prefix.'benchmark_db_'.$driver, 'n');
             if (PEAR::isError($result)) {
                 echo $result->getMessage()."\n";
             } else {
@@ -90,7 +90,7 @@ foreach ($drivers as $driver) {
                         case 1:
                             if ($testDB->exists($testKey)) {
                                 ++$actualTransactions;
-                                $testDB->delete($testKey);
+                                $testDB->remove($testKey);
                             }
                             break;
                         case 2:

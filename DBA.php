@@ -26,7 +26,7 @@ require_once('PEAR.php');
 /**
  * DBA is a set of classes for handling and extending Berkeley DB style
  * databases. It works around some of the quirks in the built-in dba
- * functions in PHP (e.g. gdbm does not support dba_replace), has its own
+ * functions in PHP (e.g. gdbm does not support dba_replace), has a file-based
  * dbm engine for installations where dba support is not included in PHP.
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
@@ -43,22 +43,22 @@ class DBA
      * @param   string $driver type of storage object to return
      * @return  object DBA storage object, returned by reference
      */
-    function &create($driver = 'simple')
+    function &create($driver = 'file')
     {
-        if (!function_exists('dba_open') || ($driver=='simple')) {
-            require_once 'DB/DBA/DBA_Simple.php';
-            return new DBA_Simple();
-        } elseif (($driver == 'db3') || ($driver == 'gdbm')){
-            require_once 'DB/DBA/DBA_Builtin.php';
-            return new DBA_Builtin($driver);
+        if (!function_exists('dba_open') || ($driver=='file')) {
+            require_once 'DBA/Driver/File.php';
+            return new DBA_Driver_File();
+        } elseif (($driver == 'db3') || ($driver == 'gdbm')) {
+            require_once 'DBA/Driver/Builtin.php';
+            return new DBA_Driver_Builtin($driver);
         } else {
             return PEAR::raiseError('Unknown DBA driver, '.$driver);
         }
     }
 
-    function exists($name, $driver = 'simple')
+    function exists($name, $driver = 'file')
     {
-        if (!function_exists('dba_open') || ($driver=='simple')) {
+        if (!function_exists('dba_open') || ($driver=='file')) {
             return (file_exists($name.'.idx') && file_exists($name.'.dat'));
         } elseif (($driver == 'db3') || ($driver == 'gdbm')){
             return file_exists($name);

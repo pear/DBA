@@ -23,7 +23,7 @@
 require_once 'PEAR.php';
 
 /**
- * DBA_Builtin uses the builtin dba functions of PHP as the underlying driver
+ * DBA_Driver_Builtin uses the builtin dba functions of PHP as the underlying driver
  * for a DBA class. Depending on the driver, this can be faster or slower than
  * the DBA_Simple class.
  *
@@ -36,7 +36,7 @@ require_once 'PEAR.php';
  * @access  public
  * @package DBA
  */
-class DBA_Builtin extends PEAR{
+class DBA_Driver_Builtin extends PEAR{
 
     // {{{ instance variables
     /**
@@ -70,13 +70,13 @@ class DBA_Builtin extends PEAR{
     var $_hasReplace;
     // }}}
 
-    // {{{ DBA_Builtin($driver = 'gdbm')
+    // {{{ DBA_Driver_Builtin($driver = 'gdbm')
     /* Constructor
      *
      * @access public
      * @param   string  $driver dba driver to use
      */
-    function DBA_Builtin($driver = 'gdbm')
+    function DBA_Driver_Builtin($driver = 'gdbm')
     {
         $this->_driver = $driver;
     }
@@ -194,12 +194,12 @@ class DBA_Builtin extends PEAR{
     }
     // }}}
 
-    // {{{ _DBA_Builtin()
+    // {{{ _DBA_Driver_Builtin()
     /**
      * PEAR emulated destructor calls close on PHP shutdown
      * @access private
      */
-    function _DBA_Builtin()
+    function _DBA_Driver_Builtin()
     {
         $this->close();
     }

@@ -45,11 +45,12 @@ define('DBA_SIMPLE_KEY',3);
 // }}}
 
 /**
- * DBA_Simple provides a file-based implementation of a DBM-style database.
- * It uses two files, and index and a data file to manage key/value pairs.
- * These two files use the suffixes '.dat' and '.idx'. When a database is
- * opened, only the index file is read. The index file contains pointers
- * to locations within the data file, which are used to retrieve values.
+ * DBA_Driver_File provides a simple, file-based implementation of a
+ * DBM-style database. It uses two files, and index and a data file to
+ * manage key/value pairs. These two files use the suffixes '.dat' and
+ * '.idx'. When a database is opened, only the index file is read. The
+ * index file contains pointers to locations within the data file, which
+ * are used to retrieve values.
  *
  * The class uses a concept of blocks for data storage. When the first value
  * is inserted, a new block is created by appending to the data file. If that
@@ -75,7 +76,7 @@ define('DBA_SIMPLE_KEY',3);
  * @access  public
  * @package DBA
  */
-class DBA_Simple extends PEAR 
+class DBA_Driver_File extends PEAR 
 {
     // {{{ instance variables
     /**
@@ -148,7 +149,7 @@ class DBA_Simple extends PEAR
                     break;
             case 'c':
                     // should we create a new database?
-                    if (!DBA_Simple::db_exists($dbName)) {
+                    if (!DBA_Driver_File::db_exists($dbName)) {
                         $file_mode = 'w+b';
                         $this->_writable = true;
                         $this->_readable = true;
@@ -255,12 +256,12 @@ class DBA_Simple extends PEAR
     }
     // }}}
 
-    // {{{ _DBA_Simple()
+    // {{{ _DBA_Driver_File()
     /**
      * PEAR emulated destructor calls close on PHP shutdown
      * @access private
      */
-    function _DBA_Simple()
+    function _DBA_Driver_File()
     {
         $this->close();
     }

@@ -27,15 +27,15 @@
 
 ini_set('include_path',ini_get('include_path').':../../');
 include 'PEAR.php';
-include 'DB/DBA/DBA_Simple.php';
+include 'DBA/Driver/File.php';
 
 $testDataArray = array ('1', '22', '333', '4444', '55555', '6666666', '7777777', '88888888', '999999999');
 
 $maxDataIndex = sizeof ($testDataArray)-1;
 
-$testDB =& new DBA_Simple();
+$testDB =& new DBA_Driver_File();
 
-if (PEAR::isError($error=$testDB->open('test', 'c')))
+if (PEAR::isError($error=$testDB->open('file_test', 'c')))
 {
     echo $error->getMessage()."\n";
 } else {
@@ -68,7 +68,7 @@ if (PEAR::isError($error=$testDB->open('test', 'c')))
     $testDB->close();
 }
 
-$testDB->open('test', 'r');
+$testDB->open('file_test', 'r');
 $key = $testDB->firstkey();
 while ($key !== FALSE) {
     echo "$key = ".$testDB->fetch($key)."\n";
