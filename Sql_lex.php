@@ -49,7 +49,8 @@ class Lexer
     var $tokStart = 0;
     var $tokLen = 0;
     var $tokText = '';
-    var $lineno = 0;
+    var $lineNo = 0;
+    var $lineBegin = 0;
     var $string;
 // }}}
 
@@ -84,6 +85,13 @@ class Lexer
     }
 // }}}
 
+    function getCurrLine() {
+        $end = 0;
+        while ($this->string[$this->lineBegin+$end] != "\n")
+            ++$end;
+        return trim(substr($this->string, $this->lineBegin, $end));
+    }
+
 // {{{ lex($this->string)
 function lex()
 {
@@ -103,7 +111,8 @@ function lex()
                 $c = $this->get();
                 while (($c == ' ') || ($c == "\t") || ($c == "\n")) {
                     if ($c == "\n") {
-                        ++$this->lineno;
+                        ++$this->lineNo;
+                        $this->lineBegin = $this->tokPtr;
                     }
                     $c = $this->skip();
                     $this->tokLen = 1;

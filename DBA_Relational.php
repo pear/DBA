@@ -113,7 +113,7 @@ class DBA_Relational extends PEAR
      */
     function _DBA_Relational()
     {
-        $this->close();
+//        $this->close();
     }
 
     /**

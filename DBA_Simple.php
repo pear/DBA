@@ -492,7 +492,7 @@ class DBA_Simple extends PEAR
             $loc = ftell($this->_datFP);
 
             // write to the data file
-            $size = $vsize; // make size 5% larger
+            $size = $vsize + 10; // make size 5% larger
 
             // add a useless "\n" to new values. This makes the data file
             // readable in any text editor. Useful when things go wrong :P

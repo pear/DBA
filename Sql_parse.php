@@ -95,6 +95,7 @@ define('SQL_INDEX',156);
 define('SQL_SET_FUNCT',157);
 define('SQL_CONSTRAINT',158);
 define('SQL_DEFAULT',159);
+define('SQL_NOTNULL',160);
 // types
 define('SQL_FLOAT',171);
 define('SQL_FIXED',172);
@@ -215,7 +216,7 @@ class Sql_Parser
         $types = array();
         while ($this->token != ')') {
             $this->getTok();
-            if ($this->isVal()) {
+            if ($this->isVal() || ($this->token == TOK_IDENT)) {
                 $values[] = $this->lexer->tokText;
                 $types[] = $this->token;
             } elseif ($this->token == ')') {
@@ -232,8 +233,16 @@ class Sql_Parser
 
     // {{{ raiseError($message)
     function raiseError($message) {
+        $end = 0;
+        while (($this->lexer->string[$this->lexer->lineBegin+$end] != "\n") &&
+               ($this->lexer->string[$this->lexer->lineBegin+$end]))
+            ++$end;
         $message = 'Parse error: '.$message.' on line '.
-            ($this->lexer->lineno+1).' at '. $this->lexer->tokText;
+            ($this->lexer->lineNo+1)."\n";
+        $message .= substr($this->lexer->string, $this->lexer->lineBegin, $end)."\n";
+        $message .= str_repeat(' ', ($this->lexer->tokPtr - 
+                          $this->lexer->lineBegin))."^\n";
+
         return PEAR::raiseError($message);
     }
     // }}}
@@ -318,8 +327,11 @@ class Sql_Parser
                         return $this->raiseError('Expected )');
                     }
                     break;
-                case (SQL_NULL): case (SQL_AUTOINCREMENT):
-                        $haveValue = false;
+                case (SQL_AUTOINCREMENT):
+                    $value = true;
+                    break;
+                case (SQL_NULL):
+                    $haveValue = false;
                     break;
                 default:
                     return $this->raiseError('Unexpected token '
@@ -408,13 +420,12 @@ class Sql_Parser
                             return $this->raiseError('Expected 1 parameter');
                         }
                         if ($types[0] != TOK_INT_VAL) {
-                            print_r($types);
                             return $this->raiseError('Expected an integer');
                         }
                         $fields[$i][SQL_SIZE] = $values[0];
                         break;
                     case SQL_ENUM: case SQL_SET:
-                        if (!$results) {
+                        if (!sizeof($values)) {
                             return $this->raiseError('Expected a domain');
                         }
                         $fields[$i][SQL_DOMAIN][] = $values;
@@ -463,7 +474,7 @@ class Sql_Parser
         $this->getTok();
         switch ($this->token) {
             case TOK_END_OF_INPUT:
-                return $this->raiseError('End of input');
+                return;
             case SQL_CREATE:
                 $this->getTok();
                 switch ($this->token) {
@@ -486,7 +497,7 @@ class Sql_Parser
             case SQL_INSERT:
                 $this->getTok();
                 if ($this->token == SQL_INTO) {
-                    $tree[SQL_COMMAND] = SQL_CREATE_TABLE;
+                    $tree[SQL_COMMAND] = SQL_INSERT;
                     $this->getTok();
                     if ($this->token == TOK_IDENT) {
                         $tree[SQL_NAME] = $this->lexer->tokText;
@@ -533,7 +544,7 @@ class Sql_Parser
         if ($this->token == ';') {
             return $tree;
         } else {
-            return $this->raiseError('Missing ;');
+            return $this->raiseError('Expected ;');
         }
     }
     // }}}
