@@ -452,8 +452,11 @@ class DBA_Table extends PEAR
                 }
             case DBA_VARCHAR:
                 if (is_scalar($value)) {
-                    $c_value = str_replace(DBA_FIELD_SEPARATOR,'', str_pad(
-                               $value, $this->_schema[$field][DBA_SIZE]));
+                    $c_value = str_replace(DBA_FIELD_SEPARATOR,'', $value);
+                    // size is optional for varchars
+                    if (isset($this->_schema[$field][DBA_SIZE])) {
+                        $c_value = str_pad($c_value, $this->_schema[$field][DBA_SIZE]);
+                    }
                     break;
                 }
             case DBA_INTEGER: case DBA_FLOAT: case DBA_FIXED:
@@ -611,7 +614,7 @@ class DBA_Table extends PEAR
 
             } elseif (isset($fieldMeta[DBA_DEFAULT])) {
 
-                if ($fieldMeta[DBA_AUTOINCREMENT]) {
+                if (isset($fieldMeta[DBA_AUTOINCREMENT])) {
                     // use the autoincrement value
                     $c_value = $this->_packField($fieldName,
                                     $this->_schema[$fieldName][DBA_DEFAULT]++);
@@ -627,7 +630,7 @@ class DBA_Table extends PEAR
                     }
                 }
 
-            } elseif ($fieldMeta[DBA_NOTNULL]) {
+            } elseif (isset($fieldMeta[DBA_NOTNULL])) {
 
                 return $this->raiseError("$fieldName cannot be null");
 
@@ -636,7 +639,7 @@ class DBA_Table extends PEAR
                 $c_value = null;
             }
 
-            if ($this->_primaryKey[$fieldName]) {
+            if (isset($this->_primaryKey[$fieldName])) {
                 $key[] = $c_value;
             }
 
