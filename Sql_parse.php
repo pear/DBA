@@ -373,25 +373,28 @@ class Sql_Parser
             // parse field type
             $this->getTok();
             if ($this->isType($this->token)) {
-                $fields[$name]['type'] = $this->typeMap[$this->token];
+                $type = $this->token;
             } else {
                 return $this->raiseError('Expected a valid type');
             }
 
             $this->getTok();
-            // handle special cases
+            // handle special case two-word types
             if ($this->token == 'precision') {
-                if ($fields[$name]['type'] != 'real') {
+                // double precision == double
+                if ($type == 'double') {
                     return $this->raiseError('Unexpected token');
                 }
                 $this->getTok();
             } elseif ($this->token == 'varying') {
-                if ($fields[$name]['type'] == 'char') {
-                    $fields[$name]['type'] == 'varchar';
+                // character varying() == varchar()
+                if ($type == 'character') {
+                    $type == 'varchar';
                 } else {
                     return $this->raiseError('Unexpected token');
                 }
             }
+            $fields[$name]['type'] = $this->typeMap[$type];
             // parse type parameters
             if ($this->token == '(') {
                 $results = $this->getParams($values, $types);
