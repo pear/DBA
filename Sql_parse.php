@@ -297,7 +297,8 @@ class Sql_Parser
     // {{{ &parseFieldList()
     function &parseFieldList()
     {
-        if ($this->lexer->lex() != '(') {
+        $this->getTok();
+        if ($this->token != '(') {
             return $this->raiseError('Expected (');
         }
 
@@ -389,6 +390,46 @@ class Sql_Parser
                 return $this->raiseError('Expected )');
             }
         }
+    }
+    // }}}
+
+    // {{{ &parseFunctionOpts()
+    function &parseFunctionOpts()
+    {
+        $function = $this->token;
+        $opts['name'] = $function;
+        $this->getTok();
+        if ($this->token != '(') {
+            return $this->raiseError('Expected "("');
+        }
+        switch ($function) {
+            case 'count':
+                $this->getTok();
+                switch ($this->token) {
+                    case 'distinct':
+                        $opts['distinct'] = true;
+                        $this->getTok();
+                        if ($this->token != 'ident') {
+                            return $this->raiseError('Expected a column name');
+                        }
+                    case 'ident': case '*':
+                        $opts['arg'] = $this->lexer->tokText;
+                        break;
+                    default:
+                        return $this->raiseError('Invalid argument');
+                }
+                break;
+            case 'avg': case 'min': case 'max': case 'sum':
+            default:
+                $this->getTok();
+                $opts['arg'] = $this->lexer->tokText;
+                break;
+        }
+        $this->getTok();
+        if ($this->token != ')') {
+            return $this->raiseError('Expected "("');
+        }
+        return $opts;
     }
     // }}}
 
@@ -563,7 +604,12 @@ class Sql_Parser
                     }
                 } elseif ($this->isFunc()) {
                     if (!isset($tree['set_quantifier'])) {
-                        $tree['set_function'] = $this->token;
+                        $result =& $this->parseFunctionOpts();
+                        if (PEAR::isError($result)) {
+                            return $result;
+                        }
+                        $tree['set_function'] =& $result;
+                        $this->getTok();
                     } else {
                         return $this->raiseError('Cannot use "'.
                                 $tree['set_quantifier'].'" with '.$this->token);

@@ -85,6 +85,8 @@ $queries = array(
 "update table3 set col=1 where col > 2 and (col < 30)",
 "select * from dog where cat <> 4",
 "select legs, hairy from dog",
+"select max(length) from dog",
+"SELECT COUNT(DISTINCT country) FROM publishers"
 );
 
 $lexer = new Lexer();
