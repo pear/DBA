@@ -72,7 +72,7 @@ define('DBA_SIMPLE_KEY',3);
  * The sync function calls fflush on the data and index files.
  *
  * @author  Brent Cook
- * @version 0.9.5
+ * @version 1.0
  * @access  public
  * @package DBA
  */
