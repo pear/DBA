@@ -127,17 +127,12 @@ class DBA_Relational extends PEAR
      */
     function _openTable($tableName, $mode = 'r')
     {
-        if (is_string($tableName)) {
-            if (!isset($this->_tables[$tableName])) {
-                if (!$this->tableExists($tableName)) {
-                    return $this->raiseError('table "'.$tableName.
-                                              '" does not exist');
-                } else {
-                    $this->_tables[$tableName] =& new DBA_Table($this->_driver);
-                }
+        if (!isset($this->_tables[$tableName])) {
+            if (!$this->tableExists($tableName)) {
+                return $this->raiseError('table '.$tableName.' does not exist');
+            } else {
+                $this->_tables[$tableName] =& new DBA_Table($this->_driver);
             }
-        } else {
-            return $this->raiseError('invalid table name, '.$tableName);
         }
 
         if (!$this->_tables[$tableName]->isOpen()) {
@@ -174,17 +169,7 @@ class DBA_Relational extends PEAR
      */
     function createTable($tableName, $schema)
     {
-        // check if this table object exists
-        if (!isset($this->_tables[$tableName])) {
-            $this->_tables[$tableName] = new DBA_Table($this->_driver);
-        } else {
-            // the table object exists, so the table must exist
-            return $this->raiseError("cannot create table: $tableName,".
-                                     " it already exists");
-        }
-
-        return $this->_tables[$tableName]->create($this->_home.$tableName,
-                                                  $schema);
+        return $this->_manager->create($this->_home.$tableName, $schema);
     }
 
     /**

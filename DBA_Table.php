@@ -203,6 +203,8 @@ class DBA_Table extends PEAR
             if (isset($this->_schema)) {
                 $schema = $this->_packSchema($this->_schema);
                 $this->_dba->replace(DBA_SCHEMA_KEY, $schema);
+            } else {
+                echo "No schema ;P\n";
             }
         }
         $this->_maxKey = null;
