@@ -40,7 +40,7 @@ foreach ($empSchema as $tableName=>$tableSchema) {
     if (PEAR::isError($result)) {
         echo $result->getMessage()."\n";
     } else {
-        foreach ($$data as $row) {
+        foreach ($empData[$tableName] as $row) {
             $result = $db->insertRow($tableName, $row);
             if (PEAR::isError($result)) {
             echo $result->getMessage()."\n";
@@ -50,6 +50,7 @@ foreach ($empSchema as $tableName=>$tableSchema) {
         $results = $db->select($tableName, '*');
 
         echo "Query: \$db->select($tableName, '*');\n";
+        print_r($results);
         echo $db->formatResults($db->finalizeRows($tableName, $results));
         echo "------------------------------------------------\n\n";
     }
