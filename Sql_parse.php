@@ -24,25 +24,6 @@
 require_once 'PEAR.php';
 require_once 'DB/DBA/Sql_lex.php';
 
-// action constants: 'size', 'domain', 'options', 'decimals', 'drop_table'
-//                   'drop_index', 'drop_sequence'
-
-// token definitions
-// operators:    'ge', 'le', 'ne', 'eq', 'gt', 'lt', 'and', 'or', 'not'
-// verbs:        'create', 'drop', 'insert', 'delete', 'select', 'update',
-//               'alter'
-// conjunctions: 'by', 'as', 'on', 'between', 'into', 'from', 'where'
-// modifiers:    'asc', 'desc', 'like', 'rlike', 'clike', 'slike', 'step',
-//               'primary', 'key', 'unique', 'limit', 'distinct', 'order',
-//               'check', 'varying', 'autoincrement'
-// nouns:        'all', 'table', 'sequence', 'value', 'values', 'null',
-//               'index', 'constraint', 'default', 'notnull'
-// types:        'float', 'fixed', 'integer', 'uint', 'bool', 'char', 'varchar',
-//               'text', 'date', 'money', 'time', 'ipv4', 'set', 'enum',
-//               'timestamp'
-// functions:    'avg_func', 'count_func', 'max_func', 'min_func', 'sum_func',
-//               'nextval_func', 'currval_func', 'setval_func'
-
 /**
  * A sql parser
  *
@@ -56,43 +37,15 @@ class Sql_Parser
     var $lexer;
     var $token;
 
-// {{{ symbol definitions
+// symbol definitions
     var $functab = array();
     var $typetab = array();
-    var $symtab = array(
-        'le'=>       '<=',
-        'ge'=>       '>=',
-        'ne'=>       '<>',
-        'lt'=>       '<',
-        'eq'=>       '=',
-        'gt'=>       '>',
-        'tinyint'=>  'integer',
-        'integer'=>  'integer',
-        'bigint'=>   'integer',
-        'int'=>      'integer',
-        'smallint'=> 'integer',
-        'float'=>    'float',
-        'real'=>     'float',
-        'double'=>   'float',
-        'numeric'=>  'fixed',
-        'decimal'=>  'fixed',
-        'character'=>'char',
-        'char'=>     'char',
-        'varchar'=>  'varchar',
-        'ipaddr'=>   'ipv4',
-        'boolean'=>  'bool',
-    );
-// }}}
+    var $symtab = array();
 
 // {{{ function Sql_Parser($string = null)
     function Sql_Parser($string = null) {
         include 'DB/DBA/Sql_dialect_ansi.php';
-        $tokens = explode(' ', implode(' ', $dialect));
-        $symtab = array_flip($tokens);
-        foreach ($symtab as $token=>$dummy) {
-            $symtab[$token] = $token;
-        }
-        $this->symtab = array_merge($symtab, $this->symtab);
+        $this->symtab = array_flip(explode(' ', implode(' ', $dialect)));
         $this->typetab = array_flip(explode(' ',$dialect['types']));
         $this->functab = array_flip(explode(' ',$dialect['functions']));
         if (is_string($string)) {

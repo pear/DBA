@@ -170,9 +170,10 @@ function lex()
                 $this->unget();
                 $this->tokText = substr($this->string, $this->tokStart,
                                         $this->tokLen);
-                if (isset($this->symtab[strtolower($this->tokText)])) {
+                $testToken = strtolower($this->tokText);
+                if (isset($this->symtab[$testToken])) {
                     $this->tokStart = $this->tokPtr;
-                    return $this->symtab[strtolower($this->tokText)];
+                    return $testToken;
                 } else {
                     $this->tokStart = $this->tokPtr;
                     return 'ident';
@@ -201,7 +202,7 @@ function lex()
                 $this->tokText = substr($this->string, $this->tokStart,
                                         $this->tokLen);
                 $this->tokStart = $this->tokPtr;
-                return ('integer');
+                return 'integer';
                 break;
             // }}}
 
@@ -230,7 +231,7 @@ function lex()
                 $this->tokText = substr($this->string, $this->tokStart,
                                         $this->tokLen);
                 $this->tokStart = $this->tokPtr;
-                return ('real');
+                return 'real';
             // }}}
 
             // {{{ State 9: Incomplete signed number
@@ -263,12 +264,11 @@ function lex()
             // {{{ State 11: Complete comparison operator
             case 11:
                 $this->unget();
-                $tokval = $this->symtab[
-                        substr($this->string, $this->tokStart, $this->tokLen)];
+                $tokval = substr($this->string, $this->tokStart, $this->tokLen);
                 if ($tokval)
                 {
                     $this->tokStart = $this->tokPtr;
-                    return ($tokval);
+                    return $tokval;
                 }
                 $state = 999;
                 break;
@@ -308,7 +308,7 @@ function lex()
             // {{{ State 13: Complete text string
             case 13:
                 $this->tokStart = $this->tokPtr;
-                return ('string');
+                return 'string';
                 break;
             // }}}
 
@@ -374,7 +374,7 @@ function lex()
                 $this->unget();
                 $this->tokText = substr($this->tokStart,$this->tokLen);
                 $this->tokStart = $this->tokPtr;
-                return ('sys_var');
+                return 'sys_var';
             // }}}
 
             // {{{ State 999 : Unknown token.  Revert to single char
@@ -382,14 +382,14 @@ function lex()
                 $this->revert();
                 $this->tokText = $this->get();
                 $this->tokStart = $this->tokPtr;
-                return ($this->tokText);
+                return $this->tokText;
             // }}}
 
             // {{{ State 1000 : End Of Input
             case 1000:
                 $this->tokText = '*end of input*';
                 $this->tokStart = $this->tokPtr;
-                return (null);
+                return null;
             // }}}
 
         }
