@@ -316,9 +316,9 @@ class DBA_Table extends PEAR
                     $c_value = strval ($value);
                 } else {
                     if (is_string ($value)) {
-                        // convert a 'boolean' string into a string boolean
-                        $c_value = strval(in_array(strtolower($str),
-                                           array('t','true','y','yes','1')));
+                        // convert a 'boolean' string into a string 1 or 0
+                        $c_value = in_array(strtolower($value),
+                                     array('t','true','y','yes','1')) ? '1':'0';
                     }
                 }
                 break;
