@@ -30,10 +30,10 @@ class DBA
     function create($driver = 'simple')
     {
         if (!function_exists('dba_open') || ($driver=='simple')) {
-            require_once 'DB/DBA_Simple.php';
+            require_once 'DB_DBA/DBA_Simple.php';
             return new DBA_Simple();
         } else {
-            require_once 'DB/DBA_Builtin.php';
+            require_once 'DB_DBA/DBA_Builtin.php';
             return new DBA_Builtin($driver);
         }
     }

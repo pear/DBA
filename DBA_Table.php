@@ -18,6 +18,8 @@
 //
 // $Id$
 //
+require_once 'DB_DBA/DBA.php';
+
 define ('DBA_TABLE_META', '__meta__');
 
 /**
@@ -26,7 +28,7 @@ define ('DBA_TABLE_META', '__meta__');
  * It uses a DBA class as the storage driver.
  *
  * @author Brent Cook <busterb@mail.utexas.edu>
- * @version 0.0.2
+ * @version 0.0.10
  */
 class DBA_Table
 {
@@ -51,12 +53,10 @@ class DBA_Table
      * Constructor
      * @param object $dba dba object to use for storage, you need this sometime
      */
-    function DBATable ($dba = NULL)
+    function DBA_Table ($driver = 'simple')
     {
-        // set the internal dba object
-        if (!is_null($dba)) {
-            $this->_dba &= $dba;
-        }
+        // initialize the internal dba object
+        $this->_dba = DBA::create($driver);
     }
 
     /**
@@ -67,13 +67,8 @@ class DBA_Table
      * @param object $dba       dba object to use for storage, you need this
      * @returns boolean false on error, true on success
      */
-    function open ($tableName, $mode = 'r', $dba = NULL)
+    function open ($tableName, $mode = 'r')
     {
-        // set the internal dba object
-        if (!is_null($dba)) {
-            $this->_dba &= $dba;
-        }
-
         if (!($this->_dba->open($tableName, $mode))) {
             return false;
         }
@@ -113,39 +108,25 @@ class DBA_Table
      * @param array  $fieldSchema field schema for the table
      * @param object $dba         dba object to use
      */
-    function create ($tableName, $fieldSchema, $dba=NULL)
+    function create ($tableName, $fieldSchema)
     {
         // pack the fieldSchema
         $fieldString = $this->_packFieldSchema($fieldSchema);
 
-        if (is_null($dba)) {
-            if (is_object($this->_dba)) {
-                // close any open table, since this opens a new database with
-                // the same internal dba object
-                $r = $this->close();
-                $r = $r && $this->_dba->open($tableName, 'n');
-                $r = $r && $this->_dba->insert(DBA_TABLE_META, $fieldString);
-                $r = $r && $this->_dba->close();
-            } else {
-                trigger_error("DBA: Could not create $tableName, no dba object".
-                               "specified", E_USER_WARNING);
-                return false;
-        } else {
-            $r = $dba->open($tableName, 'n');
-            $r = $r && $dba->insert(DBA_TABLE_META, $fieldString);
-            $r = $r && $dba->close();
-        }
+        $r = $this->_dba->open($tableName, 'n');
+        $r = $r && $this->_dba->insert(DBA_TABLE_META, $fieldString);
+        $r = $r && $this->_dba->close();
         // return the result of the creation operations
         return $r;
     }
 
     /**
-     * Check whether key exists
+     * Check whether table exists
      *
      * @param $key string
      * @returns boolean
      */
-    function exists ($tableName)
+    function tableExists ($tableName)
     {
         return $this->_dba->db_exists($tableName);
     }
@@ -234,6 +215,7 @@ class DBA_Table
      *
      * @access private
      * @returns integer a new key
+     */
     function _getUniqueKey()
     {
         // find the maxKey if necessary
@@ -311,8 +293,8 @@ class DBA_Table
                 } else {
                     if (is_string ($value)) {
                         // convert a 'boolean' string into a string boolean
-                        $c_value = strval(in_array(strtolower($str)
-                                          ,array('t','true','y','yes','1'));
+                        $c_value = strval(in_array(strtolower($str),
+                                           array('t','true','y','yes','1')));
                     }
                 }
                 break;
@@ -556,6 +538,7 @@ class DBA_Table
 
     /**
      * Inserts a new row in a database
+     */
     function insertRow ($data)
     {
         if ($this->isOpen()) {
@@ -611,10 +594,12 @@ class DBA_Table
             while ($key) {
                 if ($key != DBA_TABLE_META) {
                     if (is_null($rowIDs)) {
-                        $rows[$key] = $this->_unpackRow($this->_dba->fetch($key));
+                        $rows[$key] = $this->_unpackRow(
+                                                   $this->_dba->fetch($key));
                     } else {
                         if (in_array($key, $rowKeys)) {
-                            $rows[$key] = $this->_unpackRow($this->_dba->fetch($key));
+                            $rows[$key] = $this->_unpackRow(
+                                                   $this->_dba->fetch($key));
                         }
                     }
                 }
