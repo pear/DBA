@@ -366,7 +366,7 @@ create table nodefinitions
 ),
 array(
 'sql' => 'create dogfood',
-'expect' => 'Parse error: Cannot create dogfood on line 1
+'expect' => 'Parse error: Unknown object to create on line 1
 create dogfood
        ^ found: dogfood'
 

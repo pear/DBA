@@ -532,7 +532,7 @@ class Sql_Parser
                 $tree = array('command' => 'create_sequence');
                 break;
             default:
-                return $this->raiseError('Cannot create ' .$this->lexer->tokText);
+                return $this->raiseError('Unknown object to create');
         }
         return $tree;
     }
@@ -657,6 +657,44 @@ class Sql_Parser
             return $clause;
         }
         $tree['where_clause'] = $clause;
+        return $tree;
+    }
+    // }}}
+
+    // {{{ parseDrop()
+    function parseDrop() {
+        $this->getTok();
+        switch ($this->token) {
+            case 'table':
+                $tree = array('command' => 'drop_table');
+                $this->getTok();
+                if ($this->token != 'ident') {
+                    return $this->raiseError('Expected a table name');
+                }
+                $tree['table_name'] = $this->lexer->tokText;
+                $this->getTok();
+                if (($this->token == 'restrict') ||
+                    ($this->token == 'cascade')) {
+                    $tree['drop_behavior'] = $this->token;
+                }
+                $this->getTok();
+                if (!is_null($this->token)) {
+                    return $this->raiseError('Unexpected token');
+                }
+                return $tree;
+                break;
+            case 'index':
+                $tree = array('command' => 'drop_index');
+                break;
+            case 'constraint':
+                $tree = array('command' => 'drop_constraint');
+                break;
+            case 'sequence':
+                $tree = array('command' => 'drop_sequence');
+                break;
+            default:
+                return $this->raiseError('Unknown object to drop');
+        }
         return $tree;
     }
     // }}}
@@ -789,16 +827,18 @@ class Sql_Parser
             case null:
                 // null == end of string
                 return $this->raiseError('Nothing to do');
-            case 'create':
-                return $this->parseCreate();
-            case 'insert':
-                return $this->parseInsert();
-            case 'update':
-                return $this->parseUpdate();
-            case 'delete':
-                return $this->parseDelete();
             case 'select':
                 return $this->parseSelect();
+            case 'update':
+                return $this->parseUpdate();
+            case 'insert':
+                return $this->parseInsert();
+            case 'delete':
+                return $this->parseDelete();
+            case 'create':
+                return $this->parseCreate();
+            case 'drop':
+                return $this->parseDrop();
             default:
                 return $this->raiseError('Unknown action :'.$this->token);
         }
