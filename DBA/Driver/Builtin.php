@@ -32,7 +32,7 @@ require_once 'DBA.php';
  * is known to be unsuitable as a driver due to its lack of write ability.
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.9.4
+ * @version 0.9.5
  * @access  public
  * @package DBA
  */

@@ -51,7 +51,7 @@ define('DBA_ERROR_ALREADY_EXISTS',    -15);     // key
  * dbm engine for installations where dba support is not included in PHP.
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.9.4
+ * @version 0.9.5
  * @access  public
  * @package DBA
  */
@@ -200,15 +200,13 @@ class DBA extends PEAR
 
 /**
  * DBA_Error implements a class for reporting portable database error
- * messages. Based on the PEAR::DBM implementation.
+ * messages. Based on the PEAR::MDB implementation.
  *
  * @package DBA
  * @author  Olaf Conradi <conradi@cs.utwente.nl>
  */
 class DBA_Error extends PEAR_Error
 {
-    
-    // {{{ constructor
     
     /**
      * DBA_Error constructor.
@@ -230,7 +228,6 @@ class DBA_Error extends PEAR_Error
                 $debuginfo);
         }
     }
-    // }}}
 }
 
 ?>
