@@ -484,10 +484,13 @@ class DBA_Relational extends PEAR
             $fields = array_keys(current($table));
             $table = $altName;
             return true;
+        } elseif (is_null($table)) {
+            $fields = null;
+            $rows = null;
+            return true;
+        } else {
+            return false;
         }
-        $fields = null;
-        $rows = null;
-        return false;
     }
     // }}}
 
@@ -545,22 +548,16 @@ class DBA_Relational extends PEAR
     {
         // validate tables
         if (!$this->_validateTable($tableA, $rowsA, $fieldsA, 'A')) {
-            return $this->raiseError("$tableA does not match query");
+            return $this->raiseError("$tableA not in query");
         }
 
         if (!$this->_validateTable($tableB, $rowsB, $fieldsB, 'B')) {
-            return $this->raiseError("$tableA does not match query");
+            return $this->raiseError("$tableA not in query");
         }
 
         // check for empty tables
-        if (is_null($rowsA) && !is_null($rowsB)) {
-            return $rowsB;
-        }
-        if (!is_null($rowsA) && is_null($rowsB)) {
-            return $rowsA;
-        }
-        if (is_null($rowsA) && is_null($rowsB)) {
-            return array();
+        if (is_null($rowsA) || is_null($rowsB)) {
+            return null;
         }
         
         // TODO Implement merge join, needs secondary indexes on tables
