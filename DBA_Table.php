@@ -121,14 +121,6 @@ class DBA_Table extends PEAR
      */
     var $_primaryKey=array();
 
-    var $_systemVariables=array(
-        '_rowid'=>array(DBA_TYPE => DBA_INTEGER,
-                        DBA_DEFAULT => 0,
-                        DBA_AUTOINCREMENT => true),
-        '_timestamp'=>array(DBA_TYPE => DBA_TIMESTAMP,
-                            DBA_DEFAULT => 'time()',
-                            DBA_DEFAULTTYPE => DBA_FUNCTION)
-        );
     // }}}
 
     // {{{ DBA_Table($driver = 'simple')
@@ -236,7 +228,13 @@ class DBA_Table extends PEAR
     function create($tableName, $schema)
     {
         // pack the schema
-        $packedSchema = $this->_packSchema($schema + $this->_systemVariables);
+        $packedSchema = $this->_packSchema($schema +
+            array('_rowid'=>array(DBA_TYPE => DBA_INTEGER,
+                                DBA_DEFAULT => 0,
+                                DBA_AUTOINCREMENT => true),
+                '_timestamp'=>array(DBA_TYPE => DBA_TIMESTAMP,
+                                DBA_DEFAULT => 'time()',
+                                DBA_DEFAULTTYPE => DBA_FUNCTION)));
         if (PEAR::isError($packedSchema)) {
             return $packedSchema;
         }
