@@ -6,7 +6,7 @@
     <name>DB_DBA</name>
     <summary>Berkely-style Database Class</summary>
     <description>
-      Implements a DBM-style database using either PHP's DBA functions or a simple DBM class written in PHP itself.
+        Implements a DBM-style database using either PHP's DBA functions or a simple DBM class written in PHP. Also provides a relational database system with support for selects, joins, sorts, projects, multiple tables, type checking, autoincrements and more.
     </description>
 
     <maintainers>
@@ -19,16 +19,18 @@
     </maintainers>
 
     <release>
-        <license>PHP</license>
-        <version>0.0.12</version>
-        <date>2002-07-03</date>
-        <state>alpha</state>
+        <license>LGPL</license>
+        <version>0.0.14</version>
+        <date>2002-07-06</date>
+        <state>beta</state>
         <notes>
-             * autoincrement/decrement now store their ceiling/floor values
-               properly. improvments to simple driver
-             * fixed handling of text and boolean types
-             * sort, project and unique now work more like static functions;
-               they no longer require a table to be open
+            Initial release. Like many things, the documentation is not
+            completed and expect some changes/additions to the API as I try
+            building some sample applications with this, discovering what works
+            and what doesn't. See the test files for hints on usage; the most
+            useful bit currently is DBA_Relational. It uses DBA_Table which
+            uses DBA. They build on each other, but can be used individually.
+            See empSchema and hatSchema for examples of how to create a schema.
         </notes>
         <filelist>
             <dir name="/" baseinstalldir="DB/DBA">
