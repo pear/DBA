@@ -1,22 +1,44 @@
 <?php
+/* vim: set expandtab tabstop=4 shiftwidth=4: */
+// +----------------------------------------------------------------------+
+// | Copyright (c) 2002 Brent Cook                                        |
+// +----------------------------------------------------------------------+
+// | This library is free software; you can redistribute it and/or        |
+// | modify it under the terms of the GNU Lesser General Public           |
+// | License as published by the Free Software Foundation; either         |
+// | version 2.1 of the License, or (at your option) any later version.   |
+// |                                                                      |
+// | This library is distributed in the hope that it will be useful,      |
+// | but WITHOUT ANY WARRANTY; without even the implied warranty of       |
+// | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU    |
+// | Lesser General Public License for more details.                      |
+// |                                                                      |
+// | You should have received a copy of the GNU Lesser General Public     |
+// | License along with this library; if not, write to the Free Software  |
+// | Foundation, Inc., 59 Temple Place, Suite 330,Boston,MA 02111-1307 USA|
+// +----------------------------------------------------------------------+
+//
+// $Id$
+//
+
 require_once 'PEAR.php';
 require_once 'Sql_lex.php';
 
-define('SQL_COMMAND',0);
-define('SQL_NAME',1);
-define('SQL_TYPE',2);
-define('SQL_FIELDS',3);
-define('SQL_SIZE', 4);
-define('SQL_DOMAIN', 5);
-define('SQL_OPTIONS', 6);
-define('SQL_DECIMALS', 7);
+define('SQL_COMMAND',30);
+define('SQL_NAME',31);
+define('SQL_TYPE',32);
+define('SQL_FIELDS',33);
+define('SQL_SIZE',34);
+define('SQL_DOMAIN',35);
+define('SQL_OPTIONS',36);
+define('SQL_DECIMALS',37);
 
-define('SQL_CREATE_TABLE',10);
-define('SQL_CREATE_INDEX',11);
-define('SQL_CREATE_SEQUENCE',12);
-define('SQL_DROP_TABLE',13);
-define('SQL_DROP_INDEX',14);
-define('SQL_DROP_SEQUENCE',15);
+define('SQL_CREATE_TABLE',40);
+define('SQL_CREATE_INDEX',41);
+define('SQL_CREATE_SEQUENCE',42);
+define('SQL_DROP_TABLE',43);
+define('SQL_DROP_INDEX',44);
+define('SQL_DROP_SEQUENCE',45);
 
 // {{{ token definitions
 // logical operators
@@ -45,25 +67,25 @@ define('SQL_INTO',124);
 define('SQL_FROM',125);
 define('SQL_WHERE',126);
 // modifiers
-define('SQL_ASC',131);
-define('SQL_DESC',132);
-define('SQL_LIKE',133);
-define('SQL_RLIKE',134);
-define('SQL_CLIKE',135);
-define('SQL_SLIKE',136);
-define('SQL_STEP',137);
-define('SQL_SET',138);
-define('SQL_PRIMARY',139);
-define('SQL_KEY',140);
-define('SQL_UNIQUE',141);
-define('SQL_LIMIT',143);
-define('SQL_DISTINCT',144);
-define('SQL_ORDER',145);
-define('SQL_CHECK',146);
-define('SQL_VARYING',147);
-define('SQL_AUTOINCREMENT',148);
+define('SQL_ASC',130);
+define('SQL_DESC',131);
+define('SQL_LIKE',132);
+define('SQL_RLIKE',133);
+define('SQL_CLIKE',134);
+define('SQL_SLIKE',135);
+define('SQL_STEP',136);
+define('SQL_SET',137);
+define('SQL_PRIMARY',138);
+define('SQL_KEY',139);
+define('SQL_UNIQUE',140);
+define('SQL_LIMIT',141);
+define('SQL_DISTINCT',142);
+define('SQL_ORDER',143);
+define('SQL_CHECK',144);
+define('SQL_VARYING',145);
+define('SQL_AUTOINCREMENT',146);
 // nouns
-define('SQL_ALL',130);
+define('SQL_ALL',150);
 define('SQL_TABLE',151);
 define('SQL_SEQUENCE',152);
 define('SQL_VALUE',153);
@@ -75,19 +97,19 @@ define('SQL_CONSTRAINT',158);
 define('SQL_DEFAULT',159);
 // types
 define('SQL_FLOAT',171);
-define('SQL_FIXED',171);
-define('SQL_INT',172);
-define('SQL_UINT',173);
-define('SQL_BOOL',174);
-define('SQL_CHAR',175);
-define('SQL_VARCHAR',176);
-define('SQL_TEXT',177);
-define('SQL_DATE',178);
-define('SQL_MONEY',179);
-define('SQL_TIME',180);
-define('SQL_IPV4',181);
-define('SQL_SET',182);
-define('SQL_ENUM',183);
+define('SQL_FIXED',172);
+define('SQL_INT',173);
+define('SQL_UINT',174);
+define('SQL_BOOL',175);
+define('SQL_CHAR',176);
+define('SQL_VARCHAR',177);
+define('SQL_TEXT',178);
+define('SQL_DATE',179);
+define('SQL_MONEY',180);
+define('SQL_TIME',181);
+define('SQL_IPV4',182);
+define('SQL_SET',183);
+define('SQL_ENUM',184);
 // }}}
 
 class Sql_Parser
@@ -176,25 +198,34 @@ class Sql_Parser
     );
 // }}}
 
+// {{{ error($message)
 function error($message) {
     $message = 'Syntax error: '.$message.' on line '.
         ($this->lexer->lineno+1);
     return PEAR::raiseError($message);
 }
+// }}}
 
+// {{{ isType()
 function isType() {
     return (($this->token >= SQL_NUM) && ($this->token <= SQL_ENUM));
 }
+// }}}
 
+// {{{ isVal()
 function isVal() {
     return (($this->token >= TOK_REAL_VAL) && ($this->token <= TOK_INT_VAL));
 }
+// }}}
 
+// {{{ getTok()
 function getTok() {
     $this->token = $this->lexer->lex();
     //echo $this->token."\t".$this->lexer->tokText."\n";
 }
+// }}}
 
+// {{{ &parseFieldOptions()
 function &parseFieldOptions()
 {
     // parse field options
@@ -274,7 +305,9 @@ function &parseFieldOptions()
     }
     return $options;
 }
+// }}}
 
+// {{{ &parseFieldList()
 function &parseFieldList()
 {
     if ($this->lexer->lex() != '(') {
@@ -363,7 +396,7 @@ function &parseFieldList()
             $fields[$i][SQL_OPTIONS] = $options;
         }
 
-        if ($this->token == ')') { 
+        if ($this->token == ')') {
             return $fields;
         } elseif ($this->token == TOK_END_OF_INPUT) {
             return $this->error('Expected )');
@@ -372,7 +405,9 @@ function &parseFieldList()
         ++$i;
     }
 }
-    
+// }}}
+
+// {{{ parse($string)
 function parse($string)
 {
     $this->lexer = new Lexer();
@@ -409,7 +444,7 @@ function parse($string)
     }
     return $tree;
 }
+// }}}
 
 }
-
 ?>

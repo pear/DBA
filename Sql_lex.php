@@ -25,13 +25,13 @@ include 'phptype.php';
 
 // {{{ token definitions
 // variables
-define('TOK_IDENT',161);
-define('TOK_SYS_VAR',162);
+define('TOK_IDENT',1);
+define('TOK_SYS_VAR',2);
 // values
-define('TOK_REAL_VAL',162);
-define('TOK_TEXT_VAL',163);
-define('TOK_INT_VAL',164);
-define('TOK_END_OF_INPUT',257);
+define('TOK_REAL_VAL',3);
+define('TOK_TEXT_VAL',4);
+define('TOK_INT_VAL',5);
+define('TOK_END_OF_INPUT',6);
 // }}}
 
 /**
@@ -40,6 +40,8 @@ define('TOK_END_OF_INPUT',257);
  */
 class Lexer
 {
+    // array of valid tokens for the lexer to recognize
+    // format is 'token literal'=>TOKEN_VALUE
     var $symtab = array();
 
 // {{{ instance variables
@@ -167,7 +169,7 @@ function lex()
             /* {{{ State 2 : Complete keyword or ident */
             CASE(2):
                 $this->unget();
-                $this->tokText = substr($this->string, $this->tokStart, 
+                $this->tokText = substr($this->string, $this->tokStart,
                                         $this->tokLen);
                 $tokval = $this->symtab[strtolower($this->tokText)];
                 if ($tokval) {
@@ -177,7 +179,7 @@ function lex()
                     $this->tokStart = $this->tokPtr;
                     return (TOK_IDENT);
                 }
-                break; 
+                break;
             // }}}
 
             // {{{ State 5: Incomplete real or int number
@@ -245,7 +247,7 @@ function lex()
                 $state = 999;
                 break;
             // }}}
- 
+
             // {{{ State 10: Incomplete comparison operator
             CASE(10):
                 $c = $this->get();
