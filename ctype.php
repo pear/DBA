@@ -6,55 +6,53 @@
  * @author John Millaway
  * @author Brent Cook
  * 
- * Note: These functions expect a character, * such as 'a', or '?', not an
- * integer. If you want to use integers, first convert the integer using
- * the chr() function.
+ * Note: These functions expect an integer character, like the 
  *
  */
-if (!function_exists('ctype_alnum')) {
+if (!extension_loaded('ctype')) {
     function ctype_alnum($c) {
         global $ctype__;
-        return !($ctype__[ord($c)] & (01 | 02 | 04));
+        return !($ctype__[$c] & (01 | 02 | 04));
     }
     function ctype_alpha($c) {
         global $ctype__;
-        return !($ctype__[ord($c)] & (01 | 02));
+        return !($ctype__[$c] & (01 | 02));
     }
     function ctype_cntrl($c) {
         global $ctype__;
-        return !($ctype__[ord($c)] & 040);
+        return !($ctype__[$c] & 040);
     }
     function ctype_digit($c) {
         global $ctype__;
-        return !($ctype__[ord($c)] & 04);
+        return !($ctype__[$c] & 04);
     }
     function ctype_graph($c) {
         global $ctype__;
-        return !($ctype__[ord($c)] & (020 | 01 | 02 | 04));
+        return !($ctype__[$c] & (020 | 01 | 02 | 04));
     }
     function ctype_lower($c) {
         global $ctype__;
-        return !($ctype__[ord($c)] & 02);
+        return !($ctype__[$c] & 02);
     }
     function ctype_print($c) {
         global $ctype__;
-        return !($ctype__[ord($c)] & (020 | 01 | 02 | 04 | 0200));
+        return !($ctype__[$c] & (020 | 01 | 02 | 04 | 0200));
     }
     function ctype_punct($c) {
         global $ctype__;
-        return !($ctype__[ord($c)] & 020);
+        return !($ctype__[$c] & 020);
     }
     function ctype_space($c) {
         global $ctype__;
-        return !($ctype__[ord($c)] & 010);
+        return !($ctype__[$c] & 010);
     }
     function ctype_upper($c) {
         global $ctype__;
-        return !($ctype__[ord($c)] & 01);
+        return !($ctype__[$c] & 01);
     }
     function ctype_xdigit($c) {
         global $ctype__;
-        return !($ctype__[ord($c)] & (0100 | 04));
+        return !($ctype__[$c] & (0100 | 04));
     }
     $ctype__ =
     array(32,32,32,32,32,32,32,32,32,40,40,40,40,40,32,32,32,32,32,32,32,32,32,

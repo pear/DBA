@@ -123,17 +123,17 @@ function lex()
                     $state = 18;
                     break;
                 }
-                if (sizeof($c) && ctype_alpha($c)) {
+                if (ctype_alpha(ord($c))) {
                     $state = 1;
                     break;
                 }
-                if (sizeof($c) && ctype_digit($c)) {
+                if (ctype_digit(ord($c))) {
                     $state = 5;
                     break;
                 }
                 if ($c == '.') {
                     $t = $this->get();
-                    if (sizeof($c) && ctype_digit($t)) {
+                    if (ctype_digit(ord($t))) {
                         $this->unget();
                         $state = 7;
                         break;
@@ -164,7 +164,7 @@ function lex()
             // {{{ State 1 : Incomplete keyword or ident
             case 1:
                 $c = $this->get();
-                if (sizeof($c) && ctype_alnum($c) || ($c == '_')) {
+                if (ctype_alnum(ord($c)) || ($c == '_')) {
                     $state = 1;
                     break;
                 }
@@ -191,7 +191,7 @@ function lex()
             // {{{ State 5: Incomplete real or int number
             case 5:
                 $c = $this->get();
-                if (sizeof($c) && ctype_digit($c)) {
+                if (ctype_digit(ord($c))) {
                     $state = 5;
                     break;
                 }
@@ -224,7 +224,7 @@ function lex()
                 }
                 /* Analogy End   */
 
-                if (sizeof($c) && ctype_digit($c)) {
+                if (ctype_digit(ord($c))) {
                     $state = 7;
                     break;
                 }
@@ -244,7 +244,7 @@ function lex()
             // {{{ State 9: Incomplete signed number
             case 9:
                 $c = $this->get();
-                if (sizeof($c) && ctype_digit($c)) {
+                if (ctype_digit(ord($c))) {
                     $state = 5;
                     break;
                 }
@@ -346,7 +346,7 @@ function lex()
             // {{{ state 16: Exponent Value-first digit in Scientific Notation
             case 16:
                     $c = $this->get();
-                    if (sizeof($c) && ctype_digit($c)) {
+                    if (ctype_digit(ord($c))) {
                             $state = 17;
                             break;
                     }
@@ -357,7 +357,7 @@ function lex()
             // {{{ State 17: Exponent Value in Scientific Notation
             case 17:
                     $c = $this->get();
-                    if (sizeof($c) && ctype_digit($c)) {
+                    if (ctype_digit(ord($c))) {
                             $state = 17;
                             break;
                     }
@@ -369,7 +369,7 @@ function lex()
             // {{{ State 18 : Incomplete System Variable
             case 18:
                 $c = $this->get();
-                if (sizeof($c) && ctype_alnum($c) || $c == '_') {
+                if (ctype_alnum(ord($c)) || $c == '_') {
                     $state = 18;
                     break;
                 }
