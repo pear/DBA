@@ -76,7 +76,7 @@ function dbaToQuickform(&$form, $schema, $auxMeta)
 function quickformToDBA(&$form, $schema, $auxMeta)
 {
     foreach ($schema as $name=>$meta) {
-        if ($isset($auxMeta[$name]) && isset($_POST[$name])) {
+        if (isset($auxMeta[$name]) && isset($_POST[$name])) {
             if (($meta[DBA_TYPE] == DBA_INTEGER) &&
                 isset($auxMeta['min'])) {
                 $data[$name] = $_POST[$name] - $auxMeta['min'];
