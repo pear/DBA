@@ -27,12 +27,12 @@ require_once 'DBA.php';
  * driver for a DBA class. Depending on the driver, this can be faster or
  * slower than the DBA_Driver_File class.
  *
- * This class has been tested with DB3 and GDBM. Other drivers may have quirks
- * that this class does not address yet. CDB is known to be unsuitable as a
- * driver due to its lack of writes. DB2 currently segfaults with PHP-CVS.
+ * This class has been tested with DB3 and GDBM and probably works with DB2.
+ * Other drivers may have quirks that this class does not address yet. CDB
+ * is known to be unsuitable as a driver due to its lack of write ability.
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.9.3
+ * @version 0.9.4
  * @access  public
  * @package DBA
  */
@@ -163,6 +163,7 @@ class DBA_Driver_Builtin extends DBA
         if ($this->isOpen()) {
             $this->_readable = false;
             $this->_writable = false;
+            dba_sync($this->_dba); // db2 is known to require syncs
             dba_close($this->_dba);
         } else {
             return $this->raiseError('No database was open');
