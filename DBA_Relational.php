@@ -81,10 +81,11 @@ class DBA_Relational extends PEAR
 
         // create the _table table. this keeps track of the tables to be used
         // in DBA_Relational as well as which driver to use for each.
-        if (!$this->tableExists('_table')) {
-            $this->createTable('_table', 
+        if (!$this->tableExists('_tables')) {
+            $this->createTable('_tables', 
                 array('name'=>array(DBA_TYPE=>DBA_VARCHAR,DBA_PRIMARYKEY=>true),
-                      'driver'=>array(DBA_TYPE=>DBA_VARCHAR)));
+                      'driver'=>array(DBA_TYPE=>DBA_VARCHAR),
+                      'description'=>array(DBA_TYPE=>DBA_TEXT)));
         }
 
         // create the _sequence table. this keeps track of named sequences
@@ -195,7 +196,7 @@ class DBA_Relational extends PEAR
         if (is_null($driver)) {
             $driver = $this->_driver;
         }
-        $this->insert('_table', array($tableName, $driver));
+        $this->insert('_tables', array($tableName, $driver));
         return DBA_Table::create($this->_home.$tableName, $schema, $driver);
     }
     // }}}
