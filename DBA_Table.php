@@ -118,6 +118,11 @@ class DBA_Table extends PEAR
         $this->close();
     }
 
+    function raiseError($message)
+    {
+        return PEAR::raiseError('DBA_Table: '.$message);
+    }
+
     /**
      * Opens a table
      *
@@ -129,7 +134,7 @@ class DBA_Table extends PEAR
     function open($tableName, $mode = 'r')
     {
         if (($mode != 'w') && ($mode != 'r')) {
-            return $this->raiseError("DBA: table open mode '$mode' is invalid");
+            return $this->raiseError("table open mode '$mode' is invalid");
         }
 
         $result = $this->_dba->open($tableName, $mode);
@@ -148,7 +153,7 @@ class DBA_Table extends PEAR
             }
 
         } else {
-            return $this->raiseError('DBA: Table is missing field descriptor.'.
+            return $this->raiseError('Table is missing field descriptor.'.
                                      'at key, '. DBA_SCHEMA_KEY);
         }
         return $this->_schema;
@@ -213,7 +218,7 @@ class DBA_Table extends PEAR
         if ($this->isOpen()) {
             return $this->_schema;
         } else {
-            return $this->raiseError('DBA: table not open, no schema available');
+            return $this->raiseError('table not open, no schema available');
         }
     }  
 
@@ -498,7 +503,7 @@ class DBA_Table extends PEAR
 
                         // is this a valid type?
                         if (!in_array($value, $this->_types)) {
-                            return $this->raiseError("DBA: $value is not a valid type");
+                            return $this->raiseError("$value not a valid type");
                         }
                         $buffer .= $value;
                         break;
@@ -515,19 +520,9 @@ class DBA_Table extends PEAR
                             }
                         } 
                         break;
-                    case 'autodecrement':
-                        $buffer .= $value.';floor=';
-                        if (!isset($fieldMeta['floor'])) {
-                            if (isset($fieldMeta['init'])) {
-                                $buffer .= $fieldMeta['init'];
-                            } else {
-                                $buffer .= '0';
-                            }
-                        }
-                        break;
                     case 'primarykey':
                         if ($primarykey) {
-                            return $this->raiseError('DBA: cannot have two '.
+                            return $this->raiseError('cannot have two '.
                                                      'primary keys in schema');
                         } else {
                             $primarykey = true;
@@ -565,7 +560,7 @@ class DBA_Table extends PEAR
                         break;
                     case 'primarykey':
                         if ($this->_primaryKey) {
-                            return $this->raiseError('DBA: schema has two '.
+                            return $this->raiseError('schema has two '.
                                                      'primary keys');
                         }
                         $this->_primaryKey = true;
@@ -609,11 +604,6 @@ class DBA_Table extends PEAR
                 // get a value and increase the ceiling
                 $c_value = $this->_schema[$fieldName]['ceiling']++;
 
-            } elseif ($fieldMeta['autodecrement']==1) {
-
-                // get a value and decrease the floor
-                $c_value = $this->_schema[$fieldName]['floor']--;
-
             } elseif (isset($fieldMeta['default'])) {
 
                 // use the default value
@@ -621,7 +611,7 @@ class DBA_Table extends PEAR
 
             } elseif ($fieldMeta['notnull']) {
 
-                return $this->raiseError("DBA: $fieldName cannot be null");
+                return $this->raiseError("$fieldName cannot be null");
 
             } else {
 
@@ -680,7 +670,7 @@ class DBA_Table extends PEAR
                 if (!is_null($primaryKey)) {
                     $key = $primaryKey;
                 } else {
-                    return $this->raiseError('DBA: no primary key specified');
+                    return $this->raiseError('no primary key specified');
                 }
             } else {
                 $key = $this->_getUniqueKey();
@@ -694,7 +684,7 @@ class DBA_Table extends PEAR
             }
 
         } else {
-            return $this->raiseError('DBA: table not writable');
+            return $this->raiseError('table not writable');
         }
     }
 
@@ -742,7 +732,7 @@ class DBA_Table extends PEAR
             }
             return $this->_dba->replace($key, $packedRow);
         } else {
-            return $this->raiseError('DBA: table not open');
+            return $this->raiseError('table not open');
         }
     }
 
@@ -849,8 +839,7 @@ class DBA_Table extends PEAR
             if ($this->_dba->isOpen()) {
                 $rows = $this->getRows();
             } else {
-                return $this->raiseError('DBA: table not open and no rows'.
-                                         'specified');
+                return $this->raiseError('table not open / no rows specified');
             }
         }
 
@@ -891,7 +880,7 @@ class DBA_Table extends PEAR
                 $key = $this->_dba->nextkey($key);
             }
         } else {
-            return $this->raiseError('DBA: table not open');
+            return $this->raiseError('table not open');
         }
         return $rows;
     }
@@ -1010,7 +999,7 @@ class DBA_Table extends PEAR
 
             return $results;
         } else {
-            return $this->raiseError('DBA: table not open');
+            return $this->raiseError('table not open');
         }
     }
 
@@ -1096,12 +1085,12 @@ class DBA_Table extends PEAR
             } elseif ($order=='d') {
                 uasort($rows, array($this, '_sortCmpD'));
             } else {
-                return $this->raiseError("DBA: $order is not a valid sort order");
+                return $this->raiseError("$order is not a valid sort order");
             }
 
             return $rows;
         } else {
-            return $this->raiseError('DBA: no rows to sort specified');
+            return $this->raiseError('no rows to sort specified');
         }
     }
 
@@ -1135,7 +1124,7 @@ class DBA_Table extends PEAR
             }
             return $projectedRows;
         } else {
-            return $this->raiseError('DBA: no rows to sort specified');
+            return $this->raiseError('no rows to sort specified');
         }
     }
 
@@ -1177,7 +1166,7 @@ class DBA_Table extends PEAR
             }
             return $results;
         } else {
-            return $this->raiseError('DBA: no rows to sort specified');
+            return $this->raiseError('no rows to sort specified');
         }
     }
 

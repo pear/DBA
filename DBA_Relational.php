@@ -87,6 +87,10 @@ class DBA_Relational extends PEAR
         $this->_manager =& new DBA_Table($this->_driver);
     }
 
+    function raiseError($message) {
+        return PEAR::raiseError('DBA_Relational: '.$message);
+    }
+
     /**
      * Closes all open tables
      *
@@ -126,14 +130,14 @@ class DBA_Relational extends PEAR
         if (is_string($tableName)) {
             if (!isset($this->_tables[$tableName])) {
                 if (!$this->_manager->tableExists($this->_home.$tableName)) {
-                    return $this->raiseError('DBA: table "'.$tableName.
-                                              'does not exist');
+                    return $this->raiseError('table "'.$tableName.
+                                              '" does not exist');
                 } else {
                     $this->_tables[$tableName] =& new DBA_Table($this->_driver);
                 }
             }
         } else {
-            return $this->raiseError('DBA: invalid table name, '.$tableName);
+            return $this->raiseError('invalid table name, '.$tableName);
         }
 
         if (!$this->_tables[$tableName]->isOpen()) {
@@ -189,7 +193,7 @@ class DBA_Relational extends PEAR
             $this->_tables[$tableName] = new DBA_Table();
         } else {
             // the table object exists, so the table must exist
-            return $this->raiseError("DBA: cannot create table: $tableName,".
+            return $this->raiseError("cannot create table: $tableName,".
                                      " it already exists");
         }
 
@@ -470,11 +474,11 @@ class DBA_Relational extends PEAR
     {
         // validate tables
         if (!$this->_validateTable($tableA, $rowsA, $fieldsA, 'A')) {
-            return $this->raiseError("DBA: $tableA does not match query");
+            return $this->raiseError("$tableA does not match query");
         }
 
         if (!$this->_validateTable($tableB, $rowsB, $fieldsB, 'B')) {
-            return $this->raiseError("DBA: $tableA does not match query");
+            return $this->raiseError("$tableA does not match query");
         }
 
         // check for empty tables
