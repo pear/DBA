@@ -325,7 +325,7 @@ class DBA_Simple extends PEAR
      * @param   string $key key to examine
      * @return  mixed  the requested value on success, false on failure
      */
-    function fetch($key)
+    function &fetch($key)
     {
         if ($this->isReadable()) {
             if (!isset($this->_usedBlocks[$key])) {
@@ -333,7 +333,7 @@ class DBA_Simple extends PEAR
                               ', it does not exist');
             } else {
                 fseek($this->_datFP, $this->_usedBlocks[$key][DBA_LOC]);
-                return fread($this->_datFP, $this->_usedBlocks[$key][DBA_VSIZE]);
+                return fread($this->_datFP,$this->_usedBlocks[$key][DBA_VSIZE]);
             }
         } else {
             return $this->raiseError('DBA: cannot fetch '.$key.' on '.

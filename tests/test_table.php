@@ -38,7 +38,8 @@ if (PEAR::isError($result)) {
 }
 
 // open and close table multiple times while inserting
-$result = $table->open('hats', 'w');
+foreach (array('w','r') as $mode) {
+$result = $table->open('hats', $mode);
 if (PEAR::isError($result)) {
     echo $result->getMessage()."\n";
     exit;
@@ -50,7 +51,7 @@ for ($i=0; $i < 2; ++$i) {
     foreach ($hats as $hat) {
         $result = $table->insert($hat);
         if (PEAR::isError($result)) {
-            echo $result->getMessage()."\n";
+            echo 'Could not insert: '.$result->getMessage()."\n";
         }
     }
 }
@@ -62,7 +63,9 @@ $queries = array(
                 '$table->sort("quantity, hat_id", "a", $table->select("*"))',
                 '$table->sort(array("quantity", "hat_id"), "a", $table->getRows())',
                 '$table->sort("lastshipment", "d", $table->select("*"))',
-                '$table->unique($table->project("brand,quantity,  type",$table->sort("quantity", "d", $table->select("type != \'top hat\'"))))'
+                '$table->unique($table->project("brand,quantity,  type",$table->sort("quantity", "d", $table->select("type != \'top hat\'"))))',
+                '$table->remove("type == bowler")',
+                '$table->project("brand, type", $table->select("*"))',
                 );
 
 foreach ($queries as $query) {
@@ -79,5 +82,6 @@ foreach ($queries as $query) {
 }
 
 $table->close();
+}
 
 ?>

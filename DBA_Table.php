@@ -694,7 +694,34 @@ class DBA_Table extends PEAR
             }
 
         } else {
-            return $this->raiseError('DBA: table not open');
+            return $this->raiseError('DBA: table not writable');
+        }
+    }
+
+    /**
+     * Replaces rows that match $rawQuery with $
+     *
+     * @access  public
+     * @param   string $rawQuery query expression for performing the remove
+     * @param   array  $rows rows to select on
+     * @return  object PEAR_Error on failure
+     */
+    function replace($rawQuery, $data, $rows=null)
+    {
+        $rows =& $this->select($rawQuery, $rows);
+        if (PEAR::isError($rows)) {
+            return $rows;
+        }
+
+        $packedRow =& $this->_packRow($data);
+        if (PEAR::isError($packedRow)) {
+            return $packedRow;
+        }
+        foreach (array_keys($rows) as $rowKey) {
+            $result = $this->_dba->replace($rowKey, $packedRow);
+            if (PEAR::isError($result)) {
+                return $result;
+            }
         }
     }
 
@@ -706,23 +733,49 @@ class DBA_Table extends PEAR
      * @param   array  $data assoc array or ordered list of data to insert
      * @return  mixed  PEAR_Error on failure, the row index on success
      */
-    function replace($key, $data)
+    function replaceKey($key, $data)
     {
         if ($this->isOpen()) {
-            return $this->_dba->replace($key, $this->_packRow($data));
+            $packedRow =& $this->_packRow($data);
+            if (PEAR::isError($packedRow)) {
+                return $packedRow;
+            }
+            return $this->_dba->replace($key, $packedRow);
         } else {
             return $this->raiseError('DBA: table not open');
         }
     }
 
     /**
-     * Removes an existing row in a table
+     * Removes existing rows from table that match $rawQuery
+     *
+     * @access  public
+     * @param   string $rawQuery query expression for performing the remove
+     * @param   array  $rows rows to select on
+     * @return  object PEAR_Error on failure
+     */
+    function remove($rawQuery, $rows=null)
+    {
+        $rows =& $this->select($rawQuery, $rows);
+        if (PEAR::isError($rows)) {
+            return $rows;
+        }
+        foreach (array_keys($rows) as $rowKey) {
+            $result = $this->_dba->remove($rowKey);
+            if (PEAR::isError($result)) {
+                return $result;
+            }
+        }
+    }
+
+    /**
+     * Removes an existing row from a table, referenced by the row key
      *
      * @access  public
      * @param   string $key row id to remove
      * @return  object PEAR_Error on failure
      */
-    function remove($key)
+    function removeKey($key)
     {
         return $this->_dba->remove($key);
     }
@@ -931,7 +984,7 @@ class DBA_Table extends PEAR
      * @param   array  $rows rows to select on
      * @return  mixed  PEAR_Error on failure, the row array on success
      */
-    function select($rawQuery, $rows=null)
+    function &select($rawQuery, $rows=null)
     {
         if ($this->_dba->isOpen()) {
 
