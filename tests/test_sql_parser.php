@@ -26,17 +26,18 @@
 // test functionality of the sql parser
 
 require_once 'PEAR.php';
-require_once '../DBA_Sql.php';
+require_once '../Sql_parse.php';
 
 $queries = array(
 "CREATE TABLE albums (
   name varchar(60),
   directory varchar(60),
   rating enum (1,2,3,4,5,6,7,8,9,10) NOT NULL,
-  category set(sexy,'\'family time\'',outdoors,generic,'very weird') NULL,
+  category set('sexy','\'family time\'',\"outdoors\",'generic','very weird') NULL,
   description text NULL,
-  id int auto_increment default 200 PRIMARY KEY
-)",
+  id int default 200 PRIMARY KEY
+);",
+/*
 "CREATE TABLE photos (
   filename varchar(60) not NULL,
   name varchar(60) default \"no name\",
@@ -44,7 +45,13 @@ $queries = array(
   price float (4,2),
   description text default 'hello',
   id int default 0 primary key autoincrement not null,
-)",
+);",
+*/
+"create table brent (
+    filename varchar(10),
+    description varchar(20),
+);",
+/*
 "create table nodefinitions",
 "create dogfood",
 "create table dunce (name varchar",
@@ -61,7 +68,7 @@ $queries = array(
              CONSTRAINT production UNIQUE(date_prod)
 )",
 "CREATE TABLE distributors ( 
-             did      DECIMAL(3) PRIMARY KEY Auto_Increment, 
+             did      DECIMAL(3) PRIMARY KEY DEFAULT NEXTVAL('serial'), 
              name     VARCHAR(40) NOT NULL CHECK (name <> '') 
              CONSTRAINT con1 CHECK (did > 100 AND name > '') 
 )",
@@ -69,17 +76,33 @@ $queries = array(
             did      DECIMAL(3) PRIMARY KEY, 
             name     VARCHAR(40) 
 )",
+*/
 );
 
+$lexer = new Lexer();
+
+$parser = new Parser();
+
 foreach ($queries as $query) {
-    list($name, $schema) = Sql::parseCreate($query);
     echo "SQL:\n$query\n\n";
+
+    $results = $parser->parse($query);
+
     if (PEAR::isError($results)) {
         echo $results->getMessage()."\n";
     } else {
-        echo "Table Name: $name\n\nSchema:\n";
-        print_r($schema);
+//        echo "Table Name: $name\n\nSchema:\n";
+        echo "Results:\n";
+        print_r($results);
     }
+/*
+    $lexer = new Lexer($query);
+    $token = $lexer->lex();
+    while ($token != SQL_END_OF_INPUT) {
+        echo "'$token'\n";
+        $token = $lexer->lex();
+    }
+*/
     echo "\n***********************************\n\n";
 }
 
