@@ -3,7 +3,7 @@
 <!-- do not use the "Type" attribute here, that one is only for
      generated package.xml files -->
 <package>
-    <name>DB_DBA</name>
+    <name>DBA</name>
     <summary>Berkely-style Database Class</summary>
     <description>
         Implements a DBM-style database using either PHP's DBA functions or a simple DBM class written in PHP. Also provides a relational database system with support for selects, joins, sorts, projects, multiple tables, type checking, autoincrements and more.
@@ -20,17 +20,22 @@
 
     <release>
         <license>LGPL</license>
-        <version>0.14</version>
-        <date>2002-07-06</date>
+        <version>0.15</version>
+        <date>2002-07-08</date>
         <state>beta</state>
         <notes>
-            Initial release. Like many things, the documentation is not
+            Initial release. Like many things, the documentation is not totally
             completed and expect some changes/additions to the API as I try
             building some sample applications with this, discovering what works
             and what doesn't. See the test files for hints on usage; the most
-            useful bit currently is DBA_Relational. It uses DBA_Table which
-            uses DBA. They build on each other, but can be used individually.
-            See empSchema and hatSchema for examples of how to create a schema.
+            useful bit currently is DBA_Relational, which provides a simple
+            data management system. It uses DBA_Table which uses DBA. They build
+            on each other, but can be used individually.
+
+            See empSchema and hatSchema for examples of how to create table
+            schemas. See test_relational.php and test_table.php for examples of
+            how to formulate queries. See benchmark_drivers.php for a method of
+            determining the performance of various DBA drivers for your system.
         </notes>
         <filelist>
             <dir name="/" baseinstalldir="DB/DBA">
@@ -50,6 +55,7 @@
                 </dir>
                 <dir name="docs">
                     <file role="doc">README.txt</file>
+                    <file role="doc">Examples.txt</file>
                 </dir>
             </dir>
         </filelist>

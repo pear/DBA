@@ -32,7 +32,7 @@ require_once 'DB/DBA/DBA_Table.php';
  * @author  Brent Cook <busterb@mail.utexas.edu>
  * @package DBA
  * @access  public
- * @version 0.14
+ * @version 0.15
  */
 class DBA_Relational extends PEAR
 {

@@ -69,7 +69,7 @@ define('DBA_KEY',3);
  * The sync function calls fflush on the data and index files.
  *
  * @author  Brent Cook
- * @version 0.14
+ * @version 0.15
  * @access  public
  * @package DBA
  */

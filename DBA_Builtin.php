@@ -32,7 +32,7 @@ require_once 'PEAR.php';
  * driver due to its lack of writes. DB2 apparently segfaults PHP?
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.14
+ * @version 0.15
  * @access  public
  * @package DBA
  */

@@ -47,7 +47,7 @@ define('DBA_FIELD_SEPARATOR', '|');
  * @author  Brent Cook <busterb@mail.utexas.edu>
  * @package DBA
  * @access  public
- * @version 0.14
+ * @version 0.15
  */
 class DBA_Table extends PEAR
 {
@@ -865,7 +865,7 @@ class DBA_Table extends PEAR
      */
     function _cookQuery($query)
     {
-        foreach (array('(',')','==','!=','>','<','<=','>=') as $symbol) {
+        foreach (array(',','(',')','==','!=','>','<','<=','>=') as $symbol) {
             $query = str_replace($symbol, " $symbol ", $query);
         }
 

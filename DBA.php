@@ -28,7 +28,7 @@
  * dbm engine for installations where dba support is not included in PHP.
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.14
+ * @version 0.15
  * @access  public
  * @package DBA
  */
