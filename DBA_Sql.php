@@ -41,6 +41,7 @@ function getToken() {
 
 function getString() {
     $string = strtok(" \n\t");
+    echo $string;
     $quote = substr($string, 0, 1);
     if (($quote != '"') && ($quote != "'")) {
         // this was not quoted, just return the token
@@ -141,7 +142,7 @@ function parseCreate($rawquery) {
                     switch ($token) {
                         case 'default':
                             $tables[$tableName][$fieldName]['default'] =
-                                DBA_Sql::getToken();
+                                DBA_Sql::getString();
                             break;
                         case 'auto_increment':
                             $tables[$tableName][$fieldName]['autoincrement']=
