@@ -40,7 +40,7 @@ require_once 'DB/DBA/Sql_lex.php';
 // types:        'float', 'fixed', 'integer', 'uint', 'bool', 'char', 'varchar',
 //               'text', 'date', 'money', 'time', 'ipv4', 'set', 'enum',
 //               'timestamp'
-// functions:    'avg_func', 'count_func', 'max_func', 'min_func', 'sun_func',
+// functions:    'avg_func', 'count_func', 'max_func', 'min_func', 'sum_func',
 //               'nextval_func', 'currval_func', 'setval_func'
 
 /**
@@ -57,64 +57,15 @@ class Sql_Parser
     var $token;
 
 // {{{ symbol definitions
+    var $functab = array();
+    var $typetab = array();
     var $symtab = array(
-        '<='=>       'le',
-        '>='=>       'ge',
-        '<>'=>       'ne',
-        '<'=>        'lt',
-        '='=>        'eq',
-        '>'=>        'gt',
-        'or'=>       'or',
-        'not'=>      'not',
-        'and'=>      'and',
-        'insert'=>   'insert',
-        'select'=>   'select',
-        'delete'=>   'delete',
-        'create'=>   'create',
-        'update'=>   'update',
-        'drop'=>     'drop',
-        'as'=>       'as',
-        'into'=>     'into',
-        'on'=>       'on',
-        'between'=>  'between',
-        'where'=>    'where',
-        'from'=>     'from',
-        'by'=>       'by',
-        'distinct'=> 'distinct',
-        'primary'=>  'primary',
-        'like'=>     'like',
-        'null'=>     'null',
-        'asc'=>      'asc',
-        'desc'=>     'desc',
-        'unique'=>   'unique',
-        'table'=>    'table',
-        'index'=>    'index',
-        'clike'=>    'clike',
-        'slike'=>    'slike',
-        'rlike'=>    'rlike',
-        'all'=>      'all',
-        'key'=>      'key',
-        'sequence'=> 'sequence',
-        'default'=>  'default',
-        'order'=>    'order',
-        'check'=>    'check',
-        'step'=>     'step',
-        'auto_increment'=> 'auto_increment',
-        'value'=>    'value',
-        'values'=>   'values',
-        'constraint'=> 'constraint',
-        'varying'=>  'varying',
-        'avg'=>      'avg_func',
-        'count'=>    'count_func',
-        'max'=>      'max_func',
-        'min'=>      'min_func',
-        'sum'=>      'sun_func',
-        'nextval'=>  'nextval_func',
-        'currval'=>  'currval_func',
-        'setval'=>   'setval_func',
-        'limit'=>    'limit',
-        'time'=>     'time',
-        'timestamp'=>'timestamp',
+        'le'=>       '<=',
+        'ge'=>       '>=',
+        'ne'=>       '<>',
+        'lt'=>       '<',
+        'eq'=>       '=',
+        'gt'=>       '>',
         'tinyint'=>  'integer',
         'integer'=>  'integer',
         'bigint'=>   'integer',
@@ -128,20 +79,22 @@ class Sql_Parser
         'character'=>'char',
         'char'=>     'char',
         'varchar'=>  'varchar',
-        'money'=>    'money',
-        'date'=>     'date',
-        'text'=>     'text',
-        'ipv4'=>     'ipv4',
         'ipaddr'=>   'ipv4',
-        'set'=>      'set',
-        'enum'=>     'enum',
-        'bool'=>     'bool',
         'boolean'=>  'bool',
     );
 // }}}
 
 // {{{ function Sql_Parser($string = null)
     function Sql_Parser($string = null) {
+        include 'DB/DBA/Sql_dialect_ansi.php';
+        $tokens = explode(' ', implode(' ', $dialect));
+        $symtab = array_flip($tokens);
+        foreach ($symtab as $token=>$dummy) {
+            $symtab[$token] = $token;
+        }
+        $this->symtab = array_merge($symtab, $this->symtab);
+        $this->typetab = array_flip(explode(' ',$dialect['types']));
+        $this->functab = array_flip(explode(' ',$dialect['functions']));
         if (is_string($string)) {
             $this->lexer = new Lexer($string);
             $this->lexer->symtab =& $this->symtab;
@@ -193,24 +146,7 @@ class Sql_Parser
 
     // {{{ isType()
     function isType() {
-        $types = array(
-            'time'=>true,
-            'timestamp'=>true,
-            'integer'=>true,
-            'uint'=>true,
-            'float'=>true,
-            'fixed'=>true,
-            'char'=>true,
-            'varchar'=>true,
-            'money'=>true,
-            'date'=>true,
-            'text'=>true,
-            'ipv4'=>true,
-            'set'=>true,
-            'enum'=>true,
-            'bool'=>true,
-        );
-        return isset($types[$this->token]);
+        return isset($this->typetab[$this->token]);
     }
     // }}}
 
@@ -222,8 +158,11 @@ class Sql_Parser
     }
     // }}}
 
+    // {{{ isFunc()
     function isFunc() {
+        return isset($this->functab[$this->token]);
     }
+    // }}}
 
     // {{{ getTok()
     function getTok() {
