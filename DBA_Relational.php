@@ -79,9 +79,20 @@ class DBA_Relational extends PEAR
 
         $this->_driver = $driver;
 
-        if (!$this->tableExists('_tables')) {
-            $this->createTable('_tables', 
-                array('name'=>array(DBA_TYPE=>DBA_VARCHAR, DBA_SIZE=>30)));
+        // create the _table table. this keeps track of the tables to be used
+        // in DBA_Relational as well as which driver to use for each.
+        if (!$this->tableExists('_table')) {
+            $this->createTable('_table', 
+                array('name'=>array(DBA_TYPE=>DBA_VARCHAR,DBA_PRIMARYKEY=>true),
+                      'driver'=>array(DBA_TYPE=>DBA_VARCHAR)));
+        }
+
+        // create the _sequence table. this keeps track of named sequences
+        if (!$this->tableExists('_sequence')) {
+            $this->createTable('_sequence', 
+                array('name'=>array(DBA_TYPE=>DBA_VARCHAR,DBA_PRIMARYKEY=>true),
+                      'value'=>array(DBA_TYPE=>DBA_INTEGER),
+                      'increment'=>array(DBA_TYPE=>DBA_INTEGER)));
         }
     }
     // }}}
@@ -176,12 +187,16 @@ class DBA_Relational extends PEAR
      * @access  public
      * @param   string $tableName   name of the table to create
      * @param   array  $schema field schema for the table
+     * @param   string $driver driver to use for this table
      * @return  object PEAR_Error on failure
      */
-    function createTable($tableName, $schema)
+    function createTable($tableName, $schema, $driver=null)
     {
-        return DBA_Table::create($this->_home.$tableName, $schema,
-                                 $this->_driver);
+        if (is_null($driver)) {
+            $driver = $this->_driver;
+        }
+        $this->insert('_table', array($tableName, $driver));
+        return DBA_Table::create($this->_home.$tableName, $schema, $driver);
     }
     // }}}
 
