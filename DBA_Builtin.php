@@ -136,7 +136,6 @@ class DBA_Builtin extends PEAR{
             return $this->raiseError("DBA: Could not open database: $dbName"
                           ." with mode $mode");
         }
-        return true; // everything worked out
     }
 
     /**
@@ -152,7 +151,6 @@ class DBA_Builtin extends PEAR{
             $this->_readable = false;
             $this->_writable = false;
             dba_close($this->_dba);
-            return true;
         } else {
             return $this->raiseError('DBA: No database was open');
         }
@@ -180,8 +178,6 @@ class DBA_Builtin extends PEAR{
                 // Reopening as read-write
                 $this->close();
                 return $this->open($this->_dbName, 'w');
-            } else {
-                return true;
             }
         } else {
             return $this->raiseError('DBA: No database was open');
@@ -323,8 +319,6 @@ class DBA_Builtin extends PEAR{
                 (!dba_insert($key, $value, $this->_dba))) {
                 return $this->raiseError('DBA: cannot insert on key: '.
                                $key. ', it already exists');
-            } else {
-                return true;
             }
         } else {
             return $this->raiseError('DBA: cannot replace on '.
@@ -373,9 +367,7 @@ class DBA_Builtin extends PEAR{
     function create($dbName, $driver='gdbm')
     {
         $db = dba_open($dbName, 'n', $driver);
-        if (($db !== false) && dba_close($db)) {
-            return true;
-        } else {
+        if (!(($db !== false) && dba_close($db))) {
             return $this->raiseError('DBA: Could not create database: '.$dbName);
         }
     }

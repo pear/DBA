@@ -191,14 +191,10 @@ class DBA_Simple extends PEAR {
         }
 
         // we are writing to a new file, so we do not need to read anything
-        if ($file_mode == 'w+') {
-            return true;
+        if ($file_mode != 'w+') {
+            // parse the index file
+            $this->_readIdx();
         }
-
-        // parse the index file
-        $this->_readIdx();
-        
-        return true;
     }
 
     /**
@@ -219,7 +215,6 @@ class DBA_Simple extends PEAR {
             $this->_writable = false;
             fclose($this->_idxFP);
             fclose($this->_datFP);
-            return true;
         } else {
             return $this->raiseError('DBA: No database was open');
         }
@@ -249,8 +244,6 @@ class DBA_Simple extends PEAR {
                     // Reopening as read-write
                     $this->close();
                     return $this->open($this->_dbName, 'w');
-                } else {
-                    return true;
                 }
             }
         } else {
@@ -314,7 +307,6 @@ class DBA_Simple extends PEAR {
             if (isset($this->_usedBlocks[$key]))
             {
                 $this->_freeUsedBlock($key);
-                return true;
             } else {
                 return $this->raiseError('DBA: cannot delete key: '.
                                $key. ', it does not exist');
@@ -465,7 +457,6 @@ class DBA_Simple extends PEAR {
                     $this->_writeNewBlock($key, $value, $vsize);
                 }
             }
-            return true;
         } else {
             return $this->raiseError('DBA: cannot replace on '.
                           $this->_dbName. ', DB not writable');
@@ -565,9 +556,7 @@ class DBA_Simple extends PEAR {
      */
     function create($dbName)
     {
-        if (@touch($dbName.'.dat') && @touch($dbName.'.idx')) {
-            return true;
-        } else {
+        if (!(@touch($dbName.'.dat') && @touch($dbName.'.idx'))) {
             return $this->raiseError('DBA: Could not create database: '.$dbName);
         }
     }
