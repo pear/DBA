@@ -16,12 +16,6 @@ DBA is a wrapper for the php DBA functions. It includes a file-based emulator an
             <email>busterb@mail.utexas.edu</email>
             <role>lead</role>
         </maintainer>
-        <maintainer>
-            <user>undefined</user>
-            <name>Olaf Conradi</name>
-            <email>conradi@cs.utwente.nl</email>
-            <role>contributor</role>
-        </maintainer>
     </maintainers>
 
     <release>
