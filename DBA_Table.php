@@ -440,12 +440,7 @@ class DBA_Table extends PEAR
                                $value, $this->_schema[$field][DBA_SIZE]));
                 }
                 break;
-            case DBA_INTEGER:
-                if (is_numeric($value)) {
-                    $c_value = strval($value);
-                }
-                break;
-            case DBA_FLOAT: case DBA_NUMERIC:
+            case DBA_INTEGER: case DBA_FLOAT: case DBA_NUMERIC:
                 if (is_numeric($value)) {
                     $c_value = strval($value);
                 }
