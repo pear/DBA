@@ -395,7 +395,7 @@ class DBA_Relational extends PEAR
     function _parsePHPQuery($rawQuery, $fieldsA, $fieldsB, $tableA, $tableB)
     {
         // add spaces around symbols for explode to work properly
-        $cookedQuery = DBA_Table::_cookSpaces($rawQuery);
+        $cookedQuery = DBA_Table::_cookQuery($rawQuery);
 
         // begin building the php query for a row
         $phpQuery = '';

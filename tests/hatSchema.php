@@ -20,16 +20,17 @@
 	                                                        'medium',
 	                                                        'large',
 	                                                        'xlarge'),
-	                                     'notnull' => 'true'),
+	                                     'notnull' => true),
 
 	                   'lastshipment' => array ('type' => 'TIMESTAMP',
 	                                            'format' => 'D M j, Y'),
 	                   'hat_id' => array ('type' => 'integer',
 	                                      'autoincrement' => True,
-	                                      'primarykey' => True)
+	                                      'primarykey' => True,
+                                          'init' => 100)
 	                  );
 
-	$new_hats = array(
+	$hats = array(
         array ('type' => 'bowler',
 	           'quantity' => 20,
 	           'brand' => "Jill's Hats",

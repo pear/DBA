@@ -43,7 +43,7 @@ if (PEAR::isError($result)) {
 echo "Created table 'hats'\n";
 
 for ($i=0; $i < 2; ++$i) {
-    foreach ($new_hats as $hat) {
+    foreach ($hats as $hat) {
         $result = $table->insert($hat);
         if (PEAR::isError($result)) {
             echo $result->getMessage()."\n";
@@ -58,7 +58,7 @@ $queries = array(
                 '$table->sort("quantity, hat_id", "a", $table->select("*"))',
                 '$table->sort(array("quantity", "hat_id"), "a", $table->getRows())',
                 '$table->sort("lastshipment", "d", $table->select("*"))',
-                '$table->unique($table->project("brand,quantity",$table->sort("quantity", "d", $table->select("type != \'top hat\'"))))'
+                '$table->unique($table->project("brand,quantity,  type",$table->sort("quantity", "d", $table->select("type != \'top hat\'"))))'
                 );
 
 foreach ($queries as $query) {
