@@ -96,9 +96,9 @@ class Sql_Parser
         $message = 'Parse error: '.$message.' on line '.
             ($this->lexer->lineNo+1)."\n";
         $message .= substr($this->lexer->string, $this->lexer->lineBegin, $end)."\n";
-        $message .= str_repeat(' ', ($this->lexer->tokPtr - 
-                               $this->lexer->lineBegin -
-                               strlen($this->lexer->tokText)))."^";
+        $length = is_null($this->lexer->tokText)? 0 : strlen($this->lexer->tokText);
+        $message .= str_repeat(' ', abs($this->lexer->tokPtr - 
+                               $this->lexer->lineBegin - $length))."^";
         $message .= ' found: '.$this->lexer->tokText;
 
         return PEAR::raiseError($message);
@@ -638,7 +638,25 @@ class Sql_Parser
 
     // {{{ parseDelete()
     function parseDelete() {
+        $this->getTok();
+        if ($this->token != 'from') {
+            return $this->raiseError('Expected "from"');
+        }
         $tree = array('command' => 'delete');
+        $this->getTok();
+        if ($this->token != 'ident') {
+            return $this->raiseError('Expected a table name');
+        }
+        $tree['table_name'] = $this->lexer->tokText;
+        $this->getTok();
+        if ($this->token != 'where') {
+            return $this->raiseError('Expected "where"');
+        }
+        $clause = $this->parseSearchClause();
+        if (PEAR::isError($clause)) {
+            return $clause;
+        }
+        $tree['where_clause'] = $clause;
         return $tree;
     }
     // }}}
@@ -728,7 +746,6 @@ class Sql_Parser
                     break;
                 case 'limit':
                     $this->getTok();
-                    echo "Got here!\n";
                     if ($this->token != 'int_val') {
                         return $this->raiseError('Expected an integer value');
                     }

@@ -55,6 +55,11 @@ class SqlParserTest extends PHPUnit_TestCase {
         $this->runTests($tests);
     }
 
+    function testDelete() {
+        include 'delete.php';
+        $this->runTests($tests);
+    }
+
     function testCreate() {
         include 'create.php';
         $this->runTests($tests);
