@@ -23,7 +23,7 @@
 
 require_once "PEAR.php";
 
-class DBA_Sql
+class Sql
 {
 
 // adds spaces around special characters
@@ -38,6 +38,11 @@ function cookQuery($query)
 function getToken()
 {
     return strtok(" \n\t");
+}
+
+function getTokenL()
+{
+    return strtolower(strtok(" \n\t"));
 }
 
 function getString() {
@@ -67,11 +72,11 @@ function getString() {
 
 function isIntType ($type) {
     return in_array($type, array('int','integer','bigint','mediumint',
-                    'littleint','tinyint'));
+                    'littleint','tinyint','int2','int8','oid'));
 }
 
 function isFloatType ($type) {
-    return in_array($type, array('float','real','double'));
+    return in_array($type, array('float','real','double','float4','float8'));
 }
  
 function isFixedType ($type) {
@@ -79,17 +84,21 @@ function isFixedType ($type) {
 }
  
 function isNumberType ($type) {
-    return (DBA_Sql::isFixedType($type) || DBA_Sql::isFloatType($type)
-            || DBA_Sql::isIntType($type));
+    return (Sql::isFixedType($type) || Sql::isFloatType($type)
+            || Sql::isIntType($type));
 }
 
 function isSetType($type) {
     return in_array($type, array('enum','set'));
 }
 
+function isLogicalType($type) {
+    return in_array($type, array('bool','boolean'));
+}
+
 function isStringType($type) {
     return in_array($type, array('text','varchar','tinytext','mediumtext',
-                    'longtext','char'));
+                    'longtext','char','character'));
 }
 
 function isBinaryType($type) {
@@ -97,91 +106,97 @@ function isBinaryType($type) {
 }
 
 function isTimeType($type) {
-    return in_array($type, array('date','time','timestamp','datetime'));
+    return in_array($type, array('date','time','timestamp','datetime',
+                    'interval'));
 }
 
 function isType($type)
 {
-    return (DBA_Sql::isIntType($type) || DBA_Sql::isFixedType($type)
-            || DBA_Sql::isSetType($type) || DBA_Sql::isStringType($type)
-            || DBA_Sql::isBinaryType($type) || DBA_Sql::isTimeType($type)
-            || DBA_Sql::isFloatType($type));
+    return (Sql::isIntType($type) || Sql::isFixedType($type)
+            || Sql::isSetType($type) || Sql::isStringType($type)
+            || Sql::isBinaryType($type) || Sql::isTimeType($type)
+            || Sql::isFloatType($type) || Sql::isLogicalType($type));
 }
 
 function parseCreate($rawquery)
 {
-    $query = DBA_Sql::cookQuery($rawquery);
+    $query = Sql::cookQuery($rawquery);
     $command = strtolower(strtok($query, " \n\t"));
+
     if ($command != 'create') {
         return PEAR::raiseError('DBA: not a "create" query');
     }
     
-    $thing = strtolower(DBA_Sql::getToken());
+    $thing = Sql::getTokenL();
     if ($thing == 'table') {
-        $tableName = DBA_Sql::getToken();
-        $token = DBA_Sql::getToken();
+        $tableName = Sql::getToken();
+        $token = Sql::getToken();
         if ($token != '(') {
             return PEAR::raiseError(
                 "No field definitions found in table $tableName");
             exit;
         } else {
             while ($token && ($token != ')')) {
-                $fieldName = DBA_Sql::getToken();
-                $fieldType = DBA_Sql::getToken();
-                $tables[$tableName][$fieldName]['type'] = $fieldType;
-                $token = strtolower(DBA_Sql::getToken());
+                $fieldName = Sql::getToken();
+
+                if ($fieldName == ')') {
+                    // we must have had a trailing comma in the field list
+                    $token = $fieldName;
+                    break;
+                }
+
+                $fieldType = Sql::getTokenL();
+                $table[$fieldName]['type'] = $fieldType;
+                $token = Sql::getTokenL();
+
                 // parse field-specific parameters
-                if (DBA_Sql::isIntType($fieldType)) {
+                if (Sql::isIntType($fieldType)) {
                     if ($token == '(') {
-                        $tables[$tableName][$fieldName]['size'] =
-                                                DBA_Sql::getToken();
-                        if (DBA_Sql::getToken() != ')') {
+                        $table[$fieldName]['size'] = Sql::getToken();
+                        if (Sql::getToken() != ')') {
                             return PEAR::raiseError(
                                 "expected ) on $fieldName, $fieldType");
                         }
-                        $token = DBA_Sql::getToken();
+                        $token = Sql::getTokenL();
                     }
-                } elseif (DBA_Sql::isNumberType($fieldType)) {
+                } elseif (Sql::isNumberType($fieldType)) {
                     if ($token != '(') {
-                        if (DBA_Sql::isFixedType($fieldType)) {
+                        if (Sql::isFixedType($fieldType)) {
                             return PEAR::raiseError(
                                 "expected ( on $fieldName, $fieldType");
                         }
                     } else {
-                        $tables[$tableName][$fieldName]['size'] =
-                                                DBA_Sql::getToken();
-                        $token = DBA_Sql::getToken();
+                        $table[$fieldName]['size'] = Sql::getToken();
+                        $token = Sql::getToken();
                         if ($token == ',') {
-                            $tables[$tableName][$fieldName]
-                                ['decimals'] = DBA_Sql::getToken();
-                            $token = DBA_Sql::getToken();
+                            $table[$fieldName]['decimals'] = Sql::getToken();
+                            $token = Sql::getToken();
                         }
                         if ($token != ')') {
                             return PEAR::raiseError(
                                 "expected ) on $fieldName, $fieldType");
                         }
-                        $token = DBA_Sql::getToken();
+                        $token = Sql::getTokenL();
                     }
-                } elseif (DBA_Sql::isStringType($fieldType)) {
+                } elseif (Sql::isStringType($fieldType)) {
                     if ($token == '(') {
-                        $tables[$tableName][$fieldName]['size'] =
-                            DBA_Sql::getToken();
-                        if (DBA_Sql::getToken() != ')') {
+                        $table[$fieldName]['size'] = Sql::getToken();
+                        if (Sql::getToken() != ')') {
                             return PEAR::raiseError(
                                 "expected ) on $fieldName, $fieldType");
                         }
-                        $token = DBA_Sql::getToken();
+                        $token = Sql::getTokenL();
                     }
-                } elseif (DBA_Sql::isSetType($fieldType)) {
+                } elseif (Sql::isSetType($fieldType)) {
                     if ($token != '(') {
                         return PEAR::raiseError('Missing domain on '
                                                 .$fieldName);
                     }
                     $element = 0;
                     while ($token && ($token != ')')) {
-                        $tables[$tableName][$fieldName]['domain']
-                            [$element] = DBA_Sql::getString();
-                        $token = DBA_Sql::getToken();
+                        $table[$fieldName]['domain'][$element] =
+                            Sql::getString();
+                        $token = Sql::getToken();
                         if ($token == ',') {
                             ++$element;
                         } elseif ($token != ')') {
@@ -189,58 +204,75 @@ function parseCreate($rawquery)
                                                     .$token);
                         }
                     }
-                    $token = DBA_Sql::getToken();
+                    $token = Sql::getTokenL();
                 }
 
                 // parse extra options
-                while ($token && !(($token == ',') || ($token == ')'))) {
+                while ($token && !(($token == ',') || ($token == ')')
+                       || ($token == ';'))) {
                     switch ($token) {
                         case 'default':
-                            $tables[$tableName][$fieldName]['default'] =
-                                DBA_Sql::getString();
+                            $table[$fieldName]['default'] =Sql::getString();
                             break;
                         case 'primary':
-                            $token = strtolower(DBA_Sql::getToken());
+                            $token = Sql::getTokenL();
                             if ($token != 'key') {
                                 return PEAR::raiseError(
                                     "Expected 'key', got $token on $fieldName,".
                                     $fieldType);
                             } else {
-                             $tables[$tableName][$fieldName]['primarykey']=true;
+                                $table[$fieldName]['primarykey'] = true;
                             }
                             break;
                         case 'not':
-                            $token = strtolower(DBA_Sql::getToken());
+                            $token = Sql::getTokenL();
                             if ($token != 'null') {
                                 return PEAR::raiseError(
                                     "Parse error at $token on $rawquery");
                             } else {
-                                $tables[$tableName][$fieldName]['notnull']=true;
+                                $table[$fieldName]['notnull'] = true;
                             }
                             break;
-                        case 'null': case 'auto_increment': case 'zerofill':
-                            $tables[$tableName][$fieldName][$token]=true;
+                        case 'auto_increment': case 'zerofill':
+                        case 'unique':
+                            $table[$fieldName][$token] = true;
                             break;
                         case 'unsigned': case 'zerofill':
-                            if (!DBA_Sql::isNumberType($fieldType)) {
+                            if (!Sql::isNumberType($fieldType)) {
                                 return PEAR::raiseError(
                                    "$fieldType cannot have the $token option");
                             } else {
-                                $tables[$tableName][$fieldName][$token]=true;
+                                $table[$fieldName][$token] = true;
+                            }
+                            break;
+                        case 'varying':
+                            if (!Sql::isStringType($fieldType)) {
+                                return PEAR::raiseError(
+                                   "$fieldType cannot vary in length");
+                            } else {
+                                $table[$fieldName]['type'] = 'varchar';
+                                if (Sql::getToken() != '(') {
+                                    PEAR::raiseError('expecting (');
+                                } else {
+                                    $table[$fieldName]['size']=Sql::getToken();
+                                    if (Sql::getToken() != ')') {
+                                        PEAR::raiseError('expecting )');
+                                    }
+                                }
                             }
                     }
-                    echo $token."\n";
-                    $token = strtolower(DBA_Sql::getToken());
+                    // grab the next option
+                    $token = Sql::getTokenL();
                 }
             }
             if ($token != ')') {
-                return PEAR::raiseError('Unexpected end of input');
+                echo ("Unexpected end of input with $token\n");
             }
         }
     } else {
         return PEAR::raiseError("Do not know how to create $thing");
     }
-    return $tables;
+    return array($tableName, $table);
 }
 }
 ?>

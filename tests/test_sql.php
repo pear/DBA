@@ -43,7 +43,7 @@ $queries = array(
   album int,
   price float (4,2),
   description text default 'hello',
-  id int default 0 primary key autoincrement not null
+  id int default 0 primary key autoincrement not null,
 )",
 "create table nodefinitions",
 "create dogfood",
@@ -51,15 +51,34 @@ $queries = array(
 "create table dunce (name varchar(2,3))",
 "create table dunce (enum)",
 "create table dunce (enum(23))",
+"CREATE TABLE films ( 
+             code      CHARACTER(5) CONSTRAINT firstkey PRIMARY KEY, 
+             title     CHARACTER VARYING(40) NOT NULL, 
+             did       DECIMAL(3) NOT NULL, 
+             date_prod DATE, 
+             kind      CHAR(10), 
+             len       INTERVAL HOUR TO MINUTE
+             CONSTRAINT production UNIQUE(date_prod)
+)",
+"CREATE TABLE distributors ( 
+             did      DECIMAL(3) PRIMARY KEY DEFAULT NEXTVAL('serial'), 
+             name     VARCHAR(40) NOT NULL CHECK (name <> '') 
+             CONSTRAINT con1 CHECK (did > 100 AND name > '') 
+)",
+"CREATE TABLE distributors ( 
+            did      DECIMAL(3) PRIMARY KEY, 
+            name     VARCHAR(40) 
+)",
 );
 
 foreach ($queries as $query) {
-    $results = DBA_Sql::parseCreate($query);
-    echo $query."\n";
+    list($name, $schema) = Sql::parseCreate($query);
+    echo "SQL:\n$query\n\n";
     if (PEAR::isError($results)) {
         echo $results->getMessage()."\n";
     } else {
-        print_r($results);
+        echo "Table Name: $name\n\nSchema:\n";
+        print_r($schema);
     }
     echo "\n***********************************\n\n";
 }
