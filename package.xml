@@ -21,11 +21,29 @@ file-based DBM driver.
 
     <release>
         <license>LGPL</license>
-        <version>0.19</version>
+        <version>0.9</version>
         <date>2002-09-24</date>
-        <state>devel</state>
+        <state>beta</state>
         <notes>
-No notes is good notes.
+There is little new about DBA itself. However, this release does not include a
+lot of the pieces that were included with the earlier developer releases, such
+as the table manager and SQL parser. These have been split into separate
+packages so that the core DBA class can go ahead with a stable release.
+
+There are three changes to note:
+
+ * The 'simple' driver has been renamed to 'file'. This is a better description,
+   and shorter too.
+
+ * Support for opening a database persistently using the Builtin driver.
+   See the docs for open() on that driver. Persistence is not supported with the
+   'file' driver.
+
+ * Lastly, the installation directory structure is changed. Rather than
+   installing into a subdirectory of the DB packages (DB/DBA), DBA now installs
+   into the PEAR root directory into its own subdirectory (DBA.php, DBA).
+   Rather than use 'require "DB/DBA/DBA.php";' use 'require "DBA.php";'
+   Much simpler!
         </notes>
         <filelist>
             <dir name="/" baseinstalldir="/">

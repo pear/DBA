@@ -20,7 +20,7 @@
 //
 // $Id$
 
-require_once 'PEAR.php';
+require_once 'DBA.php';
 
 // {{{ constants
 /**
@@ -76,7 +76,7 @@ define('DBA_SIMPLE_KEY',3);
  * @access  public
  * @package DBA
  */
-class DBA_Driver_File extends PEAR 
+class DBA_Driver_File extends DBA
 {
     // {{{ instance variables
     /**
@@ -110,7 +110,25 @@ class DBA_Driver_File extends PEAR
     var $_readable;
     // }}}
 
-    // {{{ open($dbName='', $mode='r')
+    /**
+     * Determines if the driver should use an index file
+     * @access private
+     */
+    var $_indexed;
+
+    // {{{ DBA_Driver_Builtin($indexed = true)
+    /* Constructor
+     *
+     * @access public
+     * @param   string  $driver dba driver to use
+     */
+    function DBA_Driver_File($indexed = true)
+    {
+        $this->_indexed = true;
+    }
+    // }}}
+
+    // {{{ open($dbName='', $mode='r', $persistent = false)
     /**
      * Opens a database.
      *
@@ -122,12 +140,18 @@ class DBA_Driver_File extends PEAR
      *                   'n' creates a new database and opens read-write.
      *                   'c' creates a new database if the database does not
      *                      exist and opens read-write.
+     * @param   boolean $persistent Determines whether to open the database
+     *                  peristently. Not supported here.
      * @return  object  PEAR_Error on failure
      */
-    function open($dbName='', $mode='r')
+    function open($dbName='', $mode='r', $persistent = false)
     {
+        if ($persistent) {
+            return $this->raiseError('Cannot support persistent connections');
+        }
+
         if ($dbName == '') {
-            return $this->raiseError('DBA: No database name specified');
+            return $this->raiseError('No database name specified');
         } else {
             $this->_dbName = $dbName;
             $dat_name = $dbName.'.dat';
@@ -161,7 +185,7 @@ class DBA_Driver_File extends PEAR
                     $this->_readable = true;
                     break;
             default:
-                return $this->raiseError("DBA: Invalid file mode: $mode");
+                return $this->raiseError("Invalid file mode: $mode");
         }
 
         // open the index file
@@ -169,8 +193,8 @@ class DBA_Driver_File extends PEAR
         if ($this->_idxFP === false) {
             $this->_writable = false;
             $this->_readable = false;
-            return $this->raiseError('DBA: Could not open index file: '.$idx_name.
-                          ' with mode '. $file_mode);
+            return $this->raiseError('Could not open index file: '.$idx_name.
+                ' with mode '. $file_mode);
         }
 
         // open the data file
@@ -179,8 +203,7 @@ class DBA_Driver_File extends PEAR
             fclose ($this->_idxFP);
             $this->_writable = false;
             $this->_readable = false;
-            return $this->raiseError('DBA: Could not open data file: '.
-                          $dat_name);
+            return $this->raiseError('Could not open data file: '.$dat_name);
         }
 
         // get a shared lock if read-only, otherwise get an exclusive lock
@@ -220,7 +243,7 @@ class DBA_Driver_File extends PEAR
             fclose($this->_idxFP);
             fclose($this->_datFP);
         } else {
-            return $this->raiseError('DBA: No database was open');
+            return $this->raiseError('No database was open');
         }
     }
     // }}}
@@ -251,7 +274,7 @@ class DBA_Driver_File extends PEAR
                 }
             }
         } else {
-            return $this->raiseError('DBA: No database was open');
+            return $this->raiseError('No database was open');
         }
     }
     // }}}
@@ -331,12 +354,12 @@ class DBA_Driver_File extends PEAR
             if (isset($this->_usedBlocks[$key])) {
                 $this->_freeUsedBlock($key);
             } else {
-                return $this->raiseError('DBA: cannot delete key: '.
-                               $key. ', it does not exist');
+                return $this->raiseError('Cannot delete key:'.$key.
+                    ', it does not exist');
             }
         } else {
-            return $this->raiseError('DBA: cannot delete key '.
-                           $key. ', DB not writable');
+            return $this->raiseError('Cannot delete key:'.$key.
+                ', DB not writable');
         }
     }
     // }}}
@@ -353,15 +376,15 @@ class DBA_Driver_File extends PEAR
     {
         if ($this->isReadable()) {
             if (!isset($this->_usedBlocks[$key])) {
-                return $this->raiseError('DBA: cannot fetch key '.$key.
-                                         ', it does not exist');
+                return $this->raiseError('Cannot fetch key '.$key.
+                    ', it does not exist');
             } else {
                 fseek($this->_datFP, $this->_usedBlocks[$key][DBA_SIMPLE_LOC]);
                 return fread($this->_datFP,$this->_usedBlocks[$key][DBA_SIMPLE_VSIZE]);
             }
         } else {
-            return $this->raiseError('DBA: cannot fetch '.$key.' on '.
-                                     $this->_dbName. ', DB not readable');
+            return $this->raiseError('Cannot fetch '.$key.' on '.
+                $this->_dbName. ', DB not readable');
         }
     }
     // }}}
@@ -432,8 +455,8 @@ class DBA_Driver_File extends PEAR
     function insert($key, $value)
     {
         if ($this->exists($key)) {
-            return $this->raiseError('DBA: cannot insert on key: '.
-                          $key. ', it already exists');
+            return $this->raiseError('Cannot insert on key: '.
+                $key. ', it already exists');
         } else {
             return $this->replace($key, $value);
         }
@@ -487,8 +510,8 @@ class DBA_Driver_File extends PEAR
                 }
             }
         } else {
-            return $this->raiseError('DBA: cannot replace on '.
-                          $this->_dbName. ', DB not writable');
+            return $this->raiseError('Cannot replace on '.
+                $this->_dbName. ', DB not writable');
         }
     }
     // }}}
@@ -597,7 +620,7 @@ class DBA_Driver_File extends PEAR
     function create($dbName)
     {
         if (!(@touch($dbName.'.dat') && @touch($dbName.'.idx'))) {
-           return $this->raiseError('DBA: Could not create database: '.$dbName);
+           return $this->raiseError('Could not create database: '.$dbName);
         }
     }
     // }}}
