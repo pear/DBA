@@ -30,20 +30,9 @@ lot of the pieces that were included with the earlier developer releases, such
 as the table manager and SQL parser. These have been split into separate
 packages so that the core DBA class can go ahead with a stable release.
 
-There are three changes to note:
-
- * The 'simple' driver has been renamed to 'file'. This is a better description,
-   and shorter too.
-
- * Support for opening a database persistently using the Builtin driver.
-   See the docs for open() on that driver. Persistence is not supported with the
-   'file' driver.
-
- * Lastly, the installation directory structure is changed. Rather than
-   installing into a subdirectory of the DB packages (DB/DBA), DBA now installs
-   into the PEAR root directory into its own subdirectory (DBA.php, DBA).
-   Rather than use 'require "DB/DBA/DBA.php";' use 'require "DBA.php";'
-   Much simpler!
+This release fixes a bug in the the DBA compatibilty functions located in
+DBA/Compatibility.php. It the same as 0.9 except for this fix and the addition
+of a testing script for the compatibility functions.
         </notes>
         <filelist>
             <dir name="/" baseinstalldir="/">
@@ -58,6 +47,7 @@ There are three changes to note:
                 <dir name="tests" role="test">
                     <file role="test">benchmark_drivers.php</file>
                     <file role="test">test_file_driver.php</file>
+                    <file role="test">test_compatibility.php</file>
                 </dir>
                 <dir name="docs" role="doc">
                     <file role="doc">README.txt</file>
