@@ -35,19 +35,19 @@ class DBA_Table extends PEAR
 {
     /**
      * DBA object handle
-     * @access private
+     * @access  private
      */
     var $_dba;
 
     /**
      * Describes the types of fields in a table
-     * @access private
+     * @access  private
      */
     var $_schema;
 
     /**
      * Default date format
-     * @access private
+     * @access  private
      */
     var $_dateFormat = 'D M j G:i:s T Y';
 
@@ -64,7 +64,7 @@ class DBA_Table extends PEAR
 
     /**
      * PEAR emulated destructor calls close on PHP shutdown
-     * @access private
+     * @access  private
      */
     function _DBA_Table()
     {
@@ -74,9 +74,9 @@ class DBA_Table extends PEAR
     /**
      * Opens a table
      *
-     * @access public
-     * @param string $tableName name of the table to open
-     * @param char   $mode      mode to open the table; one of r,w,c,n
+     * @access  public
+     * @param   string $tableName name of the table to open
+     * @param   char   $mode      mode to open the table; one of r,w,c,n
      * @returns object PEAR_Error on failure
      */
     function open($tableName, $mode = 'r')
@@ -101,7 +101,7 @@ class DBA_Table extends PEAR
     /**
      * Closes a table
      *
-     * @access public
+     * @access  public
      * @returns object PEAR_Error on failure
      */
     function close()
@@ -117,10 +117,11 @@ class DBA_Table extends PEAR
     /**
      * Creates a new table. Note, this closes any open table.
      *
-     * @param string $tableName   name of the table to create
-     * @param array  $schema field schema for the table
+     * @param   string $tableName   name of the table to create
+     * @param   array  $schema field schema for the table
+     * @returns object PEAR_Error on failure
      */
-    function create ($tableName, $schema)
+    function create($tableName, $schema)
     {
         // pack the schema
         $packedSchema = $this->_packSchema($schema);
@@ -144,11 +145,11 @@ class DBA_Table extends PEAR
     /**
      * Check whether table exists
      *
-     * @access public
-     * @param $key string
+     * @access  public
+     * @param   string  $key
      * @returns boolean
      */
-    function tableExists ($tableName)
+    function tableExists($tableName)
     {
         return $this->_dba->db_exists($tableName);
     }
@@ -158,7 +159,7 @@ class DBA_Table extends PEAR
      *
      * @returns boolean
      */
-    function isOpen ()
+    function isOpen()
     {
         return $this->_dba->isOpen();
     }
@@ -168,7 +169,7 @@ class DBA_Table extends PEAR
      *
      * @returns boolean
      */
-    function isReadable ()
+    function isReadable()
     {
         return $this->_dba->isReadable();
     }
@@ -178,7 +179,7 @@ class DBA_Table extends PEAR
      *
      * @returns boolean
      */
-    function isWritable ()
+    function isWritable()
     {
         return $this->_dba->isWritable();
     }
@@ -198,7 +199,7 @@ class DBA_Table extends PEAR
      *
      * @returns object PEAR_Error on failure
      */
-    function lockTableEx ()
+    function lockTableEx()
     {
         return ($this->_dba->reopen('w'));
     }
@@ -208,7 +209,7 @@ class DBA_Table extends PEAR
      *
      * @returns object PEAR_Error on failure
      */
-    function lockTableSh ($table_name)
+    function lockTableSh($table_name)
     {
         return ($this->_dba->reopen('r'));
     }
@@ -217,8 +218,8 @@ class DBA_Table extends PEAR
      * DBA_Table keeps an internal row index (key)
      * This function returns the highest row index
      *
-     * @access private
-     * @returns mixed a number or false if there are no keys
+     * @access  private
+     * @returns mixed   a number or false if there are no keys
      */
     function _findMaxKey()
     {
@@ -236,7 +237,7 @@ class DBA_Table extends PEAR
     /**
      * Returns a unique key to be used as a row index
      *
-     * @access private
+     * @access  private
      * @returns integer a new key
      */
     function _getUniqueKey()
@@ -260,9 +261,9 @@ class DBA_Table extends PEAR
      * Returns a string for a raw field
      *
      * @access  private
-     * @param   array  $field field to pack
-     * @param   string $value value of this field to pack
-     * @returns string packed version of value, as per $field spec
+     * @param   array   $field field to pack
+     * @param   string  $value value of this field to pack
+     * @returns string  packed version of value, as per $field spec
      */
     function _packField($field, $value)
     {
@@ -350,8 +351,8 @@ class DBA_Table extends PEAR
     /**
      * Converts a field from its packed representation to its original value
      *
-     * @param   $field string  field to convert
-     * @param   $field string  packed value
+     * @param   string $field field to convert
+     * @param   string $field packed value
      * @returns mixed
      */
     function _unpackField($field, $value)
@@ -392,9 +393,9 @@ class DBA_Table extends PEAR
      * timestamps are converted to a readable date. No more operations
      * should be performed on a field after this though.
      *
-     * @access private
-     * @param $field  mixed
-     * @param $value  string
+     * @access  private
+     * @param   mixed   $field
+     * @param   string  $value
      * @returns string
      */
     function _finalizeField($field, $value)
@@ -424,7 +425,7 @@ class DBA_Table extends PEAR
     /**
      * Returns a string for a field structure
      *
-     * The following is the grammar for each element as packed
+     * This function uses the following is the grammar to pack elements:
      * ENUM => name;type=enum;domain=[element1,...]
      * SET  => name;type=set;domain=[element1,...]
      * TIMESTAMP => name;type=timestamp;format=<string>;init=<num>
@@ -433,10 +434,10 @@ class DBA_Table extends PEAR
      * VARCHAR => name;varchar;size=<num>;init=<string>
      * NUMERIC => name;int;size=<num>;init=<string>
      *
-     * @param $schema array schema to pack
+     * @param   array  $schema schema to pack
      * @returns string the packed schema
      */
-    function _packSchema ($schema)
+    function _packSchema($schema)
     {
         foreach ($schema as $fieldName => $fieldMeta)
         {
@@ -476,11 +477,11 @@ class DBA_Table extends PEAR
      * Unpacks a raw string as created by _packSchema into an array
      * structure for use as $this->_schema
      *
-     * @access private
-     * @param $rawFieldString string data to be unpacked into the schema
+     * @access  private
+     * @param   string  $rawFieldString data to be unpacked into the schema
      * @returns array
      */
-    function _unpackSchema ($rawFieldString)
+    function _unpackSchema($rawFieldString)
     {
         $rawFields = $this->_unpackRawRow($rawFieldString);
         foreach ($rawFields as $rawField)
@@ -508,10 +509,10 @@ class DBA_Table extends PEAR
      * serialize.
      *
      * @access  private
-     * @param   array $data row data to pack, key=>field pairs
+     * @param   array   $data row data to pack, key=>field pairs
      * @returns string
      */
-    function _packRow ($data)
+    function _packRow($data)
     {
         $buffer = array();
         $i = 0;
@@ -553,10 +554,10 @@ class DBA_Table extends PEAR
      * packed row. Think of this as a cross-language version of deserialize.
      *
      * @access  private
-     * @param   array packedData row data to unpack
-     * @returns array field=>value pairs
+     * @param   array   packedData row data to unpack
+     * @returns array   field=>value pairs
      */
-    function _unpackRow ($packedData)
+    function _unpackRow($packedData)
     {
         $data = $this->_unpackRawRow($packedData);
         $i = 0;
@@ -570,22 +571,23 @@ class DBA_Table extends PEAR
     /**
      * Concatenates fields in a row into a single string
      *
-     * @param   array $unpackedData
-     * @returns string
      * @access  private
+     * @param   array   $unpackedData
+     * @returns string
      */
-    function _packRawRow ($unpackedData)
+    function _packRawRow($unpackedData)
     {
         return implode('|', $unpackedData);
     }
 
     /**
      * Expands fields in a row into an array of fields
-     * @param   string $packedData
-     * @returns array
+     *
      * @access  private
+     * @param   string  $packedData
+     * @returns array
      */
-    function _unpackRawRow ($packedData)
+    function _unpackRawRow($packedData)
     {
         return explode('|', $packedData);
     }
@@ -594,10 +596,10 @@ class DBA_Table extends PEAR
      * Inserts a new row in a table
      * 
      * @access  public
-     * @param   array $data assoc array or ordered list of data to insert
-     * @returns mixed PEAR_Error on failure, the row index on success
+     * @param   array  $data assoc array or ordered list of data to insert
+     * @returns mixed  PEAR_Error on failure, the row index on success
      */
-    function insertRow ($data)
+    function insertRow($data)
     {
         if ($this->isWritable()) {
             $key = $this->_getUniqueKey();
@@ -620,7 +622,7 @@ class DBA_Table extends PEAR
      * @param   array  $data assoc array or ordered list of data to insert
      * @returns mixed  PEAR_Error on failure, the row index on success
      */
-    function replaceRow ($key, $data)
+    function replaceRow($key, $data)
     {
         if ($this->isOpen()) {
             return $this->_dba->replace($key, $this->_packRow($data));
@@ -636,7 +638,7 @@ class DBA_Table extends PEAR
      * @param   string $key row id to delete
      * @returns object PEAR_Error on failure
      */
-    function deleteRow ($key)
+    function deleteRow($key)
     {
         return $this->_dba->delete($key);
     }
@@ -648,7 +650,7 @@ class DBA_Table extends PEAR
      * @param   string $key row id to fetch
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function getRow ($key)
+    function fetchRow($key)
     {
         $result = $this->_dba->fetch($key);
         if (!PEAR::isError($result)) {
@@ -666,11 +668,11 @@ class DBA_Table extends PEAR
      * unless it is the final operation.
      *
      * @access  public
-     * @param   array $rows rows to finalize, if none are specified, returns the
-     * whole table
+     * @param   array  $rows rows to finalize, if none are specified, returns
+     *                      the whole table
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function finalizeRows ($rows=null)
+    function finalizeRows($rows=null)
     {
         if (is_null($rows)) {
             if ($this->_dba->isOpen()) {
@@ -692,12 +694,12 @@ class DBA_Table extends PEAR
     /**
      * Returns the specified rows. A multiple-value version of getRow
      *
-     * @access public
-     * @param   array $rowKeys keys of rows to get, if none are specified, returns the
-     * whole table
+     * @access  public
+     * @param   array  $rowKeys keys of rows to get, if none are specified,
+     *                        returns the whole table
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function getRows ($rowKeys=null)
+    function getRows($rowKeys=null)
     {
         $rows = array();
         if ($this->_dba->isOpen()) {
@@ -728,7 +730,7 @@ class DBA_Table extends PEAR
      * @access  public
      * @returns array
      */
-    function getFieldNames ()
+    function getFieldNames()
     {
         return array_keys($this->_schema);
     }
@@ -738,10 +740,10 @@ class DBA_Table extends PEAR
      * properly from other tokens.
      *
      * @access  private
-     * @param   string $string
+     * @param   string  $string
      * @returns string
      */
-    function _addSpaces ($string)
+    function _addSpaces($string)
     {
         foreach (array('(',')','==','!=','>','<','<=','>=') as $symbol) {
             $string = str_replace($symbol, " $symbol ", $string);
@@ -752,13 +754,13 @@ class DBA_Table extends PEAR
     /**
      * Converts a query expression into PHP code for executing a select.
      *
-     * @access private
-     * @param  string $rawQuery the incoming query
-     * @param  array  $fieldTokens list of tokens that should be treated as
-     * field names
-     * @returns string PHP code
+     * @access  private
+     * @param   string  $rawQuery the incoming query
+     * @param   array   $fieldTokens list of tokens that should be treated as
+     *                               field names
+     * @returns string  PHP code for performing a select
      */
-    function _parsePHPQuery ($rawQuery, $fieldTokens)
+    function _parsePHPQuery($rawQuery, $fieldTokens)
     {
         // add spaces around symbols for strtok to work properly
         $rawQuery = $this->_addSpaces($rawQuery);
@@ -788,12 +790,12 @@ class DBA_Table extends PEAR
      * expression '*' returns the entire table
      * SQL analog: 'select * from rows where rawQuery'
      *
-     * @access public
-     * @param  string $rawQuery query expression for performing the select
-     * @param  array  $rows rows to select on
+     * @access  public
+     * @param   string $rawQuery query expression for performing the select
+     * @param   array  $rows rows to select on
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function select ($rawQuery, $rows=null)
+    function select($rawQuery, $rows=null)
     {
         if ($this->_dba->isOpen()) {
 
@@ -825,9 +827,11 @@ class DBA_Table extends PEAR
 
     /**
      * Comparison function for sorting ascending order
-     * @access private
+     *
+     * @access  private
+     * @returns int
      */
-    function _sortCmpA ($a, $b)
+    function _sortCmpA($a, $b)
     {
         foreach ($this->_sortFields as $field) {
             if ($a[$field] < $b[$field]) return -1;
@@ -838,9 +842,11 @@ class DBA_Table extends PEAR
 
     /**
      * Comparison function for sorting descending order
-     * @access private
+     *
+     * @access  private
+     * @returns int
      */
-    function _sortCmpD ($a, $b)
+    function _sortCmpD($a, $b)
     {
         foreach ($this->_sortFields as $field) {
             if ($a[$field] < $b[$field]) return 1;
@@ -850,14 +856,20 @@ class DBA_Table extends PEAR
     }
 
     /**
-     * @access private
+     * explodes a string of field names into an array
+     *
+     * @access  private
+     * @param   string  $fieldString field names to explode
+     * @returns array
      */
-    function _parseFieldString ($fieldString)
+    function _parseFieldString($fieldString)
     {
         $fields = array();
         $token = strtok($fieldString, ' ,');
         while ($token) {
-            $fields[] = $token;
+            if (isset($this->_schema[$token])) {
+                $fields[] = $token;
+            }
             $token = strtok(' ,');
         }
         return $fields;
@@ -867,15 +879,15 @@ class DBA_Table extends PEAR
      * Sorts rows by field in either ascending or descending order
      * SQL analog: 'select * from rows, order by fields'
      *
-     * @access public
-     * @param  mixed $fields a string with the field name to sort by or an
-     * array of fields to sort by in order of preference
-     * @param  string $order 'a' for ascending, 'd' for descending
-     * @param  array $rows rows to sort, sorts the entire table if not
-     * specified
+     * @access  public
+     * @param   mixed  $fields a string with the field name to sort by or an
+     *                         array of fields to sort by in order of preference
+     * @param   string $order 'a' for ascending, 'd' for descending
+     * @param   array  $rows rows to sort, sorts the entire table if not
+     *                     specified
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function sort ($fields, $order='a', $rows=null)
+    function sort($fields, $order='a', $rows=null)
     {
         if ($this->_dba->isOpen()) {
             if (is_string($fields)) {
@@ -911,13 +923,13 @@ class DBA_Table extends PEAR
      * Projects rows by field. This means that a subset of the possible fields i
      * are in the resulting rows. The SQL analog is 'select fields from table'
      *
-     * @access public
-     * @param  array $fields fields to project
-     * @param  array $rows rows to project, projects entire table if not
-     * specified
+     * @access  public
+     * @param   array  $fields fields to project
+     * @param   array  $rows rows to project, projects entire table if not
+     *                     specified
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function project ($fields, $rows=null)
+    function project($fields, $rows=null)
     {
         if ($this->_dba->isOpen()) {
             $projectFields = array();
@@ -947,12 +959,12 @@ class DBA_Table extends PEAR
     /**
      * Compares two rows
      *
-     * @access public
-     * @param array $a row a
-     * @param array $b row b
-     * @returns bool true if they are the same, false if they are not
+     * @access  public
+     * @param   array  $a row a
+     * @param   array  $b row b
+     * @returns bool   true if they are the same, false if they are not
      */
-    function cmpRows ($a, $b)
+    function cmpRows($a, $b)
     {
         $equal = true;
         foreach ($a as $field=>$value) {
@@ -966,9 +978,9 @@ class DBA_Table extends PEAR
     /**
      * Returns the unique rows from a set of rows
      * 
-     * @access public
-     * @param  array $rows rows to process, uses entire table if not
-     * specified
+     * @access  public
+     * @param   array  $rows rows to process, uses entire table if not
+     *                     specified
      * @returns mixed  PEAR_Error on failure, the row array on success
      */
     function unique($rows=null)

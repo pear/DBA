@@ -45,7 +45,7 @@ class DBA_Relational extends PEAR
      * @param string  $driver DBA driver to use
      *
      */
-    function DBA_Relational ($home = '', $driver = 'simple')
+    function DBA_Relational($home = '', $driver = 'simple')
     {
         // add trailing slash if not present
         if (substr($home, -1) != '/') {
@@ -61,7 +61,7 @@ class DBA_Relational extends PEAR
      *
      * @access public
      */
-    function close ()
+    function close()
     {
         foreach ($this->_tables as $table) {
             $table->close();
@@ -77,7 +77,7 @@ class DBA_Relational extends PEAR
      * @param char   $mode      mode to open the table; one of r,w,c,n
      * @returns object PEAR_Error on failure
      */
-    function _openTable ($tableName, $mode = 'r')
+    function _openTable($tableName, $mode = 'r')
     {
         if (!isset($this->_tables[$tableName])) {
 
@@ -187,7 +187,7 @@ class DBA_Relational extends PEAR
     /**
      * Inserts a new row in a table
      *
-     * @param   string $tableName table to insert on
+     * @param   string $tableName table on which to operate
      * @param   array  $data assoc array or ordered list of data to insert
      * @returns mixed  PEAR_Error on failure, the row index on success
      */
@@ -202,7 +202,13 @@ class DBA_Relational extends PEAR
     }
 
     /**
-     * @access public
+     * Replaces an existing row in a table, inserts if the row does not exist
+     *
+     * @access  public
+     * @param   string $tableName table on which to operate
+     * @param   string $key row id to replace
+     * @param   array  $data assoc array or ordered list of data to insert
+     * @returns mixed  PEAR_Error on failure, the row index on success
      */
     function replaceRow($tableName, $key, $data)
     {
@@ -215,7 +221,12 @@ class DBA_Relational extends PEAR
     }
 
     /**
-     * @access public
+     * Deletes an existing row in a table
+     *
+     * @access  public
+     * @param   string $tableName table on which to operate
+     * @param   string $key row id to delete
+     * @returns object PEAR_Error on failure
      */
     function deleteRow($tableName, $key)
     {
@@ -228,7 +239,12 @@ class DBA_Relational extends PEAR
     }
 
     /**
-     * @access public
+     * Fetches an existing row from a table
+     *
+     * @access  public
+     * @param   string $tableName table on which to operate
+     * @param   string $key row id to fetch
+     * @returns mixed  PEAR_Error on failure, the row array on success
      */
     function fetchRow($tableName, $key)
     {
@@ -241,9 +257,19 @@ class DBA_Relational extends PEAR
     }
 
     /**
-     * @access public
+     * Performs a select on a table. This means that a subset of rows in a
+     * table are filtered and returned based on the query. Accepts any valid
+     * expression of the form '(field == field) || (field > 3)', etc. Using the
+     * expression '*' returns the entire table
+     * SQL analog: 'select * from rows where rawQuery'
+     *
+     * @access  public
+     * @param   string $tableName table on which to operate
+     * @param   string $rawQuery query expression for performing the select
+     * @param   array  $rows rows to select on
+     * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function select ($tableName, $query, $rows=null)
+    function select($tableName, $query, $rows=null)
     {
         $result = $this->_openTable($tableName, 'r');
         if (PEAR::isError($result)) {
@@ -253,10 +279,21 @@ class DBA_Relational extends PEAR
         }
     }
 
+
     /**
-     * @access public
+     * Sorts rows by field in either ascending or descending order
+     * SQL analog: 'select * from rows, order by fields'
+     *
+     * @access  public
+     * @param   string $tableName table on which to operate
+     * @param   mixed  $fields a string with the field name to sort by or an
+     *                         array of fields to sort by in order of preference
+     * @param   string $order 'a' for ascending, 'd' for descending
+     * @param   array  $rows rows to sort, sorts the entire table if not
+     *                       specified
+     * @returns mixed  PEAR_Error on failure, the row array on success
      */
-    function sort ($tableName, $fields, $order='a', $rows=null)
+    function sort($tableName, $fields, $order='a', $rows=null)
     {
         $result = $this->_openTable($tableName, 'r');
         if (PEAR::isError($result)) {
@@ -267,7 +304,15 @@ class DBA_Relational extends PEAR
     }
 
     /**
-     * @access public
+     * Projects rows by field. This means that a subset of the possible fields
+     * are in the resulting rows. The SQL analog is 'select fields from table'
+     *
+     * @access  public
+     * @param   string $tableName table on which to operate
+     * @param   array $fields fields to project
+     * @param   array $rows rows to project, projects entire table if not
+     *                      specified
+     * @returns mixed  PEAR_Error on failure, the row array on success
      */
     function project ($tableName, $fields, $rows=null)
     {
@@ -280,7 +325,13 @@ class DBA_Relational extends PEAR
     }
 
     /**
-     * @access public
+     * Returns the unique rows from a set of rows
+     *
+     * @access  public
+     * @param   string $tableName table on which to operate
+     * @param   array  $rows rows to process, uses entire table if not
+     *                     specified
+     * @returns mixed  PEAR_Error on failure, the row array on success
      */
     function unique ($tableName, $rows=null)
     {
@@ -293,7 +344,20 @@ class DBA_Relational extends PEAR
     }
 
     /**
-     * @access public
+     * Converts the results from any of the row operations to a 'finalized'
+     * display-ready form. That means that timestamps, sets and enums are
+     * converted into strings. This obviously has some consequences if you plan
+     * on chaining the results into another row operation, so don't call this
+     * unless it is the final operation.
+     *
+     * This function does not yet work reliably with the results of a join
+     * operation, due to a loss of metadata
+     *
+     * @access  public
+     * @param   string $tableName table on which to operate
+     * @param   array $rows rows to finalize, if none are specified, returns
+     *                      the whole table
+     * @returns mixed  PEAR_Error on failure, the row array on success
      */
     function finalizeRows($tableName, $rows=null)
     {
