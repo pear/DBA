@@ -74,7 +74,7 @@ if (!function_exists('dba_open')) {
 
     function dba_nextkey(&$dba)
     {
-        return $dba->nextkey($key);
+        return $dba->nextkey();
     }
 
     function dba_open($filename, $mode, $handler)
