@@ -23,7 +23,7 @@
 
 ini_set('include_path',ini_get('include_path').':../../');
 require_once 'PEAR.php';
-require_once 'DB_DBA/DBA_Relational.php';
+require_once 'DB/DBA/DBA_Relational.php';
 require_once 'empSchema.php';
 
 // set the working directory and driver

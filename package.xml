@@ -20,22 +20,30 @@
 
     <release>
         <license>PHP</license>
-        <version>0.0.9</version>
-        <date>2002-06-20</date>
+        <version>0.0.11</version>
+        <date>2002-06-24</date>
         <state>alpha</state>
         <notes>
-            Pre-initial release; this stuff is still in the works. Made lots of headway documenting and cleaning code in the driver classes. Now, they are fully PEAR compliant except for error handling, which will remain very simple for performance reasons (these are drivers, after all ;)
+           Most everything works now. It is currently impossible to finalize
+           after a join due to lost meta-information in the process. This isn't
+           much of a problem, since finalize is not that useful in a real
+           application.
         </notes>
         <filelist>
-            <dir name="/DB_DBA" base="/DB_DBA">
+            <dir name="/" baseinstalldir="DB/DBA" role="php">
                 <file role="php">DBA.php</file>
                 <file role="php">DBA_Simple.php</file>
                 <file role="php">DBA_Compat.php</file>
                 <file role="php">DBA_Builtin.php</file>
+                <file role="php">DBA_Table.php</file>
+                <file role="php">DBA_Relational.php</file>
                 <dir name="tests" role="test">
-                    <file>benchmark.php</file>
-                    <file>simple.php</file>
-                    <file>graph_template</file>
+                    <file>benchmark_drivers.php</file>
+                    <file>test_simple.php</file>
+                    <file>test_relational.php</file>
+                    <file>test_table.php</file>
+                    <file>empSchema.php</file>
+                    <file>hatSchema.php</file>
                 </dir>
             </dir>
         </filelist>

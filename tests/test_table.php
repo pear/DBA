@@ -22,7 +22,7 @@
 // test functionality of the dba table layer
 
 ini_set('include_path',ini_get('include_path').':../../');
-require_once 'DB_DBA/DBA_Table.php';
+require_once 'DB/DBA/DBA_Table.php';
 require_once 'hatSchema.php';
 
 function printQueryResults($results, $fields=null)

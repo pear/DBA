@@ -23,7 +23,7 @@
 
 ini_set('include_path',ini_get('include_path').':../../');
 include 'PEAR.php';
-include 'DB_DBA/DBA_Simple.php';
+include 'DB/DBA/DBA_Simple.php';
 
 $testDataArray = array ('1', '22', '333', '4444', '55555', '6666666', '7777777', '88888888', '999999999');
 

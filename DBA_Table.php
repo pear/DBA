@@ -19,7 +19,7 @@
 // $Id$
 //
 require_once 'PEAR.php';
-require_once 'DB_DBA/DBA.php';
+require_once 'DB/DBA/DBA.php';
 
 define ('DBA_SCHEMA_KEY', '__schema__');
 

@@ -19,7 +19,7 @@
 // $Id$
 
 require_once 'PEAR.php';
-require_once 'DB_DBA/DBA_Table.php';
+require_once 'DB/DBA/DBA_Table.php';
 
 /**
  * a relational database manager for DBM-style databases
