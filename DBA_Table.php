@@ -32,6 +32,32 @@ define('DBA_SCHEMA_KEY', '__schema__');
  * Reserved character used to separate fields in a row
  */
 define('DBA_FIELD_SEPARATOR', '|');
+define('DBA_OPTION_SEPARATOR', ';');
+
+/**
+ * Available types
+ */
+define('DBA_INTEGER', 10);
+define('DBA_NUMERIC', 11);
+define('DBA_FLOAT', 12);
+define('DBA_CHAR', 13);
+define('DBA_VARCHAR', 14);
+define('DBA_TEXT', 15);
+define('DBA_BOOLEAN', 16);
+define('DBA_ENUM', 17);
+define('DBA_SET', 18);
+define('DBA_TIMESTAMP', 19);
+
+/**
+ * Key tokens
+ */
+define('DBA_TYPE', 0);
+define('DBA_DOMAIN', 1);
+define('DBA_SIZE', 2);
+define('DBA_PRIMARYKEY', 3);
+define('DBA_AUTOINCREMENT', 4);
+define('DBA_DEFAULT', 5);
+define('DBA_NOTNULL', 6);
 
 /**
  * DBA Table
@@ -87,14 +113,6 @@ class DBA_Table extends PEAR
      * @access private
      */
     var $_primaryKey=null;
-
-    /**
-     * Data types understood by DBA_Table
-     * @var    array
-     * @access private
-     */
-    var $_types = array('integer', 'numeric', 'float', 'varchar', 'text',
-                       'boolean', 'enum', 'set', 'timestamp');
 
     /**
      * Constructor
@@ -349,8 +367,8 @@ class DBA_Table extends PEAR
     function _packField($field, $value)
     {
         $c_value = null;
-        switch ($this->_schema[$field]['type']) {
-            case 'set':
+        switch ($this->_schema[$field][DBA_TYPE]) {
+            case DBA_SET:
                 if (is_string($value)) {
                     $value = explode(',', $value);
                 }
@@ -360,7 +378,7 @@ class DBA_Table extends PEAR
                     foreach ($value as $element) {
                         if (is_string($element)) {
                             $c_element = array_search($element,
-                                         $this->_schema[$field]['domain']);
+                                         $this->_schema[$field][DBA_DOMAIN]);
                             if (!is_null($c_element)) {
                                 $c_value[] = $c_element;
                             }
@@ -369,16 +387,16 @@ class DBA_Table extends PEAR
                     $c_value = implode(',',$c_value);
                 }
                 break;
-            case 'enum':
+            case DBA_ENUM:
                 if (is_string ($value)) {
                     $c_value = array_search($value,
-                                      $this->_schema[$field]['domain']);
+                                      $this->_schema[$field][DBA_DOMAIN]);
                     if (!is_null($c_value)) {
                         $c_value = strval($c_value);
                     }
                 }
                 break;
-            case 'timestamp':
+            case DBA_TIMESTAMP:
                 if (is_numeric($value)) {
                     $c_value = strval($value);
                 } else {
@@ -392,7 +410,7 @@ class DBA_Table extends PEAR
                     }
                 }
                 break;
-            case 'boolean':
+            case DBA_BOOLEAN:
                 if (is_bool ($value)) {
                     $c_value = strval ($value);
                 } else {
@@ -403,23 +421,21 @@ class DBA_Table extends PEAR
                     }
                 }
                 break;
-            case 'text':
+            case DBA_TEXT:
                 if (!(is_array($value) || is_object($value))) {
                     $c_value = str_replace(DBA_FIELD_SEPARATOR,'', $value);
                 }
                 break;
-            case 'varchar':
+            case DBA_VARCHAR:
                 if (!(is_array($value) || is_object($value))) {
-                    if ($this->_schema[$field]['size']) {
+                    if ($this->_schema[$field][DBA_SIZE]) {
                         $c_value = rtrim(substr($value, 0,
-                                         $this->_schema[$field]['size']));
+                                         $this->_schema[$field][DBA_SIZE]));
                     }
                     $c_value = str_replace(DBA_FIELD_SEPARATOR,'', $value);
                 }
                 break;
-            case 'integer':
-            case 'float':
-            case 'numeric':
+            case DBA_INTEGER: case DBA_FLOAT: case DBA_NUMERIC:
                 if (is_numeric ($value)) {
                     $c_value = strval ($value);
                 }
@@ -437,28 +453,28 @@ class DBA_Table extends PEAR
      */
     function _unpackField($field, $value)
     {
-        switch ($this->_schema[$field]['type']) {
-            case 'set':
+        switch ($this->_schema[$field][DBA_TYPE]) {
+            case DBA_SET:
                 $c_value = array();
                 $value = explode (',',$value);
                 if (is_array($value)) {
                     foreach ($value as $element) {
-                        $c_value[] = $this->_schema[$field]['domain'][$element];
+                      $c_value[] = $this->_schema[$field][DBA_DOMAIN][$element];
                     }
                 }
                 return $c_value;
-            case 'enum':
-                return $this->_schema[$field]['domain'][$value];
-            case 'boolean':
+            case DBA_ENUM:
+                return $this->_schema[$field][DBA_DOMAIN][$value];
+            case DBA_BOOLEAN:
                 return($value == '1');
-            case 'timestamp':
-            case 'integer':
+            case DBA_TIMESTAMP:
+            case DBA_INTEGER:
                 return intval($value);
-            case 'float':
-            case 'numeric':
+            case DBA_FLOAT:
+            case DBA_NUMERIC:
                 return floatval($value);
-            case 'varchar':
-            case 'text':
+            case DBA_VARCHAR:
+            case DBA_TEXT:
                 return $value;
         }
     }
@@ -486,50 +502,29 @@ class DBA_Table extends PEAR
             $buffer = $fieldName;
 
             foreach ($fieldMeta as $attribute => $value) {
-
-                $attribute = strtolower($attribute);
-                $buffer .= ';'.$attribute.'=';
+                $buffer .= DBA_OPTION_SEPARATOR.$attribute.'=';
 
                 switch ($attribute) {
-
-                    case 'domain':
-                        $buffer .= implode(',',$value);
-                        break;
-                    case 'type':
-                        // sanitize type names
-                        $value = strtolower($value);
-                        if ($value == 'int') $value = 'integer';
-                        elseif ($value == 'bool') $value = 'boolean';
-
-                        // is this a valid type?
-                        if (!in_array($value, $this->_types)) {
-                            return $this->raiseError("$value not a valid type");
-                        }
-                        $buffer .= $value;
-                        break;
-                    case 'autoincrement':
-                        $buffer .= $value;
-                        // if we do not have an established ceiling, use
-                        // the init value, or 0
-                        if (!isset($fieldMeta['ceiling'])) {
-                            $buffer .= ';ceiling=';
-                            if (isset($fieldMeta['init'])) {
-                                $buffer .= $fieldMeta['init'];
-                            } else {
-                                $buffer .= '0';
-                            }
-                        } 
-                        break;
-                    case 'primarykey':
+                    case DBA_PRIMARYKEY:
                         if ($primarykey) {
                             return $this->raiseError('cannot have two '.
                                                      'primary keys in schema');
                         } else {
+                            $buffer .= $value;
                             $primarykey = true;
                         }
-                    case 'init': //handle this later with auto??cement
+                        break;
+                    case DBA_DEFAULT:
+                        if ($fieldMeta[DBA_AUTOINCREMENT]) {
+                            $buffer .= $value+1;
+                        }
+                        break;
                     default:
-                        $buffer .= $value;
+                        if (is_array($value)) {
+                            $buffer .= implode(',',$value);
+                        } else {
+                            $buffer .= $value;
+                        }
                 }
             }
             $fields[] = $buffer;
@@ -550,19 +545,15 @@ class DBA_Table extends PEAR
         $rawFields = explode(DBA_FIELD_SEPARATOR, $rawFieldString);
         $this->_primaryKey = false;
         foreach ($rawFields as $rawField) {
-            $rawMeta = explode(';',$rawField);
+            $rawMeta = explode(DBA_OPTION_SEPARATOR, $rawField);
             $name = array_shift($rawMeta);
             foreach ($rawMeta as $rawAttribute) {
                 list($attribute,$rawValue) = explode('=',$rawAttribute);
                 switch ($attribute) {
-                    case 'domain':
+                    case DBA_DOMAIN:
                         $value = explode(',',$rawValue);
                         break;
-                    case 'primarykey':
-                        if ($this->_primaryKey) {
-                            return $this->raiseError('schema has two '.
-                                                     'primary keys');
-                        }
+                    case DBA_PRIMARYKEY:
                         $this->_primaryKey = true;
                     default:
                         $value = $rawValue;
@@ -598,18 +589,18 @@ class DBA_Table extends PEAR
                 // data ordering is implicit, e.g. $i=>data
                 $c_value = $this->_packField($fieldName, $data[$i]);
 
-            } elseif ($fieldMeta['autoincrement']==1) {
+            } elseif ($fieldMeta[DBA_AUTOINCREMENT]==1) {
 
                 // no data is supplied
                 // get a value and increase the ceiling
                 $c_value = $this->_schema[$fieldName]['ceiling']++;
 
-            } elseif (isset($fieldMeta['default'])) {
+            } elseif (isset($fieldMeta[DBA_DEFAULT])) {
 
                 // use the default value
-                $c_value = $this->_packField($fieldName, $fieldMeta['default']);
+              $c_value = $this->_packField($fieldName, $fieldMeta[DBA_DEFAULT]);
 
-            } elseif ($fieldMeta['notnull']) {
+            } elseif ($fieldMeta[DBA_NOTNULL]) {
 
                 return $this->raiseError("$fieldName cannot be null");
 
@@ -620,7 +611,7 @@ class DBA_Table extends PEAR
             }
 
             // if this field is the primary key, set $primaryKey
-            if (isset($fieldMeta['primarykey'])) {
+            if (isset($fieldMeta[DBA_PRIMARYKEY])) {
                 $primaryKey = $c_value;
             }
 
@@ -800,22 +791,17 @@ class DBA_Table extends PEAR
      */
     function _finalizeField($field, $value)
     {
-        switch ($this->_schema[$field]['type']) {
-            case 'set':
+        switch ($this->_schema[$field][DBA_TYPE]) {
+            case DBA_SET:
                 $buffer = '';
                 foreach ($value as $element) {
                     $buffer .= "$element, ";
                 }
                 return substr($buffer,0 ,-2);
-            case 'boolean':
-                if ($value) return "true";
-                return "false";
-            case 'timestamp':
-                if ($format = $this->_schema[$field]['format']) {
-                    return date($format, $value);
-                } else {
-                    return date($this->_dateFormat, $value);
-                }
+            case DBA_BOOLEAN:
+                return $value ? 'true' : 'false';
+            case DBA_TIMESTAMP:
+                return date($this->_dateFormat, $value);
             default:
                 return $value;
         }
