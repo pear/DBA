@@ -43,7 +43,7 @@ $queries = array(
   album int,
   price float (4,2),
   description text default 'hello',
-  id int default 0 primary key auto_increment not null,
+  id int default 0 primary key not null,
 )",
 "create table brent (
     filename varchar(10),

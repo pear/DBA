@@ -96,7 +96,7 @@ class Sql_Parser
         $message .= str_repeat(' ', ($this->lexer->tokPtr - 
                                $this->lexer->lineBegin -
                                strlen($this->lexer->tokText)))."^";
-        $message .= ' found instead: '.$this->lexer->tokText."\n";
+        $message .= ' found: '.$this->lexer->tokText."\n";
 
         return PEAR::raiseError($message);
     }
@@ -172,7 +172,7 @@ class Sql_Parser
             $option = $this->token;
             $haveValue = true;
             switch ($option) {
-                case ('constraint'):
+                case 'constraint':
                     $this->getTok();
                     if ($this->token = 'ident') {
                         $constraintName = $this->lexer->tokText;
@@ -182,16 +182,23 @@ class Sql_Parser
                         return $this->raiseError('Expected a constraint name');
                     }
                     break;
-                case ('default'):
+                case 'default':
                     $this->getTok();
                     if ($this->isVal()) {
-                        $constraintType = 'default';
-                        $constraintValue = $this->lexer->tokText;
+                        $constraintOpts['type'] = 'default_value';
+                        $constraintOpts['value'] = $this->lexer->tokText;
+                    } elseif ($this->isFunc()) {
+                        $results =& $this->parseFunctionOpts();
+                        if (PEAR::isError($results)) {
+                            return $results;
+                        }
+                        $results['type'] = 'default_function';
+                        $constraintOpts =& $results;
                     } else {
                         return $this->raiseError('Expected default value');
                     }
                     break;
-                case ('primary'):
+                case 'primary':
                     $this->getTok();
                     if ($this->token == 'key') {
                         $constraintType = 'primary_key';
@@ -200,7 +207,7 @@ class Sql_Parser
                         return $this->raiseError('Expected "key"');
                     }
                     break;
-                case ('not'):
+                case 'not':
                     $this->getTok();
                     if ($this->token == 'null') {
                         $constraintType = 'not_null';
@@ -209,7 +216,7 @@ class Sql_Parser
                         return $this->raiseError('Expected "null"');
                     }
                     break;
-                case ('check'): case ('varying'): case ('unique'):
+                case 'check': case 'varying': case 'unique':
                     $this->getTok();
                     if ($this->token != '(') {
                         return $this->raiseError('Expected (');
@@ -226,11 +233,7 @@ class Sql_Parser
                         return $this->raiseError('Expected )');
                     }
                     break;
-                case ('auto_increment'):
-                    $constraintType = 'auto_increment';
-                    $constraintValue = true;
-                    break;
-                case ('null'):
+                case 'null':
                     $haveValue = false;
                     break;
                 default:
@@ -260,32 +263,40 @@ class Sql_Parser
     {
         $clause = array();
         $this->getTok();
+        // parse the first argument
+        if ($this->token == 'not') {
+            $clause['neg'] = true;
+            $this->getTok();
+        }
+        if ($this->isReserved()) {
+            return $this->raiseError('Expected a column name or value');
+        }
+        $clause['arg_1']['value'] = $this->lexer->tokText;
+        $clause['arg_1']['type'] = $this->token;
+
+        // parse the operator
+        $this->getTok();
+        if (!$this->isOperator()) {
+            return $this->raiseError('Expected an operator');
+        }
+        $clause['op'] = $this->token;
+
+        // parse the second argument
+        $this->getTok();
         if ($this->isReserved()) {
             return $this->raiseError('Expected a column name or value');
         }
         $clause['arg_2']['value'] = $this->lexer->tokText;
         $clause['arg_2']['type'] = $this->token;
         $this->getTok();
-        if (!$this->isOperator()) {
-            return $this->raiseError('Expected an operator');
-        }
-        $clause['op'] = $this->token;
-        $this->getTok();
-        if ($this->isReserved()) {
-            return $this->raiseError('Expected a column name or value');
-        } else {
-            $clause['arg_1']['value'] = $this->lexer->tokText;
-            $clause['arg_1']['type'] = $this->token;
-        }
-        $this->getTok();
         if (($this->token == 'and') || ($this->token == 'or')) {
             $subClause = $this->parseSearchClause();
             if (PEAR::isError($subClause)) {
                 return $subClause;
             } else {
-                return array('arg_2' => $clause,
+                return array('arg_1' => $clause,
                             'op' => $this->token,
-                            'arg_1' => $subClause);
+                            'arg_2' => $subClause);
             }
         } else {
             $this->lexer->unget();
@@ -308,6 +319,8 @@ class Sql_Parser
             $this->getTok();
             if ($this->token == 'ident') {
                 $name = $this->lexer->tokText;
+            } elseif ($this->token == ')') {
+                return $fields;
             } else {
                 return $this->raiseError('Expected identifier');
             }
@@ -386,7 +399,7 @@ class Sql_Parser
 
             if ($this->token == ')') {
                 return $fields;
-            } elseif ($this->token == null) {
+            } elseif (is_null($this->token)) {
                 return $this->raiseError('Expected )');
             }
         }
