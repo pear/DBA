@@ -27,20 +27,12 @@ class SqlParserTest extends PHPUnit_TestCase {
         foreach ($tests as $number=>$test) {
             $result = $this->parser->parse($test['sql']);
             $expected = $test['expect'];
-            $message = "\nSQL: {$test['sql']}\n";
-/*
-            ob_start();
-            print_r($expected);
-            $message .= "\nExpected:\n ".ob_get_contents();
-            ob_clean();
-            print_r($result);
-            $message .= "\nOutput:\n ".ob_get_contents();
-            ob_end_clean();
-            $message .= "\nExpected:\n ".serialize($expected);
-            $message .= "\nOutput:\n ".serialize($result);
-*/
-            $message .= "\nExpected:\n".$this->dumper->r_display($expected);
-            $message .= "\nResult:\n".$this->dumper->r_display($result);
+            if (PEAR::isError($result)) {
+                $message = "\nSQL: {$test['sql']}\n";
+                $message .= "\nExpected:\n".$this->dumper->r_display($expected);
+                $message .= "\nResult:\n".$this->dumper->r_display($result);
+                $result = $result->getMessage();
+            }
             $this->assertEquals($expected, $result, $message, $number);
         }
     }
@@ -50,12 +42,15 @@ class SqlParserTest extends PHPUnit_TestCase {
         $this->runTests($tests);
     }
 
-/*
     function testUpdate() {
         include 'update.php';
         $this->runTests($tests);
     }
-*/
+
+    function testInsert() {
+        include 'insert.php';
+        $this->runTests($tests);
+    }
 
     function testCreate() {
         include 'create.php';

@@ -1,52 +1,215 @@
 <?php
-$tests =
+$tests = array(
 array(
-    array(
-        'sql'=>'SELECT COUNT(DISTINCT country) FROM publishers',
-        'expect'=>array(
-            'command'=>'select',
-            'set_function'=>array(
-                'name'=>'count',
-                'distinct'=>true,
-                'arg'=>'country'),
-            'table_names'=>array('publishers')
-        )
-    ),
-    array(
-        'sql'=>'select * from dog where cat <> 4',
-        'expect'=>array(
-            'command'=>'select',
-            'column_names'=>array('*'),
-            'table_names'=>array('dog'),
-            'where_clause'=>array(
-                'arg_1'=>array(
-                    'value'=>'cat',
-                    'type'=>'ident'),
-                'op'=>'<>',
-                'arg_2'=>array(
-                    'value'=>'4',
-                    'type'=>'int_val')
+'sql' => 'update dogmeat set horse=2 dog=\'forty\' where moose <> \'howdydoo\'',
+'expect' => 'Parse error: Expected "where" or "," on line 1
+update dogmeat set horse=2 dog=\'forty\' where moose <> \'howdydoo\'
+                           ^ found: dog'
+
+),
+array(
+'sql' => 'update dogmeat set horse=2 dog=\'forty\' where moose != \'howdydoo\'',
+'expect' => 'Parse error: Expected "where" or "," on line 1
+update dogmeat set horse=2 dog=\'forty\' where moose != \'howdydoo\'
+                           ^ found: dog'
+
+),
+array(
+'sql' => 'update dogmeat set horse=2 , dog=\'forty\' where moose <> \'howdydoo\'',
+'expect' => array(
+        'command' => 'update',
+        'table_name' => 'dogmeat',
+        'column_names' => array(
+            0 => 'horse',
+            1 => 'dog'
+            ),
+        'values' => array(
+            0 => array(
+                'value' => 2,
+                'type' => 'int_val'
+                ),
+            1 => array(
+                'value' => 'forty',
+                'type' => 'text_val'
+                )
+            ),
+        'where_clause' => array(
+            'arg_1' => array(
+                'value' => 'moose',
+                'type' => 'ident'
+                ),
+            'op' => '<>',
+            'arg_2' => array(
+                'value' => 'howdydoo',
+                'type' => 'text_val'
+                )
             )
         )
-    ),
-    array(
-        'sql'=>'select legs, hairy from dog',
-        'expect'=>array(
-            'command'=>'select',
-            'column_names'=>array('legs', 'hairy'),
-            'table_names'=>array('dog'),
-        )
-    ),
-    array(
-        'sql'=>'select max(length) from dog',
-        'expect'=>array(
-            'command'=>'select',
-            'set_function'=>array(
-                'name'=>'max',
-                'arg'=>'length'
+),
+array(
+'sql' => 'update table1 set col=1 where not col = 2',
+'expect' => array(
+        'command' => 'update',
+        'table_name' => 'table1',
+        'column_names' => array(
+            0 => 'col'
             ),
-            'table_names'=>array('dog')
-        ),
-    ),
+        'values' => array(
+            0 => array(
+                'value' => 1,
+                'type' => 'int_val'
+                )
+            ),
+        'where_clause' => array(
+            'neg' => true,
+            'arg_1' => array(
+                'value' => 'col',
+                'type' => 'ident'
+                ),
+            'op' => '=',
+            'arg_2' => array(
+                'value' => 2,
+                'type' => 'int_val'
+                )
+            )
+        )
+),
+array(
+'sql' => 'update table2 set col=1 where col > 2 and col <> 4',
+'expect' => array(
+        'command' => 'update',
+        'table_name' => 'table2',
+        'column_names' => array(
+            0 => 'col'
+            ),
+        'values' => array(
+            0 => array(
+                'value' => 1,
+                'type' => 'int_val'
+                )
+            ),
+        'where_clause' => array(
+            'arg_1' => array(
+                'arg_1' => array(
+                    'value' => 'col',
+                    'type' => 'ident'
+                    ),
+                'op' => '>',
+                'arg_2' => array(
+                    'value' => 2,
+                    'type' => 'int_val'
+                    )
+                ),
+            'op' => 'and',
+            'arg_2' => array(
+                'arg_1' => array(
+                    'value' => 'col',
+                    'type' => 'ident'
+                    ),
+                'op' => '<>',
+                'arg_2' => array(
+                    'value' => 4,
+                    'type' => 'int_val'
+                    )
+                )
+            )
+        )
+),
+array(
+'sql' => 'update table2 set col=1 where col > 2 and col <> 4 or dog="Hello"',
+'expect' => array(
+        'command' => 'update',
+        'table_name' => 'table2',
+        'column_names' => array(
+            0 => 'col'
+            ),
+        'values' => array(
+            0 => array(
+                'value' => 1,
+                'type' => 'int_val'
+                )
+            ),
+        'where_clause' => array(
+            'arg_1' => array(
+                'arg_1' => array(
+                    'value' => 'col',
+                    'type' => 'ident'
+                    ),
+                'op' => '>',
+                'arg_2' => array(
+                    'value' => 2,
+                    'type' => 'int_val'
+                    )
+                ),
+            'op' => 'and',
+            'arg_2' => array(
+                'arg_1' => array(
+                    'arg_1' => array(
+                        'value' => 'col',
+                        'type' => 'ident'
+                        ),
+                    'op' => '<>',
+                    'arg_2' => array(
+                        'value' => 4,
+                        'type' => 'int_val'
+                        )
+                    ),
+                'op' => 'or',
+                'arg_2' => array(
+                    'arg_1' => array(
+                        'value' => 'dog',
+                        'type' => 'ident'
+                        ),
+                    'op' => '=',
+                    'arg_2' => array(
+                        'value' => 'Hello',
+                        'type' => 'text_val'
+                        )
+                    )
+                )
+            )
+        )
+),
+array(
+'sql' => 'update table3 set col=1 where col > 2 and col < 30',
+'expect' => array(
+        'command' => 'update',
+        'table_name' => 'table3',
+        'column_names' => array(
+            0 => 'col'
+            ),
+        'values' => array(
+            0 => array(
+                'value' => 1,
+                'type' => 'int_val'
+                )
+            ),
+        'where_clause' => array(
+            'arg_1' => array(
+                'arg_1' => array(
+                    'value' => 'col',
+                    'type' => 'ident'
+                    ),
+                'op' => '>',
+                'arg_2' => array(
+                    'value' => 2,
+                    'type' => 'int_val'
+                    )
+                ),
+            'op' => 'and',
+            'arg_2' => array(
+                'arg_1' => array(
+                    'value' => 'col',
+                    'type' => 'ident'
+                    ),
+                'op' => '<',
+                'arg_2' => array(
+                    'value' => 30,
+                    'type' => 'int_val'
+                    )
+                )
+            )
+        )
+),
 );
 ?>
