@@ -259,6 +259,15 @@ class DBA_Simple extends PEAR {
     }
 
     /**
+     * PEAR emulated destructor calls close on PHP shutdown
+     * @access private
+     */
+    function _DBA_Simple()
+    {
+        $this->close();
+    }
+
+    /**
      * Returns the current read status for the database
      *
      * @access  public

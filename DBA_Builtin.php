@@ -189,6 +189,15 @@ class DBA_Builtin extends PEAR{
     }
 
     /**
+     * PEAR emulated destructor calls close on PHP shutdown
+     * @access private
+     */
+    function _DBA_Builtin()
+    {
+        $this->close();
+    }
+
+    /**
      * Returns the current read status for the database
      *
      * @access public
