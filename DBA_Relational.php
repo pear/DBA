@@ -123,12 +123,17 @@ class DBA_Relational extends PEAR
      */
     function _openTable($tableName, $mode = 'r')
     {
-        if (!isset($this->_tables[$tableName])) {
-            if (!$this->_manager->tableExists($this->_home.$tableName)) {
-                return $this->raiseError("DBA: table '$tableName' does not exist");
-            } else {
-                $this->_tables[$tableName] =& new DBA_Table($this->_driver);
+        if (is_string($tableName)) {
+            if (!isset($this->_tables[$tableName])) {
+                if (!$this->_manager->tableExists($this->_home.$tableName)) {
+                    return $this->raiseError('DBA: table "'.$tableName.
+                                              'does not exist');
+                } else {
+                    $this->_tables[$tableName] =& new DBA_Table($this->_driver);
+                }
             }
+        } else {
+            return $this->raiseError('DBA: invalid table name, '.$tableName);
         }
 
         if (!$this->_tables[$tableName]->isOpen()) {
