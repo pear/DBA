@@ -32,10 +32,11 @@ require_once 'DB/DBA/DBA_Table.php';
  * @author  Brent Cook <busterb@mail.utexas.edu>
  * @package DBA
  * @access  public
- * @version 0.17
+ * @version 0.18
  */
 class DBA_Relational extends PEAR
 {
+    // {{{ instance variables
     /**
      * Handles to table objects
      * @access private
@@ -63,7 +64,9 @@ class DBA_Relational extends PEAR
      * @var string
      */
     var $_driver;
+    // }}}
 
+    // {{{ DBA_Relational($home = '', $driver = 'simple')
     /**
      * Constructor
      *
@@ -86,11 +89,15 @@ class DBA_Relational extends PEAR
         // initialize the manager table
         $this->_manager =& new DBA_Table($this->_driver);
     }
+    // }}}
 
+    // {{{ raiseError($message)
     function raiseError($message) {
         return PEAR::raiseError('DBA_Relational: '.$message);
     }
+    // }}}
 
+    // {{{ close()
     /**
      * Closes all open tables
      *
@@ -106,7 +113,9 @@ class DBA_Relational extends PEAR
             }
         }
     }
+    // }}}
 
+    // {{{ _DBA_Relational()
     /**
      * PEAR emulated destructor calls close on PHP shutdown
      * @access  private
@@ -115,7 +124,9 @@ class DBA_Relational extends PEAR
     {
         $this->close();
     }
+    // }}}
 
+    // {{{ _openTable($tableName, $mode = 'r')
     /**
      * Opens a table, keeps it in the list of tables. Can also reopen tables
      * to different file modes
@@ -141,13 +152,16 @@ class DBA_Relational extends PEAR
             if (($mode == 'r') && !$this->_tables[$tableName]->isReadable()) {
                 // obtain a shared lock on the table
                 return $this->_tables[$tableName]->lockSh();
-            } elseif (($mode == 'w') && !$this->_tables[$tableName]->isWritable()){
+            } elseif (($mode == 'w') &&
+                       !$this->_tables[$tableName]->isWritable()){
                 // obtain an exclusive lock on the table
                 return $this->_tables[$tableName]->lockEx();
             }
         }
     }
+    // }}}
 
+    // {{{ tableExists($tableName)
     /**
      * Returns whether the specified table exists in the db home
      *
@@ -158,7 +172,9 @@ class DBA_Relational extends PEAR
     {
         return $this->_manager->tableExists($this->_home.$tableName);
     }
+    // }}}
 
+    // {{{ createTable
     /**
      * Creates a new table
      *
@@ -171,7 +187,9 @@ class DBA_Relational extends PEAR
     {
         return $this->_manager->create($this->_home.$tableName, $schema);
     }
+    // }}}
 
+    // {{{ getSchema
     /**
      * Returns an array with the stored schema for the table
      *
@@ -187,7 +205,9 @@ class DBA_Relational extends PEAR
             return $this->_tables[$tableName]->getSchema();
         }
     }
+    // }}}
 
+    // {{{ isOpen($tableName)
     /**
      * Returns the current read status for the database
      *
@@ -201,7 +221,9 @@ class DBA_Relational extends PEAR
             return false;
         }
     }
+    // }}}
 
+    // {{{ insert($tableName, $data)
     /**
      * Inserts a new row in a table
      *
@@ -218,7 +240,9 @@ class DBA_Relational extends PEAR
             return $this->_tables[$tableName]->insert($data);
         }
     }
+    // }}}
 
+    // {{{ replace($tableName, $key, $data)
     /**
      * Replaces an existing row in a table, inserts if the row does not exist
      *
@@ -237,7 +261,9 @@ class DBA_Relational extends PEAR
             return $this->_tables[$tableName]->replace($key, $data);
         } 
     }
+    // }}}
 
+    // {{{ remove($tableName, $key)
     /**
      * Remove an existing row in a table
      *
@@ -255,7 +281,9 @@ class DBA_Relational extends PEAR
             return $this->_tables[$tableName]->remove($key);
         }
     }
+    // }}}
 
+    // {{{ fetch($tableName, $key)
     /**
      * Fetches an existing row from a table
      *
@@ -273,7 +301,9 @@ class DBA_Relational extends PEAR
             return $this->_tables[$tableName]->fetch($key);
         }
     }
+    // }}}
 
+    // {{{ select($tableName, $query, $rows=null)
     /**
      * Performs a select on a table. This means that a subset of rows in a
      * table are filtered and returned based on the query. Accepts any valid
@@ -296,8 +326,9 @@ class DBA_Relational extends PEAR
             return $this->_tables[$tableName]->select($query, $rows);
         }
     }
+    // }}}
 
-
+    // {{{ sort($fields, $order='a', $rows)
     /**
      * Sorts rows by field in either ascending or descending order
      * SQL analog: 'select * from rows, order by fields'
@@ -314,7 +345,9 @@ class DBA_Relational extends PEAR
     {
         return $this->_manager->sort($fields, $order, $rows);
     }
+    // }}}
 
+    // {{{ project($fields, $rows)
     /**
      * Projects rows by field. This means that a subset of the possible fields
      * are in the resulting rows. The SQL analog is 'select fields from table'
@@ -329,7 +362,9 @@ class DBA_Relational extends PEAR
     {
         return $this->_manager->project($fields, $rows);
     }
+    // }}}
 
+    // {{{ unique($rows)
     /**
      * Returns the unique rows from a set of rows
      *
@@ -342,7 +377,9 @@ class DBA_Relational extends PEAR
     {
         return $this->_manager->unique($rows);
     }
+    // }}}
 
+    // {{{ finalize($tableName, $rows=null)
     /**
      * Converts the results from any of the row operations to a 'finalized'
      * display-ready form. That means that timestamps, sets and enums are
@@ -368,7 +405,9 @@ class DBA_Relational extends PEAR
             return $this->_tables[$tableName]->finalize($rows);
         }
     }
+    // }}}
 
+    // {{{ _validateTable(&$table, &$rows, &$fields, $altName)
     /**
      * Verifies that the fields submitted exist in $table
      * @access private
@@ -394,7 +433,9 @@ class DBA_Relational extends PEAR
         $rows = null;
         return false;
     }
+    // }}}
 
+    // {{{ _parsePHPQuery($rawQuery, $fieldsA, $fieldsB, $tableA, $tableB)
     /**
      * Constructs a PHP query based on $rawQuery
      * @access private
@@ -431,7 +472,9 @@ class DBA_Relational extends PEAR
         }
         return $phpQuery;
     }
+    // }}}
     
+    // {{{ join($tableA, $tableB, $rawQuery)
     /**
      * Joins rows between two tables based on a query.
      *
@@ -474,4 +517,5 @@ class DBA_Relational extends PEAR
 
         return $results;
     }
+    // }}}
 }

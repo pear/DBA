@@ -20,24 +20,11 @@
 
     <release>
         <license>LGPL</license>
-        <version>0.17</version>
-        <date>2002-07-17</date>
+        <version>0.18</version>
+        <date>0000-00-00</date>
         <state>devel</state>
         <notes>
             <![CDATA[
-                Test and enjoy. Sequence and more SQL support coming soon.
-            
-                * Fixed problem inserting onto a newly created table in
-                  DBA_Relational
-                * Added support for functions as default values in DBA_Table
-                  (currently only time() works)
-                * Added a SQL parser/lexer. It currently understands 'create
-                table', 'insert into' and much that goes with them.
-                * Added two system fields on rows; _rowid and _timestamp
-                * Primary keys can consist of more than one field
-                * Changed DBA_Sql; it now holds functions for interacting with
-                  a DBA database using SQL. See test_sql_dba.php for examples.
-                * General fixes/cleanups/messups
             ]]>
         </notes>
         <filelist>

@@ -22,6 +22,7 @@
 
 require_once 'PEAR.php';
 
+// {{{ constants
 /**
  * Location in the index file for a block location
  */
@@ -41,6 +42,7 @@ define('DBA_SIMPLE_VSIZE',2);
  * Location in the index file for a block key
  */
 define('DBA_SIMPLE_KEY',3);
+// }}}
 
 /**
  * DBA_Simple provides a file-based implementation of a DBM-style database.
@@ -69,12 +71,13 @@ define('DBA_SIMPLE_KEY',3);
  * The sync function calls fflush on the data and index files.
  *
  * @author  Brent Cook
- * @version 0.17
+ * @version 0.18
  * @access  public
  * @package DBA
  */
 class DBA_Simple extends PEAR 
 {
+    // {{{ instance variables
     /**
      * Name of the database
      * @access private
@@ -104,7 +107,9 @@ class DBA_Simple extends PEAR
      * @access private
      */
     var $_readable;
+    // }}}
 
+    // {{{ open($dbName='', $mode='r')
     /**
      * Opens a database.
      *
@@ -192,7 +197,9 @@ class DBA_Simple extends PEAR
             $this->_readIdx();
         }
     }
+    // }}}
 
+    // {{{ close()
     /**
      * Closes an open database.
      *
@@ -215,7 +222,9 @@ class DBA_Simple extends PEAR
             return $this->raiseError('DBA: No database was open');
         }
     }
+    // }}}
 
+    // {{{ reopen($mode)
     /**
      * Reopens an already open database in read-only or write mode.
      * If the database is already in the requested mode, then this function
@@ -244,7 +253,9 @@ class DBA_Simple extends PEAR
             return $this->raiseError('DBA: No database was open');
         }
     }
+    // }}}
 
+    // {{{ _DBA_Simple()
     /**
      * PEAR emulated destructor calls close on PHP shutdown
      * @access private
@@ -253,7 +264,9 @@ class DBA_Simple extends PEAR
     {
         $this->close();
     }
+    // }}}
 
+    // {{{ getName()
     /**
      * Returns the name of the opened database. Assumes database is open
      * @returns string the name of the opened database
@@ -262,7 +275,9 @@ class DBA_Simple extends PEAR
     {
         return $this->_dbName;
     }
+    // }}}
 
+    // {{{ isOpen()
     /**
      * Returns the current open status for the database
      *
@@ -273,7 +288,9 @@ class DBA_Simple extends PEAR
     {
         return($this->_readable || $this->_writable);
     }
+    // }}}
 
+    // {{{ isReadable()
     /**
      * Returns the current read status for the database
      *
@@ -284,7 +301,9 @@ class DBA_Simple extends PEAR
     {
         return $this->_readable;
     }
+    // }}}
 
+    // {{{ isWritable()
     /**
      * Returns the current write status for the database
      *
@@ -295,7 +314,9 @@ class DBA_Simple extends PEAR
      {
          return $this->_writable;
      }
+    // }}}
 
+    // {{{ remove($key)
     /**
      * Removes the value at location $key
      *
@@ -317,7 +338,9 @@ class DBA_Simple extends PEAR
                            $key. ', DB not writable');
         }
     }
+    // }}}
 
+    // {{{ &fetch($key)
     /**
      * Returns the value that is stored at $key.
      *
@@ -340,7 +363,9 @@ class DBA_Simple extends PEAR
                           $this->_dbName. ', DB not readable');
         }
     }
+    // }}}
 
+    // {{{ firstkey()
     /**
      * Returns the first key in the database
      *
@@ -356,7 +381,9 @@ class DBA_Simple extends PEAR
             return false;
         }
     }
+    // }}}
 
+    // {{{ nextkey()
     /**
      * Returns the next key in the database, false if there is a problem
      *
@@ -372,7 +399,9 @@ class DBA_Simple extends PEAR
             return false;
         }
     }
+    // }}}
 
+    // {{{ size()
     /**
      * Calculates the size of the database
      *
@@ -387,7 +416,9 @@ class DBA_Simple extends PEAR
             return 0;
         }
     }
+    // }}}
 
+    // {{{ insert($key, $value)
     /**
      * Inserts a new value at $key. Will not overwrite if the key/value pair
      * already exist
@@ -406,7 +437,9 @@ class DBA_Simple extends PEAR
             return $this->replace($key, $value);
         }
     }
+    // }}}
 
+    // {{{ replace($key, $value)
     /**
      * Inserts a new value at key. If the key/value pair
      * already exist, overwrites the value
@@ -457,7 +490,9 @@ class DBA_Simple extends PEAR
                           $this->_dbName. ', DB not writable');
         }
     }
+    // }}}
     
+    // {{{ _writeNewBlock($key, $value, $vsize)
     /**
      * Allocates a new block of at least $vsize and writes $key=>$val
      * to the database
@@ -503,13 +538,15 @@ class DBA_Simple extends PEAR
             $this->_writeIdxEntry($loc, $size, $vsize, $key);
         }
     }
+    // }}}
 
+    // {{{ _getFreeBlock($reqsize)
     /**
      * Returns a block location from the free list
      *
      * @access  private
      * @param   int     $reqsize Requested size
-     * @returns mixed   location of free block, false if there are no free blocks
+     * @returns mixed  location of free block, false if there are no free blocks
      */
     function _getFreeBlock($reqsize)
     {
@@ -526,7 +563,9 @@ class DBA_Simple extends PEAR
         // no blocks available
         return false;
     }
+    // }}}
 
+    // {{{ _freeUsedBlock($key)
     /**
      * Places a used block on the free list, updates indicies accordingly
      *
@@ -543,7 +582,9 @@ class DBA_Simple extends PEAR
         $this->_freeBlocks[$loc] = $size;
         $this->_writeIdxEntry($loc, $size);
     }
+    // }}}
 
+    // {{{ create($dbName)
     /**
      * Creates a new database file if one does not exist. If it already exists,
      * updates the last-updated timestamp on the database
@@ -555,10 +596,12 @@ class DBA_Simple extends PEAR
     function create($dbName)
     {
         if (!(@touch($dbName.'.dat') && @touch($dbName.'.idx'))) {
-            return $this->raiseError('DBA: Could not create database: '.$dbName);
+           return $this->raiseError('DBA: Could not create database: '.$dbName);
         }
     }
+    // }}}
 
+    // {{{ db_exists($dbName)
     /**
      * Indicates whether a database with given name exists
      *
@@ -570,7 +613,9 @@ class DBA_Simple extends PEAR
     {
         return(file_exists($dbName.'.dat') && file_exists($dbName.'.idx'));
     }
+    // }}}
 
+    // {{{ exists($key)
     /**
      * Check whether key exists
      *
@@ -582,7 +627,9 @@ class DBA_Simple extends PEAR
     {
         return($this->isOpen() && isset($this->_usedBlocks[$key]));
     }
+    // }}}
 
+    // {{{ sync()
     /**
      * Synchronizes an open database to disk
      * @access  public
@@ -594,7 +641,9 @@ class DBA_Simple extends PEAR
             fflush($this->_idxFP);
         }
     }
+    // }}}
 
+    // {{{ optimize()
     /**
      * Optimizes an open database
      * @access  public
@@ -605,7 +654,9 @@ class DBA_Simple extends PEAR
             $this->_writeIdx();
         }
     }
+    // }}}
  
+    // {{{ _readIdx()
     /**
      * Reads the entries in an index file
      * Assumes that $this->_idxFP is valid and readable
@@ -642,14 +693,16 @@ class DBA_Simple extends PEAR
             $key = ''; // reset key for the next iteration
         }
     }
+    // }}}
 
+    // {{{ _writeIdx()
     /**
      * Rewrites the index file, removing free entries
      * Assumes that $this->_idxFP is valid and writable
      *
      * @access private
      */
-    function _writeIdx ()
+    function _writeIdx()
     {
         // move the file pointer to the beginning; ftruncate does not do this
         fseek($this->_idxFP, 0);
@@ -674,7 +727,9 @@ class DBA_Simple extends PEAR
         }
         fflush($this->_idxFP);
     }
+    // }}}
 
+    // {{{ _writeIdxEntry($loc, $size, $vsize=NULL, $key=NULL)
     /**
      * Writes a used block entry to an index file
      *
@@ -690,5 +745,6 @@ class DBA_Simple extends PEAR
             fputs($this->_idxFP, "$loc|$size|$vsize|$key\n");
         }
     }
+    // }}}
 }
 ?>

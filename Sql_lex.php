@@ -38,7 +38,7 @@ define('TOK_END_OF_INPUT',6);
  * A lexigraphical analyser inspired by the msql lexer
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.17
+ * @version 0.18
  * @access  public
  * @package DBA
  */

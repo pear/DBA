@@ -32,12 +32,13 @@ require_once 'PEAR.php';
  * driver due to its lack of writes. DB2 apparently segfaults PHP?
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.17
+ * @version 0.18
  * @access  public
  * @package DBA
  */
 class DBA_Builtin extends PEAR{
 
+    // {{{ instance variables
     /**
      * Name of the database
      * @access private
@@ -67,7 +68,9 @@ class DBA_Builtin extends PEAR{
      * @access private
      */
     var $_hasReplace;
+    // }}}
 
+    // {{{ DBA_Builtin($driver = 'gdbm')
     /* Constructor
      *
      * @access public
@@ -77,7 +80,9 @@ class DBA_Builtin extends PEAR{
     {
         $this->_driver = $driver;
     }
+    // }}}
 
+    // {{{ open($dbName='', $mode='r', $driver=NULL)
     /**
      * Opens a database.
      *
@@ -140,7 +145,9 @@ class DBA_Builtin extends PEAR{
                                      ." with mode $mode");
         }
     }
+    // }}}
 
+    // {{{ close()
     /**
      * Closes an open database.
      *
@@ -157,7 +164,9 @@ class DBA_Builtin extends PEAR{
             return $this->raiseError('DBA: No database was open');
         }
     }
+    // }}}
 
+    // {{{ reopen($mode)
     /**
      * Reopens an already open database in read-only or write mode.
      * If the database is already in the requested mode, then this function
@@ -183,7 +192,9 @@ class DBA_Builtin extends PEAR{
             return $this->raiseError('DBA: No database was open');
         }
     }
+    // }}}
 
+    // {{{ _DBA_Builtin()
     /**
      * PEAR emulated destructor calls close on PHP shutdown
      * @access private
@@ -192,7 +203,9 @@ class DBA_Builtin extends PEAR{
     {
         $this->close();
     }
+    // }}}
 
+    // {{{ isOpen()
     /**
      * Returns the current open status for the database
      *
@@ -203,7 +216,9 @@ class DBA_Builtin extends PEAR{
     {
         return($this->_readable || $this->_writable);
     }
+    // }}}
 
+    // {{{ isReadable()
     /**
      * Returns the current read status for the database
      *
@@ -214,7 +229,9 @@ class DBA_Builtin extends PEAR{
     {
         return $this->_readable;
     }
+    // }}}
 
+    // {{{ isWritable()
     /**
      * Returns the current write status for the database
      *
@@ -225,7 +242,9 @@ class DBA_Builtin extends PEAR{
      {
          return $this->_writable;
      }
+    // }}}
 
+    // {{{ remove($key)
     /**
      * Removes the value at location $key
      *
@@ -245,7 +264,9 @@ class DBA_Builtin extends PEAR{
                            $key. ', DB not writable');
         }
     }
+    // }}}
 
+    // {{{ fetch($key)
     /**
      * Returns the value that is stored at $key.
      *
@@ -267,7 +288,9 @@ class DBA_Builtin extends PEAR{
                           $this->_dbName. ', DB not readable');
         }
     }
+    // }}}
 
+    // {{{ firstkey()
     /**
      * Returns the first key in the database
      *
@@ -282,7 +305,9 @@ class DBA_Builtin extends PEAR{
             return false;
         }
     }
+    // }}}
 
+    // {{{ nextkey()
     /**
      * Returns the next key in the database, false if there is a problem
      *
@@ -297,7 +322,9 @@ class DBA_Builtin extends PEAR{
             return false;
         }
     }
+    // }}}
 
+    // {{{ insert($key, $value)
     /**
      * Inserts a new value at $key. Will not overwrite if the key/value pair
      * already exist
@@ -321,7 +348,9 @@ class DBA_Builtin extends PEAR{
                           $this->_dbName. ', DB not writable');
         }
     }
+    // }}}
 
+    // {{{ replace($key, $value)
     /**
      * Inserts a new value at key. If the key/value pair
      * already exist, overwrites the value
@@ -350,7 +379,9 @@ class DBA_Builtin extends PEAR{
                           $this->_dbName. ', DB not writable');
         }
     }
+    // }}}
     
+    // {{{ create($dbName, $driver='gdbm')
     /**
      * Creates a new database file if one does not exist. If it already exists,
      * updates the last-updated timestamp on the database
@@ -367,7 +398,9 @@ class DBA_Builtin extends PEAR{
             return $this->raiseError('DBA: Could not create database: '.$dbName);
         }
     }
+    // }}}
 
+    // {{{ db_exists($dbName)
     /**
      * Indicates whether a database with given name exists
      *
@@ -379,7 +412,9 @@ class DBA_Builtin extends PEAR{
     {
         return file_exists($dbName);
     }
+    // }}}
 
+    // {{{ exists($key)
     /**
      * Check whether key exists
      *
@@ -391,7 +426,9 @@ class DBA_Builtin extends PEAR{
     {
         return($this->isOpen() && dba_exists($key, $this->_dba));
     }
+    // }}}
 
+    // {{{ sync()
     /**
      * Synchronizes an open database to disk
      * @access public
@@ -400,7 +437,9 @@ class DBA_Builtin extends PEAR{
     {
         return dba_sync($this->_dba);
     }
+    // }}}
 
+    // {{{ optimize()
     /**
      * Optimizes an open database
      * @access public
@@ -409,5 +448,6 @@ class DBA_Builtin extends PEAR{
     {
         return dba_optimize($this->_dba);
     }
+    // }}}
 }
 ?>

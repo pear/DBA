@@ -23,6 +23,7 @@
 require_once 'PEAR.php';
 require_once 'DB/DBA/DBA.php';
 
+// {{{ constants
 /**
  * Reserved key used to store the schema record
  */
@@ -62,6 +63,7 @@ define('DBA_AUTOINCREMENT', 5);
 define('DBA_DEFAULT', 6);
 define('DBA_DEFAULTTYPE', 7);
 define('DBA_NOTNULL', 8);
+// }}}
 
 /**
  * DBA Table
@@ -77,10 +79,11 @@ define('DBA_NOTNULL', 8);
  * @author  Brent Cook <busterb@mail.utexas.edu>
  * @package DBA
  * @access  public
- * @version 0.17
+ * @version 0.18
  */
 class DBA_Table extends PEAR
 {
+    // {{{ instance variables
     /**
      * DBA object handle
      * @var     object
@@ -126,7 +129,9 @@ class DBA_Table extends PEAR
                             DBA_DEFAULT => 'time()',
                             DBA_DEFAULTTYPE => DBA_FUNCTION)
         );
+    // }}}
 
+    // {{{ DBA_Table($driver = 'simple')
     /**
      * Constructor
      *
@@ -139,7 +144,9 @@ class DBA_Table extends PEAR
         // initialize the internal dba object
         $this->_dba =& DBA::create($driver);
     }
+    // }}}
 
+    // {{{ _DBA_Table()
     /**
      * PEAR emulated destructor calls close on PHP shutdown
      * @access  private
@@ -148,12 +155,16 @@ class DBA_Table extends PEAR
     {
         $this->close();
     }
+    // }}}
 
+    // {{{ raiseError($message)
     function raiseError($message)
     {
         return PEAR::raiseError('DBA_Table: '.$message);
     }
+    // }}}
 
+    // {{{ open($tableName, $mode = 'r')
     /**
      * Opens a table
      *
@@ -189,7 +200,9 @@ class DBA_Table extends PEAR
         }
         return $this->_schema;
     }
+    // }}}
 
+    // {{{ close()
     /**
      * Closes a table
      *
@@ -210,7 +223,9 @@ class DBA_Table extends PEAR
         $this->_maxKey = null;
         return $this->_dba->close();
     }
+    // }}}
 
+    // {{{ create($tableName, $schema)
     /**
      * Creates a new table. Note, this closes any open table.
      *
@@ -241,7 +256,9 @@ class DBA_Table extends PEAR
             return $r;
         }
     }
+    // }}}
 
+    // {{{ getSchema()
     /**
      * Returns the stored schema for the table
      *
@@ -255,7 +272,9 @@ class DBA_Table extends PEAR
             return $this->raiseError('table not open, no schema available');
         }
     }  
+    // }}}
 
+    // {{{ tableExists($tableName)
     /**
      * Check whether table exists
      *
@@ -267,7 +286,9 @@ class DBA_Table extends PEAR
     {
         return $this->_dba->db_exists($tableName);
     }
+    // }}}
 
+    // {{{ isOpen()
     /**
      * Returns the current open status for the database
      *
@@ -278,7 +299,9 @@ class DBA_Table extends PEAR
     {
         return $this->_dba->isOpen();
     }
+    // }}}
 
+    // {{{ isReadable()
     /**
      * Returns the current read status for the database
      *
@@ -288,7 +311,9 @@ class DBA_Table extends PEAR
     {
         return $this->_dba->isReadable();
     }
+    // }}}
 
+    // {{{ isWritable()
     /**
      * Returns the current write status for the database
      *
@@ -298,7 +323,9 @@ class DBA_Table extends PEAR
     {
         return $this->_dba->isWritable();
     }
+    // }}}
 
+    // {{{ fieldExists($fieldName)
     /**
      * Returns whether a field exists in the current table's schema
      *
@@ -308,7 +335,9 @@ class DBA_Table extends PEAR
     {
         return($this->isOpen() && isset($this->_schema[$fieldName]));
     }
+    // }}}
 
+    // {{{ lockEx()
     /**
      * Aquire an exclusive lock on the table
      *
@@ -318,7 +347,9 @@ class DBA_Table extends PEAR
     {
         return $this->_dba->reopen('w');
     }
+    // }}}
 
+    // {{{ lockSh()
     /**
      * Aquire a shared lock on the table
      *
@@ -328,7 +359,9 @@ class DBA_Table extends PEAR
     {
         return $this->_dba->reopen('r');
     }
+    // }}}
 
+    // {{{ _packField($field, $value)
     /**
      * Returns a string for a raw field
      *
@@ -415,7 +448,9 @@ class DBA_Table extends PEAR
         }
         return $c_value;
     }
+    // }}}
 
+    // {{{ _unpackField($field, $value)
     /**
      * Converts a field from its packed representation to its original value
      *
@@ -452,7 +487,9 @@ class DBA_Table extends PEAR
                 return $value;
         }
     }
+    // }}}
 
+    // {{{ _packSchema($schema)
     /**
      * Returns a string for a field structure
      *
@@ -486,7 +523,9 @@ class DBA_Table extends PEAR
         }
         return implode(DBA_FIELD_SEPARATOR, $fields);
     }
+    // }}}
 
+    // {{{ _unpackSchema($rawFieldString)
     /**
      * Unpacks a raw string as created by _packSchema into an array
      * structure for use as $this->_schema
@@ -525,7 +564,9 @@ class DBA_Table extends PEAR
         }
         return $fields;
     }
+    // }}}
 
+    // {{{ _packRow($data, &$key)
     /**
      * Packs a fields from a raw row into an internal representation suitable
      * for storing in the table. Think of this as a cross-language version of
@@ -589,7 +630,9 @@ class DBA_Table extends PEAR
         $key = implode(DBA_KEY_SEPARATOR, $key);
         return implode(DBA_FIELD_SEPARATOR, $buffer);
     }
+    // }}}
 
+    // {{{ _unpackRow($packedData)
     /**
      * Unpacks a string into an array containing the data from the original
      * packed row. Think of this as a cross-language version of deserialize.
@@ -608,7 +651,9 @@ class DBA_Table extends PEAR
         }
         return $buffer;
     }
+    // }}}
 
+    // {{{ insert($data)
     /**
      * Inserts a new row in a table
      * 
@@ -635,7 +680,9 @@ class DBA_Table extends PEAR
             return $this->raiseError('table not writable');
         }
     }
+    // }}}
 
+    // {{{ replace($rawQuery, $data, $rows=null)
     /**
      * Replaces rows that match $rawQuery with $
      *
@@ -662,7 +709,9 @@ class DBA_Table extends PEAR
             }
         }
     }
+    // }}}
 
+    // {{{ replaceKey($key, $data)
     /**
      * Replaces an existing row in a table, inserts if the row does not exist
      *
@@ -683,7 +732,9 @@ class DBA_Table extends PEAR
             return $this->raiseError('table not open');
         }
     }
+    // }}}
 
+    // {{{ remove($rawQuery, $rows=null)
     /**
      * Removes existing rows from table that match $rawQuery
      *
@@ -705,7 +756,9 @@ class DBA_Table extends PEAR
             }
         }
     }
+    // }}}
 
+    // {{{ removeKey($key)
     /**
      * Removes an existing row from a table, referenced by the row key
      *
@@ -717,7 +770,9 @@ class DBA_Table extends PEAR
     {
         return $this->_dba->remove($key);
     }
+    // }}}
 
+    // {{{ fetch($key)
     /**
      * Fetches an existing row from a table
      *
@@ -734,7 +789,9 @@ class DBA_Table extends PEAR
             return $result;
         }
     }
+    // }}}
 
+    // {{{ _finalizeField($field, $value)
     /**
      * Converts a field from its native value to a value, that is
      * sets are converted to strings, bools are converted to 'true' and 'false'
@@ -763,7 +820,9 @@ class DBA_Table extends PEAR
                 return $value;
         }
     }
+    // }}}
 
+    // {{{ finalize($rows=null)
     /**
      * Converts the results from any of the row operations to a 'finalized'
      * display-ready form. That means that timestamps, sets and enums are
@@ -794,7 +853,9 @@ class DBA_Table extends PEAR
         }
         return $rows;
     }
+    // }}}
 
+    // {{{ getRows($rowKeys=null)
     /**
      * Returns the specified rows. A multiple-value version of getRow
      *
@@ -827,7 +888,9 @@ class DBA_Table extends PEAR
         }
         return $rows;
     }
+    // }}}
 
+    // {{{ getFieldNames()
     /**
      * Returns an array of the defined field names in the table
      *
@@ -838,7 +901,9 @@ class DBA_Table extends PEAR
     {
         return array_keys($this->_schema);
     }
+    // }}}
 
+    // {{{ _cookQuery($query)
     /**
      * Adds spaces around special symbols so that explode will separate them
      * properly from other tokens. Replace spaces within strings with pipe
@@ -869,7 +934,9 @@ class DBA_Table extends PEAR
         }
         return $cookedQuery;
     }
+    // }}}
 
+    // {{{ _parsePHPQuery($rawQuery, $fieldTokens)
     /**
      * Converts a query expression into PHP code for executing a select.
      *
@@ -903,7 +970,9 @@ class DBA_Table extends PEAR
         }
         return $phpQuery;
     }
+    // }}}
 
+    // {{{ &select($rawQuery, $rows=null)
     /**
      * Performs a select on a table. This means that a subset of rows in a
      * table are filtered and returned based on the query. Accepts any valid
@@ -945,7 +1014,9 @@ class DBA_Table extends PEAR
             return $this->raiseError('table not open');
         }
     }
+    // }}}
 
+    // {{{ _sortCmpA($a, $b)
     /**
      * Comparison function for sorting ascending order
      *
@@ -960,7 +1031,9 @@ class DBA_Table extends PEAR
         }
         return 0;
     }
+    // }}}
 
+    // {{{ _sortCmpD($a, $b)
     /**
      * Comparison function for sorting descending order
      *
@@ -975,7 +1048,9 @@ class DBA_Table extends PEAR
         }
         return 0;
     }
+    // }}}
 
+    // {{{ _parseFieldString($fieldString, $possibleFields)
     /**
      * explodes a string of field names into an array
      *
@@ -994,7 +1069,9 @@ class DBA_Table extends PEAR
         }
         return $fields;
     }
+    // }}}
 
+    // {{{ sort($fields, $order, $rows)
     /**
      * Sorts rows by field in either ascending or descending order
      * SQL analog: 'select * from rows, order by fields'
@@ -1036,7 +1113,9 @@ class DBA_Table extends PEAR
             return $this->raiseError('no rows to sort specified');
         }
     }
+    // }}}
 
+    // {{{ project($fields, $rows)
     /**
      * Projects rows by field. This means that a subset of the possible fields i
      * are in the resulting rows. The SQL analog is 'select fields from table'
@@ -1070,7 +1149,9 @@ class DBA_Table extends PEAR
             return $this->raiseError('no rows to sort specified');
         }
     }
+    // }}}
 
+    // {{{ cmpRows($a, $b)
     /**
      * Compares two rows
      *
@@ -1089,7 +1170,9 @@ class DBA_Table extends PEAR
         }
         return $equal;
     }
+    // }}}
 
+    // {{{ unique($rows)
     /**
      * Returns the unique rows from a set of rows
      * 
@@ -1112,6 +1195,7 @@ class DBA_Table extends PEAR
             return $this->raiseError('no rows to sort specified');
         }
     }
+    // }}}
 
     function time() {
         return time();

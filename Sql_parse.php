@@ -117,7 +117,7 @@ define('SQL_ENUM',184);
  * A sql parser
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.17
+ * @version 0.18
  * @access  public
  * @package DBA
  */
@@ -211,6 +211,7 @@ class Sql_Parser
     );
 // }}}
 
+// {{{ function Sql_Parser($string = null)
     function Sql_Parser($string = null) {
         if (is_string($string)) {
             $this->lexer = new Lexer($string);
@@ -218,7 +219,9 @@ class Sql_Parser
             $this->lexer->symtab =& $this->symtab;
         }
     }
-
+// }}}
+ 
+// {{{ getParams(&$values, &$types)
     function getParams(&$values, &$types) {
         $values = array();
         $types = array();
@@ -238,6 +241,7 @@ class Sql_Parser
             }
         }
     }
+// }}}
 
     // {{{ raiseError($message)
     function raiseError($message) {
