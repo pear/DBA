@@ -60,6 +60,13 @@ class DBA extends PEAR
         return PEAR::raiseError('DBA: '.$message);
     }
 
+    /**
+     * Returns whether a database exists
+     *
+     * @param  string $name name of the database to find
+     * @param  string @driver driver to test for
+     * @return boolean true if the database exists
+     */
     function exists($name, $driver = 'file')
     {
         if (!function_exists('dba_open') || ($driver=='file')) {
@@ -73,6 +80,11 @@ class DBA extends PEAR
         }
     }
 
+    /**
+     * Returns an array of the currently supported drivers
+     *
+     * @return array
+     */
     function getDriverList()
     {
         return array('gdbm', 'db3', 'file');
