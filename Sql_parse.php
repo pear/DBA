@@ -38,19 +38,21 @@ class Sql_Parser
     var $token;
 
 // symbol definitions
-    var $functab = array();
-    var $typetab = array();
-    var $symtab = array();
+    var $funcTab = array();
+    var $typeTab = array();
+    var $symTab = array();
+    var $typeClasses = array();
 
 // {{{ function Sql_Parser($string = null)
     function Sql_Parser($string = null) {
         include 'DB/DBA/Sql_dialect_ansi.php';
-        $this->symtab = array_flip(explode(' ', implode(' ', $dialect)));
-        $this->typetab = array_flip(explode(' ',$dialect['types']));
-        $this->functab = array_flip(explode(' ',$dialect['functions']));
+        $this->symTab = array_flip(explode(' ', implode(' ', $dialect)));
+        $this->typeTab = array_flip(explode(' ',$dialect['types']));
+        $this->funcTab = array_flip(explode(' ',$dialect['functions']));
+        $this->typeClasses = $typeClasses;
         if (is_string($string)) {
             $this->lexer = new Lexer($string);
-            $this->lexer->symtab =& $this->symtab;
+            $this->lexer->symTab =& $this->symTab;
         }
     }
 // }}}
@@ -99,7 +101,7 @@ class Sql_Parser
 
     // {{{ isType()
     function isType() {
-        return isset($this->typetab[$this->token]);
+        return isset($this->typeTab[$this->token]);
     }
     // }}}
 
@@ -113,7 +115,7 @@ class Sql_Parser
 
     // {{{ isFunc()
     function isFunc() {
-        return isset($this->functab[$this->token]);
+        return isset($this->funcTab[$this->token]);
     }
     // }}}
 
@@ -257,8 +259,9 @@ class Sql_Parser
                 if (PEAR::isError($results)) {
                     return $results;
                 }
-                switch ($fields[$name]['type']) {
-                    case 'fixed': case 'float':
+                $typeClass = $this->typeClasses[$fields[$name]['type']];
+                switch ($typeClass) {
+                    case 'real':
                         if (isset($values[0])) {
                         if ($types[0] == 'integer') {
                             $fields[$name]['length'] = $values[0];
@@ -274,7 +277,7 @@ class Sql_Parser
                                                      'for second parameter');
                         }}
                         break;
-                    case 'char': case 'varchar':
+                    case 'char':
                         if (sizeof($values) != 1) {
                             return $this->raiseError('Expected 1 parameter');
                         }
@@ -292,7 +295,7 @@ class Sql_Parser
                         }
                         $fields[$name]['length'] = $values[0];
                         break;
-                    case 'enum': case 'set':
+                    case 'set':
                         if (!sizeof($values)) {
                             return $this->raiseError('Expected a domain');
                         }
@@ -329,7 +332,7 @@ class Sql_Parser
     {
         if (is_string($string)) {
             $this->lexer = new Lexer($string);
-            $this->lexer->symtab =& $this->symtab;
+            $this->lexer->symTab =& $this->symTab;
         } else {
             if (!is_object($this->lexer)) {
                 return $this->raiseError('No initial string specified');
@@ -339,6 +342,7 @@ class Sql_Parser
         $tree = array();
         // query
         $this->getTok();
+        echo $this->token;
         switch ($this->token) {
             case null:
                 return;
