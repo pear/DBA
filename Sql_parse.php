@@ -22,7 +22,7 @@
 //
 
 require_once 'PEAR.php';
-require_once 'Sql_lex.php';
+require_once 'DB/DBA/Sql_lex.php';
 
 define('SQL_COMMAND',30);
 define('SQL_NAME',31);

@@ -21,7 +21,7 @@
 // $Id$
 //
 
-include 'phptype.php';
+include 'DB/DBA/phptype.php';
 
 // {{{ token definitions
 // variables
