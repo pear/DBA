@@ -23,7 +23,7 @@
 // $Id$
 //
 
-// test functionality of the simple dba layer
+// test functionality of the file-based dba driver
 
 ini_set('include_path',ini_get('include_path').':../../');
 include 'PEAR.php';

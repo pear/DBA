@@ -32,7 +32,7 @@ require_once 'DBA.php';
  * driver due to its lack of writes. DB2 currently segfaults with PHP-CVS.
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.9.1
+ * @version 0.9.2
  * @access  public
  * @package DBA
  */
@@ -101,6 +101,7 @@ class DBA_Driver_Builtin extends DBA
      */
     function open($dbName='', $mode='r', $persistent = false)
     {
+        echo "Got here";
         if (is_null($this->_driver)) {
             return $this->raiseError('No dba driver specified');
         }
@@ -301,11 +302,30 @@ class DBA_Driver_Builtin extends DBA
      */
     function firstkey()
     {
-        if ($this->isReadable() && ($this->size() > 0)) {
+        if ($this->isReadable()) {
             return dba_firstkey($this->_dba);
         } else {
             return false;
         }
+    }
+    // }}}
+
+    // {{{ size()
+    /**
+     * Calculates the size of the database in number of keys
+     *
+     * @access  public
+     * @return  int    number of keys in the database
+     */
+    function size()
+    {
+        $key = dba_firstkey($this->_dba);
+        $size = 0;
+        while ($key !== false) {
+            ++$size;
+            $key = dba_nextkey($this->_dba);
+        }
+        return $size;
     }
     // }}}
 

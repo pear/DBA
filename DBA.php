@@ -30,7 +30,7 @@ require_once('PEAR.php');
  * dbm engine for installations where dba support is not included in PHP.
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.9.1
+ * @version 0.9.2
  * @access  public
  * @package DBA
  */
@@ -71,6 +71,11 @@ class DBA extends PEAR
         } else {
             return PEAR::raiseError('Unknown DBA driver, '.$driver);
         }
+    }
+
+    function getDriverList()
+    {
+        return array('gdbm', 'db3', 'file');
     }
 }
 ?>

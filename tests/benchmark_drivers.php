@@ -45,10 +45,6 @@ $transactionsInterval = 2000;
 
 $maxTransactions = $transactionsInterval * 8;
 
-// These drivers are known to work. cdbm and db2 have problems that prevent
-// them from being suitable drivers
-$drivers = array('db3', 'gdbm', 'file');
-
 $prefix = './';
 
 function getmicrotime(){ 
@@ -56,7 +52,7 @@ function getmicrotime(){
     return((float)$usec + (float)$sec); 
 } 
 
-foreach ($drivers as $driver) {
+foreach (DBA::getDriverList() as $driver) {
     echo "Benchmarking driver: $driver\n";
     $testDB = DBA::create($driver);
 

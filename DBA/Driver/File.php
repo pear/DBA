@@ -72,7 +72,7 @@ define('DBA_SIMPLE_KEY',3);
  * The sync function calls fflush on the data and index files.
  *
  * @author  Brent Cook
- * @version 0.9.1
+ * @version 0.9.2
  * @access  public
  * @package DBA
  */
@@ -427,7 +427,7 @@ class DBA_Driver_File extends DBA
 
     // {{{ size()
     /**
-     * Calculates the size of the database
+     * Calculates the size of the database in number of keys
      *
      * @access  public
      * @return  int    number of keys in the database
