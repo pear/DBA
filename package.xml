@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE package SYSTEM "../package.dtd">
+<!-- do not use the "Type" attribute here, that one is only for
+     generated package.xml files -->
+<package>
+    <name>DB_DBA</name>
+    <summary>Berkely-style Database Class</summary>
+    <description>
+      Implements a DBM-style database using either PHP's DBA functions or a simple DBM class written in PHP itself.
+    </description>
+
+    <maintainers>
+        <maintainer>
+            <user>busterb</user>
+            <name>Brent Cook</name>
+            <email>busterb@mail.utexas.edu</email>
+            <role>maintainer</role>
+        </maintainer>
+    </maintainers>
+
+    <release>
+        <license>PHP</license>
+        <version>0.0.9</version>
+        <date>2002-06-20</date>
+        <state>alpha</state>
+        <notes>
+            Pre-initial release; this stuff is still in the works. Made lots of headway documenting and cleaning code in the driver classes. Now, they are fully PEAR compliant except for error handling, which will remain very simple for performance reasons (these are drivers, after all ;)
+        </notes>
+        <filelist>
+            <dir name="/DB_DBA" base="/DB_DBA">
+                <file role="php">DBA.php</file>
+                <file role="php">DBA_Simple.php</file>
+                <file role="php">DBA_Compat.php</file>
+                <file role="php">DBA_Builtin.php</file>
+                <dir name="tests" role="test">
+                    <file>benchmark.php</file>
+                    <file>simple.php</file>
+                    <file>graph_template</file>
+                </dir>
+            </dir>
+        </filelist>
+    </release>
+</package>
