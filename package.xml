@@ -30,20 +30,25 @@
            application.
         </notes>
         <filelist>
-            <dir name="/" baseinstalldir="DB/DBA" role="php">
-                <file role="php">DBA.php</file>
-                <file role="php">DBA_Simple.php</file>
-                <file role="php">DBA_Compat.php</file>
-                <file role="php">DBA_Builtin.php</file>
-                <file role="php">DBA_Table.php</file>
-                <file role="php">DBA_Relational.php</file>
-                <dir name="tests" role="test">
-                    <file>benchmark_drivers.php</file>
-                    <file>test_simple.php</file>
-                    <file>test_relational.php</file>
-                    <file>test_table.php</file>
-                    <file>empSchema.php</file>
-                    <file>hatSchema.php</file>
+            <dir name="/" baseinstalldir="DB/DBA">
+                <dir name="DBA">
+                    <file role="php">DBA.php</file>
+                    <file role="php">DBA_Simple.php</file>
+                    <file role="php">DBA_Compat.php</file>
+                    <file role="php">DBA_Builtin.php</file>
+                    <file role="php">DBA_Table.php</file>
+                    <file role="php">DBA_Relational.php</file>
+                </dir>
+                <dir name="tests">
+                    <file role="test">benchmark_drivers.php</file>
+                    <file role="test">test_simple.php</file>
+                    <file role="test">test_relational.php</file>
+                    <file role="test">test_table.php</file>
+                    <file role="test">empSchema.php</file>
+                    <file role="test">hatSchema.php</file>
+                </dir>
+                <dir name="docs">
+                    <file role="doc">README.txt</file>
                 </dir>
             </dir>
         </filelist>

@@ -20,7 +20,7 @@
 //
 
 ini_set('include_path',ini_get('include_path').':../../');
-require_once 'DB_DBA/DBA.php';
+require_once 'DB/DBA/DBA.php';
 require_once 'PEAR.php';
 
 $testDataArray = array ('11111111111111111111',
