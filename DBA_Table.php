@@ -275,6 +275,13 @@ class DBA_Table extends PEAR
     }
     // }}}
     
+    // {{{ _validateSchema($schema)
+    /**
+     * Validates a DBA schema
+     *
+     * @access private
+     * @returns the validated schema, PEARError
+     */
     function _validateSchema($schema) {
         foreach ($schema as $field=>$meta) {
 
@@ -302,10 +309,13 @@ class DBA_Table extends PEAR
         }
         return $schema;
     }
+    // }}}
+
     // {{{ getSchema()
     /**
      * Returns the stored schema for the table
      *
+     * @access  public
      * @return  mixed an array of the form 'fieldname'=>array(fieldmeta) on
      *          success, PEAR_Error on failure
      */
@@ -323,7 +333,7 @@ class DBA_Table extends PEAR
      * Check whether table exists
      *
      * @access  public
-     * @param   string $key
+     * @param   string $tableName
      * @return  boolean true if the table exists, false otherwise
      */
     function tableExists($tableName)
@@ -332,10 +342,19 @@ class DBA_Table extends PEAR
     }
     // }}}
 
+    // {{{ exists($key)
+    /**
+     * Check if a row with a primary key exists
+     *
+     * @access  public
+     * @param   string $key
+     * @return  boolean true if the row exists
+     */
     function exists($key)
     {
         return $this->dba->exists($key);
     }
+    // }}}
 
     // {{{ isOpen()
     /**
@@ -659,7 +678,7 @@ class DBA_Table extends PEAR
                     // use the default value
                     if ($fieldMeta[DBA_DEFAULTTYPE] == DBA_FUNCTION) {
                         $c_value = $this->_packField($fieldName,
-                           eval('return $this->'.
+                           eval('return $this->dba_'.
                                   $this->_schema[$fieldName][DBA_DEFAULT].';'));
                     } else {
                         $c_value = $this->_packField($fieldName,
@@ -742,13 +761,12 @@ class DBA_Table extends PEAR
      * Replaces rows that match $rawQuery with $
      *
      * @access  public
-     * @param   string $rawQuery query expression for performing the remove
+     * @param   string $rawQuery query expression for performing the replace
      * @param   array  $rows rows to select on
      * @return  object PEAR_Error on failure
      */
     function replace($rawQuery, $data, $rows=null)
     {
-        echo $rawQuery;
         $rows =& $this->select($rawQuery, $rows);
         if (PEAR::isError($rows)) {
             return $rows;
@@ -1260,7 +1278,14 @@ class DBA_Table extends PEAR
     }
     // }}}
 
-    function time() {
+    // {{{ dba_time()
+    /**
+     * Internal function used for query processing
+     *
+     * @access private
+     */
+    function dba_time() {
         return time();
     }
+    // }}}
 }
