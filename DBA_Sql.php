@@ -24,7 +24,7 @@
 /**
  * Functions for executing SQL queries on a DBM database
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.18
+ * @version 0.19
  * @access  public
  * @package DBA
  */
@@ -34,30 +34,6 @@ require_once 'DB/DBA/DBA_Relational.php';
 
 function executeSql(&$db, $sqlText) {
     $parser = new Sql_Parser($sqlText);
-
-    $typeMap = array(
-        'int'=>'integer',
-        'integer'=>'integer',
-        'numeric'=>'fixed',
-        'float'=>'float',
-        'real'=>'float',
-        'char'=>'char',
-        'varchar'=>'varchar',
-        'text'=>'text',
-        'bool'=>'boolean',
-        'boolean'=>'boolean',
-        'enum'=>'enum',
-        'set'=>'set',
-        'timestamp'=>'timestamp',
-    );
-
-    $constraintMap = array(
-        'length'=>'size',
-        'type'=>'type',
-        'not_null'=>'not_null',
-        'domain'=>'domain',
-        'primary_key'=>'primary_key',
-    );
 
     $tree = $parser->parse();
     if (is_null($tree)) {
@@ -70,7 +46,7 @@ function executeSql(&$db, $sqlText) {
                 $name = $tree['table_name'];
                 $schema = array();
                 foreach ($tree['col_defs'] as $colName=>$col) {
-                    $schema[$colName][DBA_TYPE] = $typeMap[$col['type']];
+                    $schema[$colName][DBA_TYPE] = $col['type'];
                     
                     foreach ($col['constraints'] as $name=>$constraint) {
                         $schema[$colName][$contraintMap[$contraint['type']]]
