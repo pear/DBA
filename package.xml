@@ -6,8 +6,8 @@
     <name>DBA</name>
     <summary>Berkely-style database abstraction class</summary>
     <description>
-Implements a DBM-style database using either PHP's DBA functions or a
-file-based DBM driver.
+DBA is a wrapper for the php DBA functions. It includes a file-based emulator
+and provides a uniform, object-based interface for the gdbm and db3 database systems.
     </description>
 
     <maintainers>
