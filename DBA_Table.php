@@ -518,7 +518,6 @@ class DBA_Table extends PEAR
     {
         $buffer = array();
         $i = 0;
-        print_r($this->_schema);
         foreach ($this->_schema as $fieldName => $fieldMeta) {
 
             if (isset($data[$fieldName])) {
