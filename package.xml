@@ -43,7 +43,6 @@ No notes is good notes.
                 </dir>
                 <dir name="docs" role="doc">
                     <file role="doc">README.txt</file>
-                    <file role="doc">Examples.txt</file>
                 </dir>
             </dir>
         </filelist>
