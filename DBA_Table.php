@@ -449,15 +449,16 @@ class DBA_Table extends PEAR
      */
     function _packSchema($schema)
     {
-        foreach ($schema as $fieldName => $fieldMeta)
-        {
+        foreach ($schema as $fieldName => $fieldMeta) {
             $buffer = $fieldName;
-            foreach ($fieldMeta as $attribute => $value)
-            {
+
+            foreach ($fieldMeta as $attribute => $value) {
+
                 $attribute = strtolower($attribute);
                 $buffer .= ';'.$attribute.'=';
-                switch ($attribute)
-                {
+
+                switch ($attribute) {
+
                     case 'domain':
                         $buffer .= implode(',',$value);
                         break;
@@ -471,19 +472,25 @@ class DBA_Table extends PEAR
                     case 'init': //handle this with auto[increment/decrement]
                         break;
                     case 'autoincrement':
-                        $buffer .= $value;
+                        $buffer .= $value.';ceiling=';
+                        // if we do not have an established ceiling, use
+                        // the init value, or 0
                         if (!isset($fieldMeta['ceiling'])) {
                             if (isset($fieldMeta['init'])) {
-                                $buffer .= ';ceiling='.$fieldMeta['init'];
+                                $buffer .= $fieldMeta['init'];
                             } else {
-                                $buffer .= ';ceiling=0';
+                                $buffer .= '0';
                             }
                         } 
                         break;
                     case 'autodecrement':
-                        $buffer .= $value;
+                        $buffer .= $value.';floor=';
                         if (!isset($fieldMeta['floor'])) {
-                            $buffer .= ';floor=0';
+                            if (isset($fieldMeta['init'])) {
+                                $buffer .= $fieldMeta['init'];
+                            } else {
+                                $buffer .= '0';
+                            }
                         }
                         break;
                     default:
