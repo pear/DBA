@@ -24,6 +24,7 @@
 require_once 'PEAR.php';
 require_once 'DB/DBA/Sql_lex.php';
 
+// {{{ action constants
 define('SQL_COMMAND',30);
 define('SQL_NAME',31);
 define('SQL_TYPE',32);
@@ -39,6 +40,7 @@ define('SQL_CREATE_SEQUENCE',42);
 define('SQL_DROP_TABLE',43);
 define('SQL_DROP_INDEX',44);
 define('SQL_DROP_SEQUENCE',45);
+// }}}
 
 // {{{ token definitions
 // logical operators
@@ -271,6 +273,8 @@ class Sql_Parser
     }
     // }}}
 
+    function isFunc() {
+
     // {{{ getTok()
     function getTok() {
         $this->token = $this->lexer->lex();
@@ -440,7 +444,7 @@ class Sql_Parser
                         if (!sizeof($values)) {
                             return $this->raiseError('Expected a domain');
                         }
-                        $fields[$i][SQL_DOMAIN][] = $values;
+                        $fields[$i][SQL_DOMAIN] = $values;
                         break;
                     default:
                         if (sizeof($values)) {
@@ -487,6 +491,7 @@ class Sql_Parser
         switch ($this->token) {
             case TOK_END_OF_INPUT:
                 return;
+            // {{{ SQL_CREATE
             case SQL_CREATE:
                 $this->getTok();
                 switch ($this->token) {
@@ -506,6 +511,8 @@ class Sql_Parser
                         break;
                 }
                 break;
+            // }}}
+            // {{{ SQL_INSERT
             case SQL_INSERT:
                 $this->getTok();
                 if ($this->token == SQL_INTO) {
@@ -551,6 +558,11 @@ class Sql_Parser
                     return $this->raiseError('Expected "into"');
                 }
                 break;
+            // }}}
+            case SQL_UPDATE:
+            case SQL_DELETE:
+            case SQL_SELECT:
+            case SQL_ALTER:
         }
         $this->getTok();
         if ($this->token == ';') {
