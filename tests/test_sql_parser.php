@@ -76,8 +76,12 @@ $queries = array(
 "insert into dogmeat ('horse', 'hair') values (2, 4)",
 "inSERT into dogmeat (horse, hair) values (2, 4)",
 "CREATE TABLE msgs ( user_id integer, msg_id integer, msg_text varchar, msg_title varchar(30), msg_date time)",
+"update dogmeat set horse=2 dog='forty' where moose <> 'howdydoo'",
 "update dogmeat set horse=2 dog='forty' where moose != 'howdydoo'",
-"update dogmeat set horse=2 , dog='forty' where moose != 'howdydoo'",
+"update dogmeat set horse=2 , dog='forty' where moose <> 'howdydoo'",
+"update table1 set col=1 where not col = 2",
+"update table2 set col=1 where col > 2 and col <> 4",
+"update table3 set col=1 where col > 2 and (col < 30)",
 );
 
 $lexer = new Lexer();

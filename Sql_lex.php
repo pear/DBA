@@ -40,7 +40,7 @@ class Lexer
 {
     // array of valid tokens for the lexer to recognize
     // format is 'token literal'=>TOKEN_VALUE
-    var $symTab = array();
+    var $symbols = array();
 
 // {{{ instance variables
     var $tokPtr = 0;
@@ -171,7 +171,7 @@ function lex()
                 $this->tokText = substr($this->string, $this->tokStart,
                                         $this->tokLen);
                 $testToken = strtolower($this->tokText);
-                if (isset($this->symTab[$testToken])) {
+                if (isset($this->symbols[$testToken])) {
                     $this->tokStart = $this->tokPtr;
                     return $testToken;
                 } else {

@@ -38,21 +38,24 @@ class Sql_Parser
     var $token;
 
 // symbol definitions
-    var $funcTab = array();
-    var $typeTab = array();
-    var $symTab = array();
+    var $functions = array();
+    var $types = array();
+    var $symbols = array();
+    var $operators = array();
     var $typeClasses = array();
 
 // {{{ function Sql_Parser($string = null)
     function Sql_Parser($string = null) {
         include 'DB/DBA/Sql_dialect_ansi.php';
-        $this->symTab = array_flip(explode(' ', implode(' ', $dialect)));
-        $this->typeTab = array_flip(explode(' ',$dialect['types']));
-        $this->funcTab = array_flip(explode(' ',$dialect['functions']));
+        $this->symbols = array_flip(explode(' ', implode(' ', $dialect)));
+        $this->types = array_flip(explode(' ',$dialect['types']));
+        $this->functions = array_flip(explode(' ',$dialect['functions']));
+        $this->operators = array_flip(explode(' ',$dialect['operators']));
+        print_r($this->operators);
         $this->typeClasses = $typeClasses;
         if (is_string($string)) {
             $this->lexer = new Lexer($string);
-            $this->lexer->symTab =& $this->symTab;
+            $this->lexer->symbols =& $this->symbols;
         }
     }
 // }}}
@@ -101,7 +104,7 @@ class Sql_Parser
 
     // {{{ isType()
     function isType() {
-        return isset($this->typeTab[$this->token]);
+        return isset($this->types[$this->token]);
     }
     // }}}
 
@@ -115,7 +118,39 @@ class Sql_Parser
 
     // {{{ isFunc()
     function isFunc() {
-        return isset($this->funcTab[$this->token]);
+        return isset($this->functions[$this->token]);
+    }
+    // }}}
+
+    // {{{ isReserved()
+    function isReserved() {
+        return isset($this->symbols[$this->token]);
+    }
+    // }}}
+
+    // {{{ isOperator()
+    function isOperator() {
+        if (isset($this->operators[$this->token])) {
+            if ($this->token == 'is') {
+                $this->getTok();
+                if ($this->token == 'null') {
+                    $this->token = 'is null';
+                    return true;
+                } elseif ($this->token == 'not') {
+                    $this->getTok();
+                    if ($this->token == 'null') {
+                        $this->token = 'is not null';
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
     // }}}
 
@@ -220,6 +255,36 @@ class Sql_Parser
     }
     // }}}
 
+    // {{{ &parseSearchClause()
+    function &parseSearchClause()
+    {
+        $clause = array();
+        $this->getTok();
+        if ($this->isReserved()) {
+            return $this->raiseError('Expected a column name or value');
+        }
+        $clause['arg_2'] = $this->lexer->tokText;
+        $this->getTok();
+        if (!$this->isOperator()) {
+            return $this->raiseError('Expected an operator');
+        }
+        $clause['op'] = $this->token;
+        $this->getTok();
+        if ($this->isReserved()) {
+            return $this->raiseError('Expected a column name or value');
+        } elseif ($this->token == '(') {
+            $clause['arg_1'] = $this->parseSearchClause;
+            $this->getTok();
+            if ($this->token != ')') {
+                return $this->raiseError('Expected )');
+            }
+        } else {
+            $clause['arg_1'] = $this->lexer->tokText;
+        }
+        return $clause;
+    }
+    // }}}
+
     // {{{ &parseFieldList()
     function &parseFieldList()
     {
@@ -231,10 +296,6 @@ class Sql_Parser
         while (1) {
             // parse field identifier
             $this->getTok();
-            if ($this->token == ')') {
-                return $fields;
-            }
-
             if ($this->token == 'ident') {
                 $name = $this->lexer->tokText;
             } else {
@@ -327,7 +388,7 @@ class Sql_Parser
     {
         if (is_string($string)) {
             $this->lexer = new Lexer($string);
-            $this->lexer->symTab =& $this->symTab;
+            $this->lexer->symbols =& $this->symbols;
         } else {
             if (!is_object($this->lexer)) {
                 return $this->raiseError('No initial string specified');
@@ -455,6 +516,11 @@ class Sql_Parser
                                               'type'=>$this->token);
                     $this->getTok();
                     if ($this->token == 'where') {
+                        $clause =& $this->parseSearchClause();
+                        if (PEAR::isError($clause)) {
+                            return $clause;
+                        }
+                        $tree['where_clause'] =& $clause;
                         break;
                     } elseif ($this->token != ',') {
                         return $this->raiseError('Expected "where" or ","');
