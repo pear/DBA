@@ -38,7 +38,8 @@ function addQuickformDBA(&$form, $schema, $auxMeta)
             $defaults[$name] = $auxMeta['default'];
         }
         if (isset($auxMeta[$name])) {
-            $desc = isset($auxMeta['desc']) ? $auxMeta['desc'] : $name;
+            $desc = isset($auxMeta[$name]['desc']) ?
+                        $auxMeta[$name]['desc'] : $name;
             switch($meta[DBA_TYPE]) {
                 case DBA_INTEGER:
                     if (isset($auxMeta[$name]['min']) &&
