@@ -410,7 +410,7 @@ class DBA_Relational extends PEAR
      */
     function _parsePHPQuery($rawQuery, $fieldsA, $fieldsB, $tableA, $tableB)
     {
-        // add spaces around symbols for strtok to work properly
+        // add spaces around symbols for explode to work properly
         $rawQuery = DBA_Table::_addSpaces($rawQuery);
 
         // begin building the php query for a row

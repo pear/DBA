@@ -738,7 +738,7 @@ class DBA_Table extends PEAR
     }
 
     /**
-     * Adds spaces around symbol tokens so that strtok will separate them
+     * Adds spaces around special symbols so that explode will separate them
      * properly from other tokens.
      *
      * @access  private
@@ -764,7 +764,7 @@ class DBA_Table extends PEAR
      */
     function _parsePHPQuery($rawQuery, $fieldTokens)
     {
-        // add spaces around symbols for strtok to work properly
+        // add spaces around symbols for explode to work properly
         $rawQuery = $this->_addSpaces($rawQuery);
 
         // begin building the php query for a row
@@ -867,12 +867,11 @@ class DBA_Table extends PEAR
     function _parseFieldString($fieldString)
     {
         $fields = array();
-        $token = strtok($fieldString, ' ,');
-        while ($token) {
+        $tokens = split('/[ \,]/', $fieldString);
+        foreach ($tokens as $token) {
             if (isset($this->_schema[$token])) {
                 $fields[] = $token;
             }
-            $token = strtok(' ,');
         }
         return $fields;
     }
