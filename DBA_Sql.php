@@ -36,26 +36,27 @@ function executeSql(&$db, $sqlText) {
     $parser = new Sql_Parser($sqlText);
 
     $typeMap = array(
-        SQL_INT=>DBA_INTEGER,
-        SQL_FIXED=>DBA_FIXED,
-        SQL_FLOAT=>DBA_FLOAT,
-        SQL_CHAR=>DBA_CHAR,
-        SQL_VARCHAR=>DBA_VARCHAR,
-        SQL_TEXT=>DBA_TEXT,
-        SQL_BOOL=>DBA_BOOLEAN,
-        SQL_ENUM=>DBA_ENUM,
-        SQL_SET=>DBA_SET,
-        SQL_TIMESTAMP=>DBA_TIMESTAMP,
-        SQL_DATE=>DBA_TIMESTAMP,
-        SQL_TIME=>DBA_TIMESTAMP
+        'int'=>DBA_INTEGER,
+        'integer'=>DBA_INTEGER,
+        'numeric'=>DBA_FIXED,
+        'float'=>DBA_FLOAT,
+        'real'=>DBA_FLOAT,
+        'char'=>DBA_CHAR,
+        'varchar'=>DBA_VARCHAR,
+        'text'=>DBA_TEXT,
+        'bool'=>DBA_BOOLEAN,
+        'boolean'=>DBA_BOOLEAN,
+        'enum'=>DBA_ENUM,
+        'set'=>DBA_SET,
+        'timestamp'=>DBA_TIMESTAMP,
     );
 
-    $optionMap = array(
-        SQL_SIZE=>DBA_SIZE,
-        SQL_DEFAULT=>DBA_DEFAULT,
-        SQL_NOTNULL=>DBA_NOTNULL,
-        SQL_DOMAIN=>DBA_DOMAIN,
-        SQL_AUTOINCREMENT=>DBA_AUTOINCREMENT,
+    $constraintMap = array(
+        'length'=>DBA_SIZE,
+        'type'=>DBA_DEFAULT,
+        'not_null'=>DBA_NOTNULL,
+        'domain'=>DBA_DOMAIN,
+        'auto_increment'=>DBA_AUTOINCREMENT,
     );
 
     while ($parser->token != TOK_END_OF_INPUT) {
@@ -65,15 +66,15 @@ function executeSql(&$db, $sqlText) {
         } elseif (PEAR::isError($tree)) {
             return $tree;
         } else {
-            switch ($tree[SQL_COMMAND]) {
-                case SQL_CREATE_TABLE:
+            switch ($tree['command']) {
+                case 'create':
                     $name = $tree[SQL_NAME];
                     $schema = array();
                     foreach ($tree[SQL_FIELDS] as $field) {
                         $fieldName = $field[SQL_NAME];
                         $schema[$fieldName][DBA_TYPE] = $typeMap[$field[SQL_TYPE]];
                         
-                        foreach ($optionMap as $sql=>$dba) {
+                        foreach ($constraintMap as $sql=>$dba) {
                             if (isset($field[$sql]))
                                 $schema[$fieldName][$dba] = $field[$sql];
                         }
@@ -85,8 +86,8 @@ function executeSql(&$db, $sqlText) {
                         }
                     }
                 break;
-                case SQL_INSERT:
-                    foreach ($tree[SQL_FIELDS] as $key=>$field) {
+                case 'insert':
+                    foreach ($tree['field_names'] as $key=>$field) {
                         $row[$field] = $tree[SQL_VALUES][$key];
                     }
                     $db->insert($name, $row);
