@@ -221,7 +221,11 @@ class DBA extends PEAR
      */
     function getDriverList()
     {
-        return array_merge(dba_handlers(), array('file'));
+        if (function_exists('dba_handlers')) {
+            return array_merge(dba_handlers(), array('file'));
+        } else {
+            return array('file');
+        }
     }
 }
 
