@@ -96,7 +96,8 @@ class Sql_Parser
         $message .= substr($this->lexer->string, $this->lexer->lineBegin, $end)."\n";
         $message .= str_repeat(' ', ($this->lexer->tokPtr - 
                                $this->lexer->lineBegin -
-                               strlen($this->lexer->tokText)))."^\n";
+                               strlen($this->lexer->tokText)))."^";
+        $message .= 'found instead: '.$this->lexer->tokText."\n";
 
         return PEAR::raiseError($message);
     }
@@ -449,12 +450,19 @@ class Sql_Parser
                 if ($this->token == 'into') {
                     $tree['command'] = 'insert';
                     $this->getTok();
-                    if ($this->token == 'ident') {
-                        $tree['table_name'] = $this->lexer->tokText;
-                    } else {
-                        return $this->raiseError('Expected table name');
+                    while ($this->token == 'ident') {
+                        $tree['table_names'][] = $this->lexer->tokText;
+                        $this->getTok();
+                        if ($this->token == ',') {
+                            $this->getTok();
+                        } elseif (($this->token != '(') &&
+                                  ($this->token != 'values')) {
+                            return $this->raiseError('Expected "(" or "values"');
+                        }
                     }
-                    $this->getTok();
+                    if (!isset($tree['table_names'])) {
+                        return $this->raiseError('No tables specified');
+                    }
                     if ($this->token == '(') {
                         $results = $this->getParams($values, $types);
                         if (PEAR::isError($results)) {
@@ -496,15 +504,19 @@ class Sql_Parser
             // }}}
             // {{{ 'update'
             case 'update':
+                $tree['command'] = 'update';
                 $this->getTok();
-                if ($this->token == 'ident') {
-                    $tree['table_name'] = $this->lexer->tokText;
-                } else {
-                    return $this->raiseError('Expected table name');
+                while ($this->token == 'ident') {
+                    $tree['table_names'][] = $this->lexer->tokText;
+                    $this->getTok();
+                    if ($this->token == ',') {
+                        $this->getTok();
+                    } elseif ($this->token != 'set') {
+                        return $this->raiseError('Expected "set"');
+                    }
                 }
-                $this->getTok();
-                if ($this->token != 'set') {
-                    return $this->raiseError('Expected "set"');
+                if (!isset($tree['table_names'])) {
+                    return $this->raiseError('No tables specified');
                 }
                 while (true) {
                     $this->getTok();
@@ -538,9 +550,16 @@ class Sql_Parser
             // }}}
             // {{{ 'delete'
             case 'delete':
+                $tree['command'] = 'delete';
             // }}}
             // {{{ 'select'
             case 'select':
+                $tree['command'] = 'select';
+                $this->getTok();
+                if (($this->token == 'distinct') || ($this->token == 'all')) {
+                    $this->getTok();
+                }
+                break;
             // }}}
         }
         return $tree;
