@@ -23,6 +23,13 @@
 require_once 'PEAR.php';
 require_once 'DB/DBA/DBA.php';
 
+if (!function_exists('floatval')) {
+    function floatval( $strValue ) {
+        $floatValue = preg_replace( "/[^0-9\.]*/", "", $strValue );
+        return $floatValue;
+    }
+}
+
 // {{{ constants
 /**
  * Reserved key used to store the schema record
@@ -1082,7 +1089,7 @@ class DBA_Table extends PEAR
                         ') $results[$key] = $row;';
 
             // perform the select
-            $results = array();
+            $results = null;
             eval ($PHPSelect);
 
             return $results;
