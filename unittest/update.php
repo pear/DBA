@@ -8,14 +8,14 @@ update dogmeat set horse=2 dog=\'forty\' where moose <> \'howdydoo\'
 
 ),
 array(
-'sql' => 'update dogmeat set horse=2 dog=\'forty\' where moose != \'howdydoo\'',
-'expect' => 'Parse error: Expected "where" or "," on line 1
-update dogmeat set horse=2 dog=\'forty\' where moose != \'howdydoo\'
-                           ^ found: dog'
+'sql' => 'update dogmeat set horse=2, dog=\'forty\' where moose != \'howdydoo\'',
+'expect' => 'Parse error: Expected an operator on line 1
+update dogmeat set horse=2, dog=\'forty\' where moose != \'howdydoo\'
+                                                    ^ found: !'
 
 ),
 array(
-'sql' => 'update dogmeat set horse=2 , dog=\'forty\' where moose <> \'howdydoo\'',
+'sql' => 'update dogmeat set horse=2, dog=\'forty\' where moose <> \'howdydoo\'',
 'expect' => array(
         'command' => 'update',
         'table_name' => 'dogmeat',

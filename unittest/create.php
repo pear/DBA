@@ -68,14 +68,6 @@ array(
                         )
                     )
                 )
-            ),
-        'column_names' => array(
-            0 => 'name',
-            1 => 'directory',
-            2 => 'rating',
-            3 => 'category',
-            4 => 'description',
-            5 => 'id'
             )
         )
 ),
@@ -145,14 +137,6 @@ array(
                         )
                     )
                 )
-            ),
-        'column_names' => array(
-            0 => 'filename',
-            1 => 'name',
-            2 => 'album',
-            3 => 'price',
-            4 => 'description',
-            5 => 'id'
             )
         )
 ),
@@ -173,63 +157,8 @@ array(
                 'type' => 'varchar',
                 'length' => 20
                 )
-            ),
-        'column_names' => array(
-            0 => 'filename',
-            1 => 'description'
             )
         )
-),
-array(
-'sql' => 'create table nodefinitions',
-'expect' => 'Parse error: Expected ( on line 1
-create table nodefinitions
-             ^ found: *end of input*'
-
-),
-array(
-'sql' => 'create dogfood',
-'expect' => 'Parse error: Cannot create dogfood on line 1
-create dogfood
-       ^ found: dogfood'
-
-),
-array(
-'sql' => 'create table dunce (name varchar',
-'expect' => 'Parse error: Expected ) on line 1
-create table dunce (name varchar
-                   ^ found: *end of input*'
-
-),
-array(
-'sql' => 'create table dunce (name varchar(2,3))',
-'expect' => array(
-        'command' => 'create_table',
-        'table_name' => 'dunce',
-        'column_defs' => array(
-            'name' => array(
-                'type' => 'varchar',
-                'length' => 2
-                )
-            ),
-        'column_names' => array(
-            0 => 'name'
-            )
-        )
-),
-array(
-'sql' => 'create table dunce (enum)',
-'expect' => 'Parse error: Expected identifier on line 1
-create table dunce (enum)
-                    ^ found: enum'
-
-),
-array(
-'sql' => 'create table dunce (enum(23))',
-'expect' => 'Parse error: Expected identifier on line 1
-create table dunce (enum(23))
-                    ^ found: enum'
-
 ),
 array(
 'sql' => 'CREATE TABLE films ( 
@@ -239,6 +168,7 @@ array(
              date_prod DATE, 
              kind      CHAR(10), 
              len       INTERVAL HOUR TO MINUTE
+             CONSTRAINT production UNIQUE(date_prod)
 )',
 'expect' => array(
         'command' => 'create_table',
@@ -256,12 +186,9 @@ array(
                 ),
             'title' => array(
                 'type' => 'char',
+                'length' => 40,
                 'constraints' => array(
                     0 => array(
-                        'type' => 'varying',
-                        'value' => 40
-                        ),
-                    1 => array(
                         'type' => 'not_null',
                         'value' => true
                         )
@@ -291,17 +218,15 @@ array(
                         'quantum_1' => 'hour',
                         'quantum_2' => 'minute',
                         'type' => 'values'
+                        ),
+                    'production' => array(
+                        'type' => 'unique',
+                        'column_names' => array(
+                            0 => 'date_prod'
+                            )
                         )
                     )
                 )
-            ),
-        'column_names' => array(
-            0 => 'code',
-            1 => 'title',
-            2 => 'did',
-            3 => 'date_prod',
-            4 => 'kind',
-            5 => 'len'
             )
         )
 ),
@@ -309,6 +234,7 @@ array(
 'sql' => 'CREATE TABLE distributors ( 
              did      DECIMAL(3) PRIMARY KEY DEFAULT NEXTVAL(\'serial\'), 
              name     VARCHAR(40) NOT NULL CHECK (name <> \'\') 
+             CONSTRAINT con1 CHECK (did > 100 AND name > \'\') 
 )',
 'expect' => array(
         'command' => 'create_table',
@@ -348,13 +274,35 @@ array(
                             'type' => 'text_val'
                             ),
                         'type' => 'check'
+                        ),
+                    'con1' => array(
+                        'arg_1' => array(
+                            'arg_1' => array(
+                                'value' => 'did',
+                                'type' => 'ident'
+                                ),
+                            'op' => '>',
+                            'arg_2' => array(
+                                'value' => 100,
+                                'type' => 'int_val'
+                                )
+                            ),
+                        'op' => 'and',
+                        'arg_2' => array(
+                            'arg_1' => array(
+                                'value' => 'name',
+                                'type' => 'ident'
+                                ),
+                            'op' => '>',
+                            'arg_2' => array(
+                                'value' => '',
+                                'type' => 'text_val'
+                                )
+                            ),
+                        'type' => 'check'
                         )
                     )
                 )
-            ),
-        'column_names' => array(
-            0 => 'did',
-            1 => 'name'
             )
         )
 ),
@@ -381,10 +329,6 @@ array(
                 'type' => 'varchar',
                 'length' => 40
                 )
-            ),
-        'column_names' => array(
-            0 => 'did',
-            1 => 'name'
             )
         )
 ),
@@ -410,15 +354,50 @@ array(
             'msg_date' => array(
                 'type' => null
                 )
-            ),
-        'column_names' => array(
-            0 => 'user_id',
-            1 => 'msg_id',
-            2 => 'msg_text',
-            3 => 'msg_title',
-            4 => 'msg_date'
             )
         )
+),
+array(
+'sql' => 'create table nodefinitions',
+'expect' => 'Parse error: Expected ( on line 1
+create table nodefinitions
+             ^ found: *end of input*'
+
+),
+array(
+'sql' => 'create dogfood',
+'expect' => 'Parse error: Cannot create dogfood on line 1
+create dogfood
+       ^ found: dogfood'
+
+),
+array(
+'sql' => 'create table dunce (name varchar',
+'expect' => 'Parse error: Expected ) on line 1
+create table dunce (name varchar
+                   ^ found: *end of input*'
+
+),
+array(
+'sql' => 'create table dunce (name varchar(2,3))',
+'expect' => 'Parse error: Expected 1 parameter on line 1
+create table dunce (name varchar(2,3))
+                                    ^ found: )'
+
+),
+array(
+'sql' => 'create table dunce (enum)',
+'expect' => 'Parse error: Expected identifier on line 1
+create table dunce (enum)
+                    ^ found: enum'
+
+),
+array(
+'sql' => 'create table dunce (enum(23))',
+'expect' => 'Parse error: Expected identifier on line 1
+create table dunce (enum(23))
+                    ^ found: enum'
+
 ),
 );
 ?>
