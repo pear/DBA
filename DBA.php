@@ -51,7 +51,7 @@ define('DBA_ERROR_ALREADY_EXISTS',    -15);     // key
  * dbm engine for installations where dba support is not included in PHP.
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.9.5
+ * @version 1.0-rc1
  * @access  public
  * @package DBA
  */
@@ -194,7 +194,7 @@ class DBA extends PEAR
      */
     function getDriverList()
     {
-        return array('gdbm', 'db3', 'file', 'db2');
+        return array_merge(dba_handlers(), array('file'));
     }
 }
 
