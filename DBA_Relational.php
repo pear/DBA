@@ -176,7 +176,7 @@ class DBA_Relational extends PEAR
     {
         // check if this table object exists
         if (!isset($this->_tables[$tableName])) {
-            $this->_tables[$tableName] = new DBA_Table();
+            $this->_tables[$tableName] = new DBA_Table($this->_driver);
         } else {
             // the table object exists, so the table must exist
             return $this->raiseError("cannot create table: $tableName,".
