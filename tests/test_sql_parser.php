@@ -36,7 +36,7 @@ $queries = array(
   category set('sexy','\'family time\'',\"outdoors\",'generic','very weird') NULL,
   description text NULL,
   id int default 200 PRIMARY KEY
-);",
+)",
 "CREATE TABLE photos (
   filename varchar(60) not NULL,
   name varchar(60) default \"no name\",
@@ -44,11 +44,11 @@ $queries = array(
   price float (4,2),
   description text default 'hello',
   id int default 0 primary key auto_increment not null,
-);",
+)",
 "create table brent (
     filename varchar(10),
     description varchar(20),
-);",
+)",
 "create table nodefinitions",
 "create dogfood",
 "create table dunce (name varchar",
@@ -63,17 +63,19 @@ $queries = array(
              kind      CHAR(10), 
              len       INTERVAL HOUR TO MINUTE
              CONSTRAINT production UNIQUE(date_prod)
-);",
+)",
 "CREATE TABLE distributors ( 
              did      DECIMAL(3) PRIMARY KEY DEFAULT NEXTVAL('serial'), 
              name     VARCHAR(40) NOT NULL CHECK (name <> '') 
              CONSTRAINT con1 CHECK (did > 100 AND name > '') 
-);",
+)",
 "CREATE TABLE distributors ( 
             did      DECIMAL(3) PRIMARY KEY, 
             name     VARCHAR(40) 
-);",
-"insert into dogmeat ('horse', 'hair') values (2, 4);"
+)",
+"insert into dogmeat ('horse', 'hair') values (2, 4)",
+"inSERT into dogmeat (horse, hair) values (2, 4)",
+"CREATE TABLE msgs ( user_id integer, msg_id integer, msg_text varchar, msg_title varchar(30), msg_date time)"
 );
 
 $lexer = new Lexer();

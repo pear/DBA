@@ -25,7 +25,7 @@ include 'DB/DBA/ctype.php';
 
 // {{{ token definitions
 // variables: 'ident', 'sys_var'
-// values:    'real_val', 'text_val', 'int_val', null
+// values:    'real', 'string', 'integer', null
 // }}}
 
 /**
@@ -201,7 +201,7 @@ function lex()
                 $this->tokText = substr($this->string, $this->tokStart,
                                         $this->tokLen);
                 $this->tokStart = $this->tokPtr;
-                return ('int_val');
+                return ('integer');
                 break;
             // }}}
 
@@ -230,7 +230,7 @@ function lex()
                 $this->tokText = substr($this->string, $this->tokStart,
                                         $this->tokLen);
                 $this->tokStart = $this->tokPtr;
-                return ('real_val');
+                return ('real');
             // }}}
 
             // {{{ State 9: Incomplete signed number
@@ -308,7 +308,7 @@ function lex()
             // {{{ State 13: Complete text string
             case 13:
                 $this->tokStart = $this->tokPtr;
-                return ('text_val');
+                return ('string');
                 break;
             // }}}
 
