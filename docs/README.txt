@@ -3,6 +3,8 @@ databases. It works around some of the quirks in the built-in dba
 functions in PHP (e.g. gdbm does not support dba_replace), has its own 
 dbm engine for installations where dba support is not included in PHP.
 
+** Using DBA, DBA_Simple, DBA_Builtin **
+
 Berkeley DB style databases are much simpler than the other database 
 systems that PHP supports. They typically support inserting, removing, 
 and retreiving data from a file, using a key as a reference. An 
@@ -71,5 +73,11 @@ DBA supports some additional methods:
 $db->sync() synchronizes pending writes to disk (these happen 
 automatically too)$db->exists($key) checks if a key exists
 $db->isOpen(), $db->isWritable(), $db->isReadable()
+
+** Using DBA_Table, DBA_Relational **
+
+This needs to be written. For now, see the examples in test_table.php and
+test_relational.php. There are also PHPDoc comments for each function in these
+classes.
 
 DBA is copyright 2002 Brent Cook <busterb@mail.utexas.edu>

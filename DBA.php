@@ -17,8 +17,6 @@
 // | License along with this library; if not, write to the Free Software  |
 // | Foundation, Inc., 59 Temple Place, Suite 330,Boston,MA 02111-1307 USA|
 // +----------------------------------------------------------------------+
-// | Author: Brent Cook <busterb@mail.utexas.edu>                         |
-// +----------------------------------------------------------------------+
 //
 // $Id$
 //
@@ -30,7 +28,7 @@
  * dbm engine for installations where dba support is not included in PHP.
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.0.14
+ * @version 0.14
  * @access  public
  * @package DBA
  */

@@ -20,7 +20,7 @@
 
     <release>
         <license>LGPL</license>
-        <version>0.0.14</version>
+        <version>0.14</version>
         <date>2002-07-06</date>
         <state>beta</state>
         <notes>
@@ -34,15 +34,13 @@
         </notes>
         <filelist>
             <dir name="/" baseinstalldir="DB/DBA">
-                <dir name="DBA">
-                    <file role="php">DBA.php</file>
-                    <file role="php">DBA_Simple.php</file>
-                    <file role="php">DBA_Compat.php</file>
-                    <file role="php">DBA_Builtin.php</file>
-                    <file role="php">DBA_Table.php</file>
-                    <file role="php">DBA_Relational.php</file>
-                </dir>
-                <dir name="tests">
+                <file role="php">DBA.php</file>
+                <file role="php">DBA_Simple.php</file>
+                <file role="php">DBA_Compat.php</file>
+                <file role="php">DBA_Builtin.php</file>
+                <file role="php">DBA_Table.php</file>
+                <file role="php">DBA_Relational.php</file>
+                <dir name="tests" role="test">
                     <file role="test">benchmark_drivers.php</file>
                     <file role="test">test_simple.php</file>
                     <file role="test">test_relational.php</file>

@@ -1,0 +1,243 @@
+Output from test_table.php
+
+Created table 'hats'
+Query: $table->select("(type != bowler) and (type != fedora)")
+  type           quantity   brand              sizes                  lastshipment       hat_id  
+ -------------- ---------- ------------------ ---------------------- ------------------ -------- 
+  stocking cap   0          Brent's Hats       xlarge, large          Sat Jul 6, 2002    101     
+  top hat        10         Laurie's Hats      small, medium, large   Sat Apr 22, 2000   103     
+  top hat        60         Travis' Hats       small                  Sat Jan 1, 2000    104     
+  beanie         600        Elizabeth's Hats   small, large           Sat May 18, 2002   105     
+  stocking cap   0          Brent's Hats       xlarge, large          Sat Jul 6, 2002    107     
+  top hat        10         Laurie's Hats      small, medium, large   Sat Apr 22, 2000   109     
+  top hat        60         Travis' Hats       small                  Sat Jan 1, 2000    110     
+  beanie         600        Elizabeth's Hats   small, large           Sat May 18, 2002   111     
+------------------------------------------------
+
+Query: $table->select("quantity<=60")
+  type           quantity   brand           sizes                  lastshipment       hat_id  
+ -------------- ---------- --------------- ---------------------- ------------------ -------- 
+  bowler         20         Jill's Hats     small, large           Mon May 29, 1978   100     
+  stocking cap   0          Brent's Hats    xlarge, large          Sat Jul 6, 2002    101     
+  top hat        10         Laurie's Hats   small, medium, large   Sat Apr 22, 2000   103     
+  top hat        60         Travis' Hats    small                  Sat Jan 1, 2000    104     
+  bowler         20         Jill's Hats     small, large           Mon May 29, 1978   106     
+  stocking cap   0          Brent's Hats    xlarge, large          Sat Jul 6, 2002    107     
+  top hat        10         Laurie's Hats   small, medium, large   Sat Apr 22, 2000   109     
+  top hat        60         Travis' Hats    small                  Sat Jan 1, 2000    110     
+------------------------------------------------
+
+Query: $table->select("quantity>=50")
+  type      quantity   brand              sizes                  lastshipment       hat_id  
+ --------- ---------- ------------------ ---------------------- ------------------ -------- 
+  fedora    800        Shilanda's Hats    small, medium, large   Sat Jun 30, 2001   102     
+  top hat   60         Travis' Hats       small                  Sat Jan 1, 2000    104     
+  beanie    600        Elizabeth's Hats   small, large           Sat May 18, 2002   105     
+  fedora    800        Shilanda's Hats    small, medium, large   Sat Jun 30, 2001   108     
+  top hat   60         Travis' Hats       small                  Sat Jan 1, 2000    110     
+  beanie    600        Elizabeth's Hats   small, large           Sat May 18, 2002   111     
+------------------------------------------------
+
+Query: $table->sort("quantity, hat_id", "a", $table->select("*"))
+  type           quantity   brand              sizes                  lastshipment       hat_id  
+ -------------- ---------- ------------------ ---------------------- ------------------ -------- 
+  stocking cap   0          Brent's Hats       xlarge, large          Sat Jul 6, 2002    101     
+  stocking cap   0          Brent's Hats       xlarge, large          Sat Jul 6, 2002    107     
+  top hat        10         Laurie's Hats      small, medium, large   Sat Apr 22, 2000   103     
+  top hat        10         Laurie's Hats      small, medium, large   Sat Apr 22, 2000   109     
+  bowler         20         Jill's Hats        small, large           Mon May 29, 1978   100     
+  bowler         20         Jill's Hats        small, large           Mon May 29, 1978   106     
+  top hat        60         Travis' Hats       small                  Sat Jan 1, 2000    104     
+  top hat        60         Travis' Hats       small                  Sat Jan 1, 2000    110     
+  beanie         600        Elizabeth's Hats   small, large           Sat May 18, 2002   105     
+  beanie         600        Elizabeth's Hats   small, large           Sat May 18, 2002   111     
+  fedora         800        Shilanda's Hats    small, medium, large   Sat Jun 30, 2001   102     
+  fedora         800        Shilanda's Hats    small, medium, large   Sat Jun 30, 2001   108     
+------------------------------------------------
+
+Query: $table->sort(array("quantity", "hat_id"), "a", $table->getRows())
+  type           quantity   brand              sizes                  lastshipment       hat_id  
+ -------------- ---------- ------------------ ---------------------- ------------------ -------- 
+  stocking cap   0          Brent's Hats       xlarge, large          Sat Jul 6, 2002    101     
+  stocking cap   0          Brent's Hats       xlarge, large          Sat Jul 6, 2002    107     
+  top hat        10         Laurie's Hats      small, medium, large   Sat Apr 22, 2000   103     
+  top hat        10         Laurie's Hats      small, medium, large   Sat Apr 22, 2000   109     
+  bowler         20         Jill's Hats        small, large           Mon May 29, 1978   100     
+  bowler         20         Jill's Hats        small, large           Mon May 29, 1978   106     
+  top hat        60         Travis' Hats       small                  Sat Jan 1, 2000    104     
+  top hat        60         Travis' Hats       small                  Sat Jan 1, 2000    110     
+  beanie         600        Elizabeth's Hats   small, large           Sat May 18, 2002   105     
+  beanie         600        Elizabeth's Hats   small, large           Sat May 18, 2002   111     
+  fedora         800        Shilanda's Hats    small, medium, large   Sat Jun 30, 2001   102     
+  fedora         800        Shilanda's Hats    small, medium, large   Sat Jun 30, 2001   108     
+------------------------------------------------
+
+Query: $table->sort("lastshipment", "d", $table->select("*"))
+  type           quantity   brand              sizes                  lastshipment       hat_id  
+ -------------- ---------- ------------------ ---------------------- ------------------ -------- 
+  stocking cap   0          Brent's Hats       xlarge, large          Sat Jul 6, 2002    107     
+  stocking cap   0          Brent's Hats       xlarge, large          Sat Jul 6, 2002    101     
+  beanie         600        Elizabeth's Hats   small, large           Sat May 18, 2002   111     
+  beanie         600        Elizabeth's Hats   small, large           Sat May 18, 2002   105     
+  fedora         800        Shilanda's Hats    small, medium, large   Sat Jun 30, 2001   108     
+  fedora         800        Shilanda's Hats    small, medium, large   Sat Jun 30, 2001   102     
+  top hat        10         Laurie's Hats      small, medium, large   Sat Apr 22, 2000   109     
+  top hat        10         Laurie's Hats      small, medium, large   Sat Apr 22, 2000   103     
+  top hat        60         Travis' Hats       small                  Sat Jan 1, 2000    110     
+  top hat        60         Travis' Hats       small                  Sat Jan 1, 2000    104     
+  bowler         20         Jill's Hats        small, large           Mon May 29, 1978   100     
+  bowler         20         Jill's Hats        small, large           Mon May 29, 1978   106     
+------------------------------------------------
+
+Query: $table->unique($table->project("brand,quantity,  type",$table->sort("quantity", "d", $table->select("type != 'top hat'"))))
+  brand              quantity   type          
+ ------------------ ---------- -------------- 
+  Shilanda's Hats    800        fedora        
+  Elizabeth's Hats   600        beanie        
+  Jill's Hats        20         bowler        
+  Brent's Hats       0          stocking cap  
+------------------------------------------------
+
+Output from test_relational.php
+Creating table: emp
+Query: $db->select(emp, '*');
+  id     empname   job        manager   hiredate           salary   comm   deptno  
+ ------ --------- ---------- --------- ------------------ -------- ------ -------- 
+  7369   Smith     clerk      7782      Mon May 29, 1978   800      0      20      
+  7499   Allen     salesman   7782      Fri Feb 20, 1981   1600     300    30      
+  7521   Ward      salesman   7782      Sun Feb 22, 1981   1250     500    30      
+  7782   Clark     manager    7788      Tue Jun 9, 1981    2450     0      10      
+  7788   Scott     analyst    0         Thu Dec 9, 1982    3000     0      20      
+------------------------------------------------
+
+Creating table: dept
+Query: $db->select(dept, '*');
+  deptno   deptname     manager  
+ -------- ------------ --------- 
+  10       ACCOUNTING   7782     
+  20       RESEARCH     7788     
+  30       SALES        7369     
+  40       OPERATIONS   7782     
+------------------------------------------------
+
+Creating table: location
+Query: $db->select(location, '*');
+  locno   locname   
+ ------- ---------- 
+  1       New York  
+  2       Austin    
+  3       Chicago   
+------------------------------------------------
+
+Creating table: deptloc
+Query: $db->select(deptloc, '*');
+  deptno   locno  
+ -------- ------- 
+  10       1      
+  20       2      
+  30       3      
+  40       3      
+  10       2      
+------------------------------------------------
+
+Creating table: account
+Query: $db->select(account, '*');
+  id   rid   name    notes                    active  
+ ---- ----- ------- ------------------------ -------- 
+  0    100   Ford    Wear black to meetings   true    
+  1    99    Chevy   Springtime casual        false   
+------------------------------------------------
+
+Query: $db->select("nothere", "pigs == 'fly'")
+ Query failed.
+DBA: table 'nothere' does not exist
+------------------------------------------------
+
+Query: $db->select("emp", "salary >= 1500")
+  id     empname   job        manager   hiredate    salary   comm   deptno  
+ ------ --------- ---------- --------- ----------- -------- ------ -------- 
+  7499   Allen     salesman   7782      351496800   1600     300    30      
+  7782   Clark     manager    7788      360910800   2450     0      10      
+  7788   Scott     analyst    0         408261600   3000     0      20      
+------------------------------------------------
+
+Query: $db->sort("empname", "a",
+                    $db->select("emp", "(job != 'analyst') and (job != 'intern')")
+                 )
+  id     empname   job        manager   hiredate    salary   comm   deptno  
+ ------ --------- ---------- --------- ----------- -------- ------ -------- 
+  7499   Allen     salesman   7782      351496800   1600     300    30      
+  7782   Clark     manager    7788      360910800   2450     0      10      
+  7369   Smith     clerk      7782      265266000   800      0      20      
+  7521   Ward      salesman   7782      351669600   1250     500    30      
+------------------------------------------------
+
+Query: $db->sort("empname", "d",
+                    $db->select("emp", "(job != 'analyst') and (job != 'intern')")
+                 )
+  id     empname   job        manager   hiredate    salary   comm   deptno  
+ ------ --------- ---------- --------- ----------- -------- ------ -------- 
+  7521   Ward      salesman   7782      351669600   1250     500    30      
+  7369   Smith     clerk      7782      265266000   800      0      20      
+  7782   Clark     manager    7788      360910800   2450     0      10      
+  7499   Allen     salesman   7782      351496800   1600     300    30      
+------------------------------------------------
+
+Query: $db->join("emp", "dept", "emp.deptno == dept.deptno")
+  id     empname   job        manager   hiredate    salary   comm   deptno   deptname    
+ ------ --------- ---------- --------- ----------- -------- ------ -------- ------------ 
+  7369   Smith     clerk      7788      265266000   800      0      20       RESEARCH    
+  7499   Allen     salesman   7369      351496800   1600     300    30       SALES       
+  7521   Ward      salesman   7369      351669600   1250     500    30       SALES       
+  7782   Clark     manager    7782      360910800   2450     0      10       ACCOUNTING  
+  7788   Scott     analyst    7788      408261600   3000     0      20       RESEARCH    
+------------------------------------------------
+
+Query: $db->join("location", 
+                    $db->join("dept", "deptloc", "dept.deptno == deptloc.deptno"),
+                    "location.locno == B.locno"
+                 )
+  locno   locname    deptno   deptname     manager  
+ ------- ---------- -------- ------------ --------- 
+  1       New York   10       ACCOUNTING   7782     
+  2       Austin     10       ACCOUNTING   7782     
+  2       Austin     20       RESEARCH     7788     
+  3       Chicago    30       SALES        7369     
+  3       Chicago    40       OPERATIONS   7782     
+------------------------------------------------
+
+Query: $db->sort("manager", "a",
+                    $db->join("location",
+                        $db->join("dept", "deptloc", "dept.deptno == deptloc.deptno"),
+                        "location.locno == B.locno"
+                    )
+                 )
+  locno   locname    deptno   deptname     manager  
+ ------- ---------- -------- ------------ --------- 
+  3       Chicago    30       SALES        7369     
+  1       New York   10       ACCOUNTING   7782     
+  2       Austin     10       ACCOUNTING   7782     
+  3       Chicago    40       OPERATIONS   7782     
+  2       Austin     20       RESEARCH     7788     
+------------------------------------------------
+
+Query: $db->sort("empname, locname, deptname", "a",
+                    $db->project("empname, locname, deptname",
+                        $db->join("emp", 
+                            $db->join("location",
+                                $db->join("dept", "deptloc", "dept.deptno == deptloc.deptno"),
+                                "location.locno == B.locno"
+                            ),
+                            "emp.id == B.manager"
+                        )
+                    )
+                 )
+  empname   locname    deptname    
+ --------- ---------- ------------ 
+  Clark     Austin     ACCOUNTING  
+  Clark     Chicago    OPERATIONS  
+  Clark     New York   ACCOUNTING  
+  Scott     Austin     RESEARCH    
+  Smith     Chicago    SALES       
+------------------------------------------------
+
