@@ -121,8 +121,7 @@ class DBA_Simple extends PEAR
      */
     function open($dbName='', $mode='r')
     {
-        if ($dbName == '')
-        {
+        if ($dbName == '') {
             return $this->raiseError('DBA: No database name specified');
         } else {
             $this->_dbName = $dbName;
@@ -130,8 +129,7 @@ class DBA_Simple extends PEAR
             $idx_name = $dbName.'.idx';
         }
 
-        switch ($mode)
-        {
+        switch ($mode) {
             case 'r':
                     // open for reading
                     $file_mode = 'rb';
@@ -232,10 +230,8 @@ class DBA_Simple extends PEAR
      */
     function reopen($mode)
     {
-        if ($this->isOpen())
-        {
-            if (($mode == 'r') && $this->isWritable())
-            {
+        if ($this->isOpen()) {
+            if (($mode == 'r') && $this->isWritable()) {
                 // Reopening as read-only
                 $this->close();
                 return $this->open($this->_dbName, 'r');
@@ -279,7 +275,7 @@ class DBA_Simple extends PEAR
      */
     function isOpen()
     {
-        return ($this->_readable || $this->_writable);
+        return($this->_readable || $this->_writable);
     }
 
     /**
@@ -314,10 +310,8 @@ class DBA_Simple extends PEAR
      */
     function delete($key)
     {
-        if ($this->isWritable())
-        {
-            if (isset($this->_usedBlocks[$key]))
-            {
+        if ($this->isWritable()) {
+            if (isset($this->_usedBlocks[$key])) {
                 $this->_freeUsedBlock($key);
             } else {
                 return $this->raiseError('DBA: cannot delete key: '.
@@ -339,10 +333,8 @@ class DBA_Simple extends PEAR
      */
     function fetch($key)
     {
-        if ($this->isReadable())
-        {
-            if (!isset($this->_usedBlocks[$key]))
-            {
+        if ($this->isReadable()) {
+            if (!isset($this->_usedBlocks[$key])) {
                 return $this->raiseError('DBA: cannot fetch key '.$key.
                               ', it does not exist');
             } else {
@@ -364,8 +356,7 @@ class DBA_Simple extends PEAR
      */
     function firstkey()
     {
-        if ($this->isReadable() && ($this->size() > 0))
-        {
+        if ($this->isReadable() && ($this->size() > 0)) {
             reset($this->_usedBlocks);
             return key($this->_usedBlocks);
         } else {
@@ -398,8 +389,7 @@ class DBA_Simple extends PEAR
      */
     function size()
     {
-        if (is_array($this->_usedBlocks))
-        {
+        if (is_array($this->_usedBlocks)) {
             return sizeof($this->_usedBlocks);
         } else {
             return 0;
@@ -418,8 +408,7 @@ class DBA_Simple extends PEAR
      */
     function insert($key, $value)
     {
-        if ($this->exists($key))
-        {
+        if ($this->exists($key)) {
             return $this->raiseError('DBA: cannot insert on key: '.
                           $key. ', it already exists');
         } else {
@@ -440,13 +429,11 @@ class DBA_Simple extends PEAR
     function replace($key, $value)
     {
         // is the database in a usable state?
-        if ($this->isWritable())
-        {
+        if ($this->isWritable()) {
             // get how much space we need
             $vsize = strlen($value);
 
-            if (!isset($this->_usedBlocks[$key]))
-            {
+            if (!isset($this->_usedBlocks[$key])) {
                 // the value is new
                 $this->_writeNewBlock($key, $value, $vsize);
 
@@ -494,8 +481,7 @@ class DBA_Simple extends PEAR
     {
         // is there is a sufficiently sized block free ?
         $loc = $this->_getFreeBlock($vsize);
-        if ($loc !== false)
-        {
+        if ($loc !== false) {
             // update free block list
             $size = $this->_freeBlocks[$loc];
             unset($this->_freeBlocks[$loc]);
@@ -592,7 +578,7 @@ class DBA_Simple extends PEAR
      */
     function db_exists($dbName)
     {
-        return (file_exists($dbName.'.dat') && file_exists($dbName.'.idx'));
+        return(file_exists($dbName.'.dat') && file_exists($dbName.'.idx'));
     }
 
     /**
@@ -604,7 +590,7 @@ class DBA_Simple extends PEAR
      */
     function exists($key)
     {
-        return ($this->isOpen() && isset($this->_usedBlocks[$key]));
+        return($this->isOpen() && isset($this->_usedBlocks[$key]));
     }
 
     /**
@@ -706,8 +692,7 @@ class DBA_Simple extends PEAR
      */
     function _writeIdxEntry($loc, $size, $vsize=NULL, $key=NULL)
     {
-        if (is_null($vsize))
-        {
+        if (is_null($vsize)) {
             // write a free block entry
             fputs($this->_idxFP, "$loc|$size\n");
         } else {

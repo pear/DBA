@@ -51,11 +51,11 @@ foreach ($empSchema as $tableName=>$tableSchema) {
             }
         }
 
-        $results = $db->select($tableName, '*');
+ //       $results = $db->select($tableName, '*');
 
-        echo "Query: \$db->select($tableName, '*');\n";
-        echo $db->formatTextResults($db->finalize($tableName, $results));
-        echo "------------------------------------------------\n\n";
+//        echo "Query: \$db->select($tableName, '*');\n";
+ //       echo $db->formatTextResults($db->finalize($tableName, $results));
+//        echo "------------------------------------------------\n\n";
     }
 }
 
@@ -63,6 +63,11 @@ foreach ($empSchema as $tableName=>$tableSchema) {
 $db->close();
 
 $queries = array(
+                '$db->select("emp", "*")',
+                '$db->select("deptloc", "*")',
+                '$db->select("location", "*")',
+                '$db->select("dept", "*")',
+                '$db->select("account", "*")',
                 '$db->select("nothere", "pigs == \'fly\'")',
                 '$db->select("emp", "salary >= 1500")',
                 '$db->sort("empname", "a",
@@ -103,7 +108,7 @@ foreach ($queries as $query) {
         echo " Query failed.\n";
         echo $results->getMessage()."\n";
     } else {
-        echo $db->formatTextResults ($results);
+        echo $db->formatTextResults($results);
     }
 
     echo "------------------------------------------------\n\n";

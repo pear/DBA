@@ -73,7 +73,7 @@ class DBA_Builtin extends PEAR{
      * @access public
      * @param   string  $driver dba driver to use
      */
-    function DBA_Builtin ($driver = 'gdbm')
+    function DBA_Builtin($driver = 'gdbm')
     {
         $this->_driver = $driver;
     }
@@ -93,7 +93,7 @@ class DBA_Builtin extends PEAR{
      * @return  object
      * @returns PEAR_Error on failure
      */
-    function open ($dbName='', $mode='r', $driver=NULL)
+    function open($dbName='', $mode='r', $driver=NULL)
     {
         if (!is_null($driver)) {
             $this->_driver = $driver;
@@ -115,8 +115,7 @@ class DBA_Builtin extends PEAR{
             $this->_dbName = $dbName;
         }
 
-        switch ($mode)
-        {
+        switch ($mode) {
             case 'r':
                     // open for reading
                     $this->_writable = false;
@@ -150,10 +149,9 @@ class DBA_Builtin extends PEAR{
      * @return  object
      * @returns PEAR_Error on failure
      */
-    function close ()
+    function close()
     {
-        if ($this->isOpen())
-        {
+        if ($this->isOpen()) {
             $this->_readable = false;
             $this->_writable = false;
             dba_close($this->_dba);
@@ -172,12 +170,10 @@ class DBA_Builtin extends PEAR{
      * @return  object
      * @returns PEAR_Error on failure
      */
-    function reopen ($mode)
+    function reopen($mode)
     {
-        if ($this->isOpen())
-        {
-            if (($mode == 'r') && $this->isWritable())
-            {
+        if ($this->isOpen()) {
+            if (($mode == 'r') && $this->isWritable()) {
                 // Reopening as read-only
                 $this->close();
                 return $this->open($this->_dbName, 'r');
@@ -208,7 +204,7 @@ class DBA_Builtin extends PEAR{
      */
     function isOpen()
     {
-        return ($this->_readable || $this->_writable);
+        return($this->_readable || $this->_writable);
     }
 
     /**
@@ -243,8 +239,7 @@ class DBA_Builtin extends PEAR{
      */
     function delete($key)
     {
-        if ($this->isWritable())
-        {
+        if ($this->isWritable()) {
             if (!dba_delete($key, $this->_dba)) {
                 return $this->raiseError('DBA: cannot delete key: '.
                                $key. ', it does not exist');
@@ -265,8 +260,7 @@ class DBA_Builtin extends PEAR{
      */
     function fetch($key)
     {
-        if ($this->isReadable())
-        {
+        if ($this->isReadable()) {
             if (dba_exists($key, $this->_dba)) {
                 return dba_fetch($key, $this->_dba);
             } else {
@@ -288,8 +282,7 @@ class DBA_Builtin extends PEAR{
      */
     function firstkey()
     {
-        if ($this->isReadable() && ($this->size() > 0))
-        {
+        if ($this->isReadable() && ($this->size() > 0)) {
             return dba_firstkey($this->_dba);
         } else {
             return false;
@@ -305,8 +298,7 @@ class DBA_Builtin extends PEAR{
      */
     function nextkey()
     {
-        if ($this->isReadable())
-        {
+        if ($this->isReadable()) {
             return dba_nextkey($this->_dba);
         } else {
             return false;
@@ -407,7 +399,7 @@ class DBA_Builtin extends PEAR{
      */
     function exists($key)
     {
-        return ($this->isOpen() && dba_exists($key, $this->_dba));
+        return($this->isOpen() && dba_exists($key, $this->_dba));
     }
 
     /**

@@ -151,7 +151,7 @@ class DBA_Relational extends PEAR
      */
     function tableExists($tableName)
     {
-        return (!PEAR::isError($this->_openTable($tableName)));
+        return !PEAR::isError($this->_openTable($tableName));
     }
 
     /**

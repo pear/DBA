@@ -274,7 +274,7 @@ class DBA_Table extends PEAR
      */
     function fieldExists($fieldName)
     {
-        return ($this->isOpen() && isset($this->_schema[$fieldName]));
+        return($this->isOpen() && isset($this->_schema[$fieldName]));
     }
 
     /**
@@ -285,7 +285,7 @@ class DBA_Table extends PEAR
      */
     function lockEx()
     {
-        return ($this->_dba->reopen('w'));
+        return $this->_dba->reopen('w');
     }
 
     /**
@@ -296,7 +296,7 @@ class DBA_Table extends PEAR
      */
     function lockSh($table_name)
     {
-        return ($this->_dba->reopen('r'));
+        return $this->_dba->reopen('r');
     }
 
     /**
@@ -356,8 +356,7 @@ class DBA_Table extends PEAR
     function _packField($field, $value)
     {
         $c_value = null;
-        switch ($this->_schema[$field]['type'])
-        {
+        switch ($this->_schema[$field]['type']) {
             case 'set':
                 if (is_string($value)) {
                     $value = explode(',', $value);
@@ -446,8 +445,7 @@ class DBA_Table extends PEAR
      */
     function _unpackField($field, $value)
     {
-        switch ($this->_schema[$field]['type'])
-        {
+        switch ($this->_schema[$field]['type']) {
             case 'set':
                 $c_value = array();
                 $value = explode (',',$value);
@@ -460,7 +458,7 @@ class DBA_Table extends PEAR
             case 'enum':
                 return $this->_schema[$field]['domain'][$value];
             case 'boolean':
-                return ($value == '1');
+                return($value == '1');
             case 'timestamp':
             case 'integer':
                 return intval($value);
@@ -570,12 +568,10 @@ class DBA_Table extends PEAR
     {
         $rawFields = explode(DBA_FIELD_SEPARATOR, $rawFieldString);
         $this->_primaryKey = false;
-        foreach ($rawFields as $rawField)
-        {
+        foreach ($rawFields as $rawField) {
             $rawMeta = explode(';',$rawField);
             $name = array_shift($rawMeta);
-            foreach ($rawMeta as $rawAttribute)
-            {
+            foreach ($rawMeta as $rawAttribute) {
                 list($attribute,$rawValue) = explode('=',$rawAttribute);
                 switch ($attribute) {
                     case 'domain':
@@ -780,8 +776,7 @@ class DBA_Table extends PEAR
      */
     function _finalizeField($field, $value)
     {
-        switch ($this->_schema[$field]['type'])
-        {
+        switch ($this->_schema[$field]['type']) {
             case 'set':
                 $buffer = '';
                 foreach ($value as $element) {
