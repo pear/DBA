@@ -96,7 +96,7 @@ class Sql_Parser
         $message .= str_repeat(' ', ($this->lexer->tokPtr - 
                                $this->lexer->lineBegin -
                                strlen($this->lexer->tokText)))."^";
-        $message .= ' found: '.$this->lexer->tokText."\n";
+        $message .= ' found: '.$this->lexer->tokText;
 
         return PEAR::raiseError($message);
     }
@@ -385,6 +385,12 @@ class Sql_Parser
                     return $this->raiseError('Unexpected token');
                 }
                 $this->getTok();
+            } elseif ($this->token == 'varying') {
+                if ($fields[$name]['type'] == 'char') {
+                    $fields[$name]['type'] == 'varchar';
+                } else {
+                    return $this->raiseError('Unexpected token');
+                }
             }
             // parse type parameters
             if ($this->token == '(') {
@@ -393,7 +399,7 @@ class Sql_Parser
                     return $results;
                 }
                 switch ($fields[$name]['type']) {
-                    case 'dec':
+                    case 'numeric':
                         if (isset($values[1])) {
                             if ($types[1] != 'int_val') {
                                 return $this->raiseError('Expected an integer');
@@ -421,7 +427,7 @@ class Sql_Parser
                         }
                         $fields[$name]['length'] = $values[0];
                         break;
-                    case 'set':
+                    case 'set': case 'enum':
                         if (!sizeof($values)) {
                             return $this->raiseError('Expected a domain');
                         }
@@ -429,7 +435,7 @@ class Sql_Parser
                         break;
                     default:
                         if (sizeof($values)) {
-                            return $this->raiseError('Unexpected (');
+                            return $this->raiseError('Unexpected )');
                         }
                 }
                 $this->getTok();
