@@ -53,6 +53,7 @@ foreach ($empSchema as $tableName=>$tableSchema) {
         echo $db->formatResults($db->finalizeRows($tableName, $results));
         echo "------------------------------------------------\n\n";
     }
+    print_r($db->getSchema($tableName));
 }
 
 // closes all open tables - testing auto-open feature

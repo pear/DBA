@@ -148,7 +148,7 @@ class DBA_Table extends PEAR
      * @returns array
      */
     function getSchema() {
-        if (!$this->isOpen()) {
+        if ($this->isOpen()) {
             return $this->_schema;
         } else {
             return $this->raiseError('DBA: table not open, no schema available');
@@ -436,13 +436,13 @@ class DBA_Table extends PEAR
      * Returns a string for a field structure
      *
      * This function uses the following is the grammar to pack elements:
-     * ENUM => name;type=enum;domain=[element1,...]
-     * SET  => name;type=set;domain=[element1,...]
-     * TIMESTAMP => name;type=timestamp;format=<string>;init=<num>
-     * BOOL => name;type=bool;init=[true, false]
-     * TEXT => name;type=text;init=<string>
-     * VARCHAR => name;varchar;size=<num>;init=<string>
-     * NUMERIC => name;int;size=<num>;init=<string>
+     * enum      => name;type=enum;domain=[element1,...]
+     * set       => name;type=set;domain=[element1,...]
+     * timestamp => name;type=timestamp;format=<string>;init=<num>
+     * boolean   => name;type=bool;default=[true, false]
+     * text      => name;type=text;default=<string>
+     * varchar   => name;varchar;size=<num>;default=<string>
+     * numeric   => name;[autoincrement];size=<num>;default=<string>
      *
      * @param   array  $schema schema to pack
      * @returns string the packed schema
@@ -468,11 +468,17 @@ class DBA_Table extends PEAR
                         elseif ($value == 'bool') $value = 'boolean';
                         $buffer .= $value;
                         break;
+                    case 'init': //handle this with auto[increment/decrement]
+                        break;
                     case 'autoincrement':
                         $buffer .= $value;
                         if (!isset($fieldMeta['ceiling'])) {
-                            $buffer .= ';ceiling=0';
-                        }
+                            if (isset($fieldMeta['init'])) {
+                                $buffer .= ';ceiling='.$fieldMeta['init'];
+                            } else {
+                                $buffer .= ';ceiling=0';
+                            }
+                        } 
                         break;
                     case 'autodecrement':
                         $buffer .= $value;
@@ -548,11 +554,16 @@ class DBA_Table extends PEAR
                 
                 // no data is supplied
                 if ($fieldMeta['autoincrement']==1) {
-                    // get a value as well as increase the ceiling
-                    $c_value = $this->_schema[$fieldName]['ceiling']++;
+
+                    // get a value and increase the ceiling
+                    $c_value = $this->_schema[$fieldName]['ceiling'];
+                    $this->_schema[$fieldName]['ceiling']++;
+
                 } elseif ($fieldMeta['autodecrement']==1) {
+
                     // get a value and decrease the floor
                     $c_value = $this->_schema[$fieldName]['floor']--;
+
                 } else {
                     // use the default value
                     $c_value = $this->_packField($fieldName,

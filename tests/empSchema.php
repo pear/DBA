@@ -38,7 +38,7 @@ $empSchema = array (
              ),
 'account'  => array('id'       => array('type' => 'int',
                                         'autoincrement' => True,
-                                        'default' => 100),
+                                        'init' => 100),
                     'name'     => array('type' => 'varchar',
                                         'size' => 45),
                     'notes'    => array('type' => 'text'),
