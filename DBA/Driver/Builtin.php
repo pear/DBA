@@ -32,7 +32,7 @@ require_once 'DBA.php';
  * driver due to its lack of writes. DB2 currently segfaults with PHP-CVS.
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.9.2
+ * @version 0.9.3
  * @access  public
  * @package DBA
  */
@@ -79,6 +79,8 @@ class DBA_Driver_Builtin extends DBA
      */
     function DBA_Driver_Builtin($driver = 'gdbm')
     {
+        // call the base constructor
+        $this->DBA();
         $this->_driver = $driver;
     }
     // }}}

@@ -30,12 +30,21 @@ require_once('PEAR.php');
  * dbm engine for installations where dba support is not included in PHP.
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.9.2
+ * @version 0.9.3
  * @access  public
  * @package DBA
  */
 class DBA extends PEAR
 {
+    /**
+     * Default constructor
+     */
+    function DBA()
+    {
+        // call the base constructor
+        $this->PEAR();
+    }
+
     /**
      * Creates a new DBA object
      *

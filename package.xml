@@ -20,13 +20,17 @@ DBA is a wrapper for the php DBA functions. It includes a file-based emulator an
 
     <release>
         <license>LGPL</license>
-        <version>0.9.2</version>
-        <date>2002-09-25</date>
+        <version>0.9.3</version>
+        <date>2002-09-26</date>
         <state>beta</state>
         <notes>
-This release fixes a bug in the firstkey() function of the builtin drivers (gdbm, db3) and adds the missing size() function.
+This release updates the driver constructors so that they call their base class's constructors. This makes PEAR's virtual destructor system function properly.
 
-Note that many of the pieces that were included with the earlier developer releases, such as the table manager and SQL parser, have been split into separate packages to be released again soon.
+NOTE: The file driver appears to work incorrectly with the latest PHP CVS. I am
+currently investigating the issue. For now, either use CVS from a few weeks
+ago, or PHP up to 4.2.3.
+
+Many of the functions that were included with the earlier developer releases, such as the table manager and SQL parser, have been split into separate packages to be released soon.
         </notes>
         <filelist>
             <dir name="/" baseinstalldir="/">

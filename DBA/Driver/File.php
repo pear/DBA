@@ -72,7 +72,7 @@ define('DBA_SIMPLE_KEY',3);
  * The sync function calls fflush on the data and index files.
  *
  * @author  Brent Cook
- * @version 0.9.2
+ * @version 0.9.3
  * @access  public
  * @package DBA
  */
@@ -108,15 +108,15 @@ class DBA_Driver_File extends DBA
      * @access private
      */
     var $_readable;
-    // }}}
 
     /**
      * Determines if the driver should use an index file
      * @access private
      */
     var $_indexed;
+    // }}}
 
-    // {{{ DBA_Driver_Builtin($indexed = true)
+    // {{{ DBA_Driver_File($indexed = true)
     /* Constructor
      *
      * @access public
@@ -124,6 +124,8 @@ class DBA_Driver_File extends DBA
      */
     function DBA_Driver_File($indexed = true)
     {
+        // call the base constructor
+        $this->DBA();
         $this->_indexed = true;
     }
     // }}}
@@ -242,8 +244,6 @@ class DBA_Driver_File extends DBA
             $this->_writable = false;
             fclose($this->_idxFP);
             fclose($this->_datFP);
-        } else {
-            return $this->raiseError('No database was open');
         }
     }
     // }}}
