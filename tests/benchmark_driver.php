@@ -41,71 +41,76 @@ $transactionsInterval = 2000;
 
 $maxTransactions = $transactionsInterval * 8;
 
-$driver = 'db3';
+$drivers = array('db3', 'gdbm', 'simple');
 
-$testDB = DBA::create($driver);
+$prefix = './data/';
 
 function getmicrotime(){ 
     list($usec, $sec) = explode(" ",microtime()); 
     return ((float)$usec + (float)$sec); 
 } 
 
-foreach ($maxTestKeys as $maxTestKey) {
+foreach ($drivers as $driver) {
+    echo "Benchmarking driver: $driver\n";
+    $testDB = DBA::create($driver);
 
-    $dat_fp = fopen("{$driver}_{$maxTestKey}.dat", 'w');
-    for ($transactions=$transactionsInterval; $transactions <= $maxTransactions;
+    foreach ($maxTestKeys as $maxTestKey) {
+
+        $dat_fp = fopen($prefix."{$driver}_{$maxTestKey}.dat", 'w');
+        for ($transactions=$transactionsInterval;
+            $transactions <= $maxTransactions;
             $transactions+=$transactionsInterval) {
 
-        $result = $testDB->open('benchmark_db', 'n');
-        if (PEAR::isError($result)) {
-            echo $result->getMessage()."\n";
-        } else {
-            // only measure successful transactions
-            $actualTransactions = 0;
+            $result = $testDB->open($prefix.'benchmark_db', 'n');
+            if (PEAR::isError($result)) {
+                echo $result->getMessage()."\n";
+            } else {
+                // only measure successful transactions
+                $actualTransactions = 0;
 
-            // begin stopwatch
-            $start = getmicrotime();
+                // begin stopwatch
+                $start = getmicrotime();
 
-            for ($i=0; $i<$transactions; ++$i) {
-                $testKey = rand (0, $maxTestKey);
-                $testData = $testDataArray[rand(0, $maxDataIndex)];
-                switch (rand(0, 3)) {
-                    case 0:
-                        if (!$testDB->exists($testKey)) {
-                            ++$actualTransactions;
-                            $testDB->insert($testKey, $testData);
-                        }
-                        break;
-                    case 1:
-                        if ($testDB->exists($testKey)) {
-                            ++$actualTransactions;
-                            $testDB->delete($testKey);
-                        }
-                        break;
-                    case 2:
-                        $testDB->replace($testKey, $testData);
-                        break;
-                    case 3:
-                        if ($testDB->exists($testKey)) {
-                            ++$actualTransactions;
-                            $testDB->fetch($testKey);
-                        }
+                for ($i=0; $i<$transactions; ++$i) {
+                    $testKey = rand (0, $maxTestKey);
+                    $testData = $testDataArray[rand(0, $maxDataIndex)];
+                    switch (rand(0, 3)) {
+                        case 0:
+                            if (!$testDB->exists($testKey)) {
+                                ++$actualTransactions;
+                                $testDB->insert($testKey, $testData);
+                            }
+                            break;
+                        case 1:
+                            if ($testDB->exists($testKey)) {
+                                ++$actualTransactions;
+                                $testDB->delete($testKey);
+                            }
+                            break;
+                        case 2:
+                            $testDB->replace($testKey, $testData);
+                            break;
+                        case 3:
+                            if ($testDB->exists($testKey)) {
+                                ++$actualTransactions;
+                                $testDB->fetch($testKey);
+                            }
+                    }
                 }
+                $testDB->close();
             }
-            $testDB->close();
+
+            // end stopwatch
+            $stop = getmicrotime();
+            $line = $actualTransactions.' '.($stop - $start)."\n";
+            echo "Keys: $maxTestKey Transactions: $line";
+            fwrite($dat_fp, $line);
         }
-
-        // end stopwatch
-        $stop = getmicrotime();
-        $line = $actualTransactions.' '.($stop - $start)."\n";
-        echo "Keys: $maxTestKey Transactions: $line";
-        fwrite($dat_fp, $line);
+        fclose($dat_fp);
     }
-    fclose($dat_fp);
-}
 
-// make a gnuplot data file
-$graph_data = <<<EOT
+    // make a gnuplot data file
+    $graph_data = <<<EOT
 set size 1.0, 1.0
 set terminal postscript portrait "Helvetica" 12
 set title "driver: $driver"
@@ -115,14 +120,14 @@ set out "$driver.ps"
 plot
 EOT;
 
-foreach ($maxTestKeys as $maxTestKey) {
-    $graph_data .= " \"{$driver}_{$maxTestKey}.dat\" using 1:2 title '".
-                   "$driver, $maxTestKey keys' with lines,\\\n";
+    foreach ($maxTestKeys as $maxTestKey) {
+        $graph_data .= " \"{$driver}_{$maxTestKey}.dat\" using 1:2 title '".
+                    "$driver, $maxTestKey keys' with lines,\\\n";
+    }
+
+    // write the gnuplot data file, trimming off that last comma :P
+    $graph_fp = fopen($prefix.$driver.'_graph', 'w');
+    fwrite($graph_fp, substr($graph_data, 0, -3));
+    fclose($graph_fp);
 }
-
-// write the gnuplot data file, trimming off that last comma :P
-$graph_fp = fopen($driver.'_graph', 'w');
-fwrite($graph_fp, substr($graph_data, 0, -3));
-fclose($graph_fp);
-
 ?>

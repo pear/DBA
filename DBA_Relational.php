@@ -155,7 +155,7 @@ class DBA_Relational extends PEAR
      * @param   array  $schema field schema for the table
      * @returns object PEAR_Error on failure
      */
-    function createTable ($tableName, $schema)
+    function createTable($tableName, $schema)
     {
         // check if this table object exists
         if (!isset($this->_tables[$tableName])) {
@@ -175,7 +175,7 @@ class DBA_Relational extends PEAR
      *
      * @returns boolean
      */
-    function isOpen ($tableName)
+    function isOpen($tableName)
     {
         if (isset($this->_tables[$tableName])) {
             return $this->_tables[$tableName]->isOpen();
@@ -191,7 +191,7 @@ class DBA_Relational extends PEAR
      * @param   array  $data assoc array or ordered list of data to insert
      * @returns mixed  PEAR_Error on failure, the row index on success
      */
-    function insertRow ($tableName, $data)
+    function insertRow($tableName, $data)
     {
         $result = $this->_openTable($tableName, 'w');
         if (PEAR::isError($result)) {
@@ -204,7 +204,7 @@ class DBA_Relational extends PEAR
     /**
      * @access public
      */
-    function replaceRow ($tableName, $key, $data)
+    function replaceRow($tableName, $key, $data)
     {
         $result = $this->_openTable($tableName, 'w');
         if (PEAR::isError($result)) {
@@ -217,7 +217,7 @@ class DBA_Relational extends PEAR
     /**
      * @access public
      */
-    function deleteRow ($tableName, $key)
+    function deleteRow($tableName, $key)
     {
         $result = $this->_openTable($tableName, 'w');
         if (PEAR::isError($result)) {
@@ -230,7 +230,7 @@ class DBA_Relational extends PEAR
     /**
      * @access public
      */
-    function fetchRow ($tableName, $key)
+    function fetchRow($tableName, $key)
     {
         $result = $this->_openTable($tableName, 'r');
         if (PEAR::isError($result)) {
@@ -311,7 +311,8 @@ class DBA_Relational extends PEAR
     function _validateTable(&$table, &$rows, &$fields, $altName)
     {
         // validate query by checking for existence of fields
-        if (is_string($table) && ($this->_openTable($table, 'r'))) {
+        if (is_string($table) && !PEAR::isError($this->_openTable($table, 'r')))
+        {
 
             $rows = $this->_tables[$table]->getRows();
             $fields = $this->_tables[$table]->getFieldNames();
@@ -367,8 +368,7 @@ class DBA_Relational extends PEAR
     }
     
     /**
-     * Joins rows between two tables based on a query. It is faster to
-     * use the smaller table of two tables as tableB
+     * Joins rows between two tables based on a query.
      *
      * @access public
      * @param  string $tableA   name of table to join
@@ -379,11 +379,11 @@ class DBA_Relational extends PEAR
     {
         // validate tables
         if (!$this->_validateTable($tableA, $rowsA, $fieldsA, 'A')) {
-            return false;
+            return $this->raiseError("DBA: $tableA does not match query");
         }
-        echo "Got here\n";
+
         if (!$this->_validateTable($tableB, $rowsB, $fieldsB, 'B')) {
-            return false;
+            return $this->raiseError("DBA: $tableA does not match query");
         }
 
         // check for empty tables
@@ -403,7 +403,6 @@ class DBA_Relational extends PEAR
           $this->_parsePHPQuery($rawQuery, $fieldsA, $fieldsB, $tableA, $tableB)
           .') $results[] = array_merge($rowA, $rowB);';
 
-        echo $PHPJoin;
         // evaluate the join
         eval ($PHPJoin);
 

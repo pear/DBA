@@ -672,6 +672,16 @@ class DBA_Table extends PEAR
     }
 
     /**
+     * Returns an array of the defined field names in the table
+     * @access  public
+     * @returns array
+     */
+    function getFieldNames ()
+    {
+        return array_keys($this->_schema);
+    }
+
+    /**
      * @access private
      */
     function _addSpaces ($string)

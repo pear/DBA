@@ -261,6 +261,15 @@ class DBA_Simple extends PEAR {
     }
 
     /**
+     * Returns the name of the opened database. Assumes database is open
+     * @returns string
+     */
+    function getName()
+    {
+        return $this->_dbName;
+    }
+
+    /**
      * Returns the current read status for the database
      *
      * @access  public

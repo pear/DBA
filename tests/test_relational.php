@@ -74,6 +74,7 @@ foreach ($queries as $query) {
 
     if (PEAR::isError($results)) { 
         echo " Query failed.\n";
+        echo $results->getMessage()."\n";
     } else {
         echo $db->formatResults ($results);
     }
