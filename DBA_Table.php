@@ -33,6 +33,7 @@ define('DBA_SCHEMA_KEY', '__schema__');
  */
 define('DBA_FIELD_SEPARATOR', '|');
 define('DBA_OPTION_SEPARATOR', ';');
+define('DBA_DOMAIN_SEPARATOR', ',');
 
 /**
  * Available types
@@ -370,7 +371,7 @@ class DBA_Table extends PEAR
         switch ($this->_schema[$field][DBA_TYPE]) {
             case DBA_SET:
                 if (is_string($value)) {
-                    $value = explode(',', $value);
+                    $value = explode(DBA_DOMAIN_SEPARATOR, $value);
                 }
 
                 if (is_array($value)) {
@@ -384,7 +385,7 @@ class DBA_Table extends PEAR
                             }
                         }
                     }
-                    $c_value = implode(',',$c_value);
+                    $c_value = implode(DBA_DOMAIN_SEPARATOR,$c_value);
                 }
                 break;
             case DBA_ENUM:
@@ -422,22 +423,31 @@ class DBA_Table extends PEAR
                 }
                 break;
             case DBA_TEXT:
-                if (!(is_array($value) || is_object($value))) {
+                if (is_scalar($value)) {
                     $c_value = str_replace(DBA_FIELD_SEPARATOR,'', $value);
+                }
+                break;
+            case DBA_CHAR:
+                if (is_scalar($value)) {
+                    $c_value = str_replace(DBA_FIELD_SEPARATOR, '', substr(
+                               str_pad($value, $this->_schema[$field][DBA_SIZE])
+                                       ,0, $this->_schema[$field][DBA_SIZE]));
                 }
                 break;
             case DBA_VARCHAR:
-                if (!(is_array($value) || is_object($value))) {
-                    if ($this->_schema[$field][DBA_SIZE]) {
-                        $c_value = rtrim(substr($value, 0,
-                                         $this->_schema[$field][DBA_SIZE]));
-                    }
-                    $c_value = str_replace(DBA_FIELD_SEPARATOR,'', $value);
+                if (is_scalar($value)) {
+                    $c_value = str_replace(DBA_FIELD_SEPARATOR,'', str_pad(
+                               $value, $this->_schema[$field][DBA_SIZE]));
                 }
                 break;
-            case DBA_INTEGER: case DBA_FLOAT: case DBA_NUMERIC:
-                if (is_numeric ($value)) {
-                    $c_value = strval ($value);
+            case DBA_INTEGER:
+                if (is_numeric($value)) {
+                    $c_value = strval($value);
+                }
+                break;
+            case DBA_FLOAT: case DBA_NUMERIC:
+                if (is_numeric($value)) {
+                    $c_value = strval($value);
                 }
                 break;
         }
@@ -456,7 +466,7 @@ class DBA_Table extends PEAR
         switch ($this->_schema[$field][DBA_TYPE]) {
             case DBA_SET:
                 $c_value = array();
-                $value = explode (',',$value);
+                $value = explode (DBA_DOMAIN_SEPARATOR,$value);
                 if (is_array($value)) {
                     foreach ($value as $element) {
                       $c_value[] = $this->_schema[$field][DBA_DOMAIN][$element];
@@ -473,7 +483,9 @@ class DBA_Table extends PEAR
             case DBA_FLOAT:
             case DBA_NUMERIC:
                 return floatval($value);
+            case DBA_CHAR:
             case DBA_VARCHAR:
+                return rtrim($value);
             case DBA_TEXT:
                 return $value;
         }
@@ -514,14 +526,9 @@ class DBA_Table extends PEAR
                             $primarykey = true;
                         }
                         break;
-                    case DBA_DEFAULT:
-                        if ($fieldMeta[DBA_AUTOINCREMENT]) {
-                            $buffer .= $value+1;
-                        }
-                        break;
                     default:
                         if (is_array($value)) {
-                            $buffer .= implode(',',$value);
+                            $buffer .= implode(DBA_DOMAIN_SEPARATOR,$value);
                         } else {
                             $buffer .= $value;
                         }
@@ -551,7 +558,7 @@ class DBA_Table extends PEAR
                 list($attribute,$rawValue) = explode('=',$rawAttribute);
                 switch ($attribute) {
                     case DBA_DOMAIN:
-                        $value = explode(',',$rawValue);
+                        $value = explode(DBA_DOMAIN_SEPARATOR,$rawValue);
                         break;
                     case DBA_PRIMARYKEY:
                         $this->_primaryKey = true;
@@ -589,16 +596,17 @@ class DBA_Table extends PEAR
                 // data ordering is implicit, e.g. $i=>data
                 $c_value = $this->_packField($fieldName, $data[$i]);
 
-            } elseif ($fieldMeta[DBA_AUTOINCREMENT]==1) {
-
-                // no data is supplied
-                // get a value and increase the ceiling
-                $c_value = $this->_schema[$fieldName]['ceiling']++;
-
             } elseif (isset($fieldMeta[DBA_DEFAULT])) {
 
-                // use the default value
-              $c_value = $this->_packField($fieldName, $fieldMeta[DBA_DEFAULT]);
+                if ($fieldMeta[DBA_AUTOINCREMENT]) {
+                    // use the autoincrement value
+                    $c_value = $this->_packField($fieldName,
+                                    $this->_schema[$fieldName][DBA_DEFAULT]++);
+                } else {
+                    // use the default value
+                    $c_value = $this->_packField($fieldName,
+                                    $this->_schema[$fieldName][DBA_DEFAULT]);
+                }
 
             } elseif ($fieldMeta[DBA_NOTNULL]) {
 
