@@ -48,18 +48,24 @@ define('SQL_UNIQUE',141);
 define('SQL_LIMIT',143);
 define('SQL_DISTINCT',144);
 define('SQL_ORDER',145);
+define('SQL_CHECK',146);
+define('SQL_VARYING',147);
+define('SQL_AUTO_INCREMENT',148);
 // nouns
 define('SQL_ALL',130);
 define('SQL_TABLE',151);
 define('SQL_SEQUENCE',152);
 define('SQL_VALUE',153);
 define('SQL_VALUES',154);
-define('SQL_NULLSYM',155);
+define('SQL_NULL',155);
 define('SQL_INDEX',156);
 define('SQL_SET_FUNCT',157);
-// values
+define('SQL_CONSTRAINT',158);
+define('SQL_DEFAULT',159);
+// variables
 define('SQL_IDENT',161);
 define('SQL_SYS_VAR',162);
+// values
 define('SQL_REAL_VAL',162);
 define('SQL_TEXT_VAL',163);
 define('SQL_INT_VAL',164);
@@ -71,13 +77,13 @@ define('SQL_UINT',173);
 define('SQL_BOOL',174);
 define('SQL_CHAR',175);
 define('SQL_VARCHAR',176);
-define('SQL_DATE',177);
-define('SQL_MONEY',178);
-define('SQL_TIME',179);
-define('SQL_IPV4',180);
-define('SQL_SET',181);
-define('SQL_ENUM',182);
-
+define('SQL_TEXT',177);
+define('SQL_DATE',178);
+define('SQL_MONEY',179);
+define('SQL_TIME',180);
+define('SQL_IPV4',181);
+define('SQL_SET',182);
+define('SQL_ENUM',183);
 // }}}
 
 class Lexer
@@ -109,7 +115,7 @@ class Lexer
         'distinct'=> SQL_DISTINCT,
         'primary'=>  SQL_PRIMARY,
         'like'=>     SQL_LIKE,
-        'null'=>     SQL_NULLSYM,
+        'null'=>     SQL_NULL,
         'asc'=>      SQL_ASC,
         'desc'=>     SQL_DESC,
         'unique'=>   SQL_UNIQUE,
@@ -121,11 +127,16 @@ class Lexer
         'all'=>      SQL_ALL,
         'key'=>      SQL_KEY,
         'sequence'=> SQL_SEQUENCE,
+        'default'=>  SQL_DEFAULT,
         'order'=>    SQL_ORDER,
+        'check'=>    SQL_CHECK,
         'set'=>      SQL_SET,
         'step'=>     SQL_STEP,
+        'auto_increment'=> SQL_AUTOINCREMENT,
         'value'=>    SQL_VALUE,
         'values'=>   SQL_VALUES,
+        'constraint'=> SQL_CONSTRAINT,
+        'varying'=>  SQL_VARYING,
         'avg'=>      SQL_SET_FUNCT,
         'count'=>    SQL_SET_FUNCT,
         'max'=>      SQL_SET_FUNCT,
@@ -154,7 +165,6 @@ class Lexer
         'ipaddr'=>   SQL_IPV4,
         'set'=>      SQL_SET,
         'enum'=>     SQL_ENUM,
-        'null'=>     SQL_NULLSYM,
     );
 // }}}
 
