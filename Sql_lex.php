@@ -8,169 +8,166 @@ include 'phptype.php';
 
 // {{{ token definitions
 define('SQL_END_OF_INPUT',257);
-define('SQL_GE',258);
-define('SQL_LE',259);
-define('SQL_NE',260);
-define('SQL_EQ',261);
-define('SQL_GT',262);
-define('SQL_LT',263);
-define('SQL_BETWEEN',264);
-define('SQL_CREATE',265);
-define('SQL_DROP',266);
-define('SQL_INSERT',267);
-define('SQL_DELETE',268);
-define('SQL_SELECT',269);
-define('SQL_UPDATE',270);
-define('SQL_ALL',271);
-define('SQL_DISTINCT',272);
-define('SQL_AS',273);
-define('SQL_WHERE',274);
-define('SQL_ORDER',275);
-define('SQL_FROM',276);
-define('SQL_INTO',277);
-define('SQL_TABLE',278);
-define('SQL_BY',279);
-define('SQL_ASC',280);
-define('SQL_DESC',281);
-define('SQL_LIKE',282);
-define('SQL_RLIKE',283);
-define('SQL_CLIKE',284);
-define('SQL_SLIKE',285);
-define('SQL_AND',286);
-define('SQL_OR',287);
-define('SQL_VALUES',288);
-define('SQL_SET',289);
-define('SQL_NOT',290);
-define('SQL_NULLSYM',291);
-define('SQL_PRIMARY',292);
-define('SQL_KEY',293);
-define('SQL_INDEX',294);
-define('SQL_UNIQUE',295);
-define('SQL_ON',296);
-define('SQL_IDENT',297);
-define('SQL_SET_FUNCT',298);
-define('SQL_SYS_VAR',299);
-define('SQL_NUM',300);
-define('SQL_REAL_NUM',301);
-define('SQL_INT',302);
-define('SQL_INT8',303);
-define('SQL_INT16',304);
-define('SQL_INT32',305);
-define('SQL_INT64',306);
-define('SQL_UINT',307);
-define('SQL_UINT8',308);
-define('SQL_UINT16',309);
-define('SQL_UINT32',310);
-define('SQL_UINT64',311);
-define('SQL_BOOL',312);
-define('SQL_CHAR',313);
-define('SQL_VARCHAR',314);
-define('SQL_TEXT',315);
-define('SQL_REAL',316);
-define('SQL_DATE',317);
-define('SQL_MONEY',318);
-define('SQL_TIME',319);
-define('SQL_IPV4',320);
-define('SQL_LIMIT',321);
-define('SQL_SEQUENCE',328);
-define('SQL_VALUE',329);
-define('SQL_STEP',330);
-define('SQL_AVL_INDEX',331);
+// logical operators
+define('SQL_GE',100);
+define('SQL_LE',101);
+define('SQL_NE',102);
+define('SQL_EQ',103);
+define('SQL_GT',104);
+define('SQL_LT',105);
+define('SQL_AND',106);
+define('SQL_OR',107);
+define('SQL_NOT',108);
+// verbs
+define('SQL_CREATE',110);
+define('SQL_DROP',111);
+define('SQL_INSERT',112);
+define('SQL_DELETE',113);
+define('SQL_SELECT',114);
+define('SQL_UPDATE',115);
+// conjunctions
+define('SQL_BY',120);
+define('SQL_AS',121);
+define('SQL_ON',122);
+define('SQL_BETWEEN',123);
+define('SQL_INTO',124);
+define('SQL_FROM',125);
+define('SQL_WHERE',126);
+// modifiers
+define('SQL_ASC',131);
+define('SQL_DESC',132);
+define('SQL_LIKE',133);
+define('SQL_RLIKE',134);
+define('SQL_CLIKE',135);
+define('SQL_SLIKE',136);
+define('SQL_STEP',137);
+define('SQL_SET',138);
+define('SQL_PRIMARY',139);
+define('SQL_KEY',140);
+define('SQL_UNIQUE',141);
+define('SQL_LIMIT',143);
+define('SQL_DISTINCT',144);
+define('SQL_ORDER',145);
+// nouns
+define('SQL_ALL',130);
+define('SQL_TABLE',151);
+define('SQL_SEQUENCE',152);
+define('SQL_VALUE',153);
+define('SQL_VALUES',154);
+define('SQL_NULLSYM',155);
+define('SQL_INDEX',156);
+define('SQL_SET_FUNCT',157);
+// values
+define('SQL_IDENT',161);
+define('SQL_SYS_VAR',162);
+define('SQL_REAL_VAL',162);
+define('SQL_TEXT_VAL',163);
+define('SQL_INT_VAL',164);
+// types
+define('SQL_FLOAT',171);
+define('SQL_FIXED',171);
+define('SQL_INT',172);
+define('SQL_UINT',173);
+define('SQL_BOOL',174);
+define('SQL_CHAR',175);
+define('SQL_VARCHAR',176);
+define('SQL_DATE',177);
+define('SQL_MONEY',178);
+define('SQL_TIME',179);
+define('SQL_IPV4',180);
+define('SQL_SET',181);
+define('SQL_ENUM',182);
+
 // }}}
 
 class Lexer
 {
 // {{{ array $symtab
     var $symtab = array(
-        'select'=>  SQL_SELECT,
-        'values'=>  SQL_VALUES,
-        'uint'=>    SQL_UINT,
-        'int32'=>   SQL_INT,
-        'or'=>      SQL_OR,
-        'not'=>     SQL_NOT,
-        'distinct'=>SQL_DISTINCT,
-        'int16'=>   SQL_INT16,
-        'and'=>     SQL_AND,
-        'delete'=>  SQL_DELETE,
-        'update'=>  SQL_UPDATE,
-        'avl'=>     SQL_AVL_INDEX,
-        'ipv4'=>    SQL_IPV4,
-        'int8'=>    SQL_INT8,
-        'from'=>    SQL_FROM,
-        'create'=>  SQL_CREATE,
-        'primary'=> SQL_PRIMARY,
-        'smallint'=>SQL_INT,
-        'real'=>    SQL_REAL,
-        'as'=>      SQL_AS,
-        'min'=>     SQL_SET_FUNCT,
-        'ipaddr'=>  SQL_IPV4,
-        'drop'=>    SQL_DROP,
-        'insert'=>  SQL_INSERT,
-        'like'=>    SQL_LIKE,
-        'text'=>    SQL_TEXT,
-        'sum'=>     SQL_SET_FUNCT,
-        'int64'=>   SQL_INT64,
-        'uint32'=>  SQL_UINT,
-        'NULL'=>    SQL_NULLSYM,
-        'max'=>     SQL_SET_FUNCT,
-        'float'=>   SQL_REAL,
-        'asc'=>     SQL_ASC,
-        'unique'=>  SQL_UNIQUE,
-        'rlike'=>   SQL_RLIKE,
-        'uint16'=>  SQL_UINT16,
-        'table'=>   SQL_TABLE,
-        'index'=>   SQL_INDEX,
-        'clike'=>   SQL_CLIKE,
-        'money'=>   SQL_MONEY,
-        'slike'=>   SQL_SLIKE,
-        'uint8'=>   SQL_UINT8,
-        '<='=>      SQL_LE,
-        'all'=>     SQL_ALL,
-        'key'=>     SQL_KEY,
-        'count'=>   SQL_SET_FUNCT,
-        'sequence'=>SQL_SEQUENCE,
-        '<>'=>      SQL_NE,
-        'into'=>    SQL_INTO,
-        'between'=> SQL_BETWEEN,
-        'uint64'=>  SQL_UINT64,
-        'where'=>   SQL_WHERE,
-        '>='=>      SQL_GE,
-        'by'=>      SQL_BY,
-        'null'=>    SQL_NULLSYM,
-        'int'=>     SQL_INT,
-        'double'=>  SQL_REAL,
-        '<'=>       SQL_LT,
-        'order'=>   SQL_ORDER,
-        'set'=>     SQL_SET,
-        'step'=>    SQL_STEP,
-        '='=>       SQL_EQ,
-        'on'=>      SQL_ON,
-        'value'=>   SQL_VALUE,
+        '<='=>       SQL_LE,
+        '>='=>       SQL_GE,
+        '<>'=>       SQL_NE,
+        '<'=>        SQL_LT,
+        '='=>        SQL_EQ,
+        '>'=>        SQL_GT,
+        'or'=>       SQL_OR,
+        'not'=>      SQL_NOT,
+        'and'=>      SQL_AND,
+        'insert'=>   SQL_INSERT,
+        'select'=>   SQL_SELECT,
+        'delete'=>   SQL_DELETE,
+        'create'=>   SQL_CREATE,
+        'update'=>   SQL_UPDATE,
+        'drop'=>     SQL_DROP,
+        'as'=>       SQL_AS,
+        'into'=>     SQL_INTO,
+        'on'=>       SQL_ON,
+        'between'=>  SQL_BETWEEN,
+        'where'=>    SQL_WHERE,
+        'from'=>     SQL_FROM,
+        'by'=>       SQL_BY,
+        'distinct'=> SQL_DISTINCT,
+        'primary'=>  SQL_PRIMARY,
+        'like'=>     SQL_LIKE,
+        'null'=>     SQL_NULLSYM,
+        'asc'=>      SQL_ASC,
+        'desc'=>     SQL_DESC,
+        'unique'=>   SQL_UNIQUE,
+        'table'=>    SQL_TABLE,
+        'index'=>    SQL_INDEX,
+        'clike'=>    SQL_CLIKE,
+        'slike'=>    SQL_SLIKE,
+        'rlike'=>    SQL_RLIKE,
+        'all'=>      SQL_ALL,
+        'key'=>      SQL_KEY,
+        'sequence'=> SQL_SEQUENCE,
+        'order'=>    SQL_ORDER,
+        'set'=>      SQL_SET,
+        'step'=>     SQL_STEP,
+        'value'=>    SQL_VALUE,
+        'values'=>   SQL_VALUES,
+        'avg'=>      SQL_SET_FUNCT,
+        'count'=>    SQL_SET_FUNCT,
+        'max'=>      SQL_SET_FUNCT,
+        'min'=>      SQL_SET_FUNCT,
+        'sum'=>      SQL_SET_FUNCT,
+        'limit'=>    SQL_LIMIT,
+        'time'=>     SQL_TIME,
+        'tinyint'=>  SQL_INT,
+        'integer'=>  SQL_INT,
+        'bigint'=>   SQL_INT,
+        'int'=>      SQL_INT,
+        'smallint'=> SQL_INT,
+        'uint'=>     SQL_UINT,
+        'float'=>    SQL_FLOAT,
+        'real'=>     SQL_FLOAT,
+        'double'=>   SQL_FLOAT,
+        'numeric'=>  SQL_FIXED,
+        'decimal'=>  SQL_FIXED,
         'character'=>SQL_CHAR,
-        'bigint'=>  SQL_INT,
-        '>'=>       SQL_GT,
-        'integer'=> SQL_INT,
-        'char'=>    SQL_CHAR,
-        'varchar'=> SQL_VARCHAR,
-        'avg'=>     SQL_SET_FUNCT,
-        'date'=>    SQL_DATE,
-        'float8'=>  SQL_REAL,
-        'desc'=>    SQL_DESC,
-        'limit'=>   SQL_LIMIT,
-        'time'=>    SQL_TIME,
-        'tinyint'=> SQL_INT,
-        'int4'=>    SQL_INT,
+        'char'=>     SQL_CHAR,
+        'varchar'=>  SQL_VARCHAR,
+        'money'=>    SQL_MONEY,
+        'date'=>     SQL_DATE,
+        'text'=>     SQL_TEXT,
+        'ipv4'=>     SQL_IPV4,
+        'ipaddr'=>   SQL_IPV4,
+        'set'=>      SQL_SET,
+        'enum'=>     SQL_ENUM,
+        'null'=>     SQL_NULLSYM,
     );
 // }}}
 
+// {{{ instance variables
     var $tokPtr = 0;
     var $tokStart = 0;
     var $tokLen = 0;
-    var $currTok = '';
-    var $lastTok = '';
+    var $tokText = '';
     var $lineno = 0;
     var $string;
+// }}}
 
+// {{{ incidental functions
     function Lexer($string = '')
     {
         $this->string = $string;
@@ -194,12 +191,12 @@ class Lexer
     function revert() {
         $this->tokPtr = $this->tokStart;
         $this->tokLen = 0;
-        $this->currTok = $this->lastTok;
     }
 
     function isCompop($c) {
         return ($c == '<' || $c == '>' || $c == '=');
     }
+// }}}
 
 // {{{ lex($this->string)
 function lex()
@@ -215,7 +212,7 @@ function lex()
             // {{{ State 0 : Start of token
             CASE(0):
                 $this->tokPtr = $this->tokStart;
-                $this->currTok = '';
+                $this->tokText = '';
                 $this->tokLen = 0;
                 $c = $this->get();
                 while (($c == ' ') || ($c == "\t") || ($c == "\n")) {
@@ -296,8 +293,7 @@ function lex()
                     $this->tokStart = $this->tokPtr;
                     return ($tokval);
                 } else {
-                    $this->lastTok = $this->currTok;
-                    $this->currTok = substr($this->string, $this->tokStart, $this->tokLen);
+                    $this->tokText = substr($this->string, $this->tokStart, $this->tokLen);
                     $this->tokStart = $this->tokPtr;
                     return (SQL_IDENT);
                 }
@@ -319,8 +315,7 @@ function lex()
             // {{{ State 4: Complete ident
             CASE(4):
                 $this->unget();
-                $this->lastTok = $this->currTok;
-                $this->currTok = substr($this->string, $this->tokStart, $this->tokLen);
+                $this->tokText = substr($this->string, $this->tokStart, $this->tokLen);
                 $this->tokStart = $this->tokPtr;
                 return (SQL_IDENT);
             // }}}
@@ -343,10 +338,9 @@ function lex()
             // {{{ State 6: Complete integer number
             CASE(6):
                 $this->unget();
-                $this->lastTok = $this->currTok;
-                $this->currTok = substr($this->string,$this->tokStart,$this->tokLen);
+                $this->tokText = substr($this->string,$this->tokStart,$this->tokLen);
                 $this->tokStart = $this->tokPtr;
-                return (SQL_NUM);
+                return (SQL_INT_VAL);
                 break;
             // }}}
 
@@ -372,10 +366,9 @@ function lex()
             // {{{ State 8: Complete real number */
             CASE(8):
                 $this->unget();
-                $this->lastTok = $this->currTok;
-                $this->currTok = substr($this->string, $this->tokStart, $this->tokLen);
+                $this->tokText = substr($this->string, $this->tokStart, $this->tokLen);
                 $this->tokStart = $this->tokPtr;
-                return (SQL_REAL_NUM);
+                return (SQL_REAL_VAL);
             // }}}
 
             // {{{ State 9: Incomplete signed number
@@ -410,7 +403,6 @@ function lex()
                 $this->unget();
                 $tokval = $this->symtab[
                         substr($this->string,$this->tokStart,$this->tokLen)];
-//                $tokval = _findKeyword(tokStart,$this->tokLen);
                 if ($tokval)
                 {
                     $this->tokStart = $this->tokPtr;
@@ -422,32 +414,29 @@ function lex()
 
             // {{{ State 12: Incomplete text string
             CASE(12):
-//                $this->currTok = $this->readTextLiteral;
+//                $this->tokText = $this->readTextLiteral;
 
                 $bail = false;
                 while (!$bail) {
                     switch ($this->get()) {
                         case '':
-                            $this->lastTok = $this->currTok;
-                            $this->currTok = '';
+                            $this->tokText = '';
                             $bail = true;
                             break;
                         case "\\":
                             if (!$this->get()) {
-                                $this->lastTok = $this->currTok;
-                                $this->currTok = '';
+                                $this->tokText = '';
                                 $bail = true;
                             }
                                 //$bail = true;
                             break;
                         case $quote:
-                            $this->lastTok = $this->currTok;
-                            $this->currTok = substr($this->string, $this->tokStart, $this->tokLen);
+                            $this->tokText = substr($this->string, $this->tokStart, $this->tokLen);
                             $bail = true;
                             break;
                     }
                 }
-                if ($this->currTok) {
+                if ($this->tokText) {
                     $state = 13;
                     break;
                 }
@@ -458,7 +447,7 @@ function lex()
             // {{{ State 13: Complete text string
             CASE(13):
                 $this->tokStart = $this->tokPtr;
-                return (SQL_TEXT);
+                return (SQL_TEXT_VAL);
                 break;
             // }}}
 
@@ -522,8 +511,7 @@ function lex()
             // {{{ State 19: Complete Sys Var
             CASE(19):
                 $this->unget();
-                $this->lastTok = $this->currTok;
-                $this->currTok = substr($this->tokStart,$this->tokLen);
+                $this->tokText = substr($this->tokStart,$this->tokLen);
                 $this->tokStart = $this->tokPtr;
                 return (SQL_SYS_VAR);
             // }}}
@@ -531,22 +519,21 @@ function lex()
             // {{{ State 999 : Unknown token.  Revert to single char
             CASE(999):
                 $this->revert();
-                $this->currTok = $this->get();
+                $this->tokText = $this->get();
                 $this->tokStart = $this->tokPtr;
-                return ($this->currTok);
+                return ($this->tokText);
             // }}}
 
             // {{{ State 1000 : End Of Input
             CASE(1000):
-                $this->currTok = '*end of input*';
+                $this->tokText = '*end of input*';
                 $this->tokStart = $this->tokPtr;
                 return (SQL_END_OF_INPUT);
             // }}}
 
         }
     }
-// }}}
-
 }
+// }}}
 }
 ?>
