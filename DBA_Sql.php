@@ -41,11 +41,15 @@ function getToken() {
 
 function getString() {
     $string = strtok(" \n\t");
-    echo $string;
     $quote = substr($string, 0, 1);
     if (($quote != '"') && ($quote != "'")) {
         // this was not quoted, just return the token
         return $string;
+    } elseif ((substr($string, -1) == $quote) &&
+              (substr($string, -2) != "\\$quote") &&
+              (strlen($string) > 1)) {
+        // corner case of a single quoted word
+        return substr($string, 1, -1);
     } else {
         // strip the first quote
         $string = substr($string, 1).' ';
@@ -73,7 +77,7 @@ function parseCreate($rawquery) {
         $token = DBA_Sql::getToken();
         if ($token != '(') {
             return PEAR::raiseError(
-                "Parse error at $token on $rawquery");
+                "No field definitions found in table $tableName");
             exit;
         } else {
             while ($token && ($token != ')')) {
@@ -83,10 +87,9 @@ function parseCreate($rawquery) {
                 $token = strtolower(DBA_Sql::getToken());
                 // parse field-specific parameters
                 switch ($fieldType) {
-                    case 'int':
-                    case 'integer':
-                    case 'float':
-                    case 'numeric':
+                    case 'int': case 'integer': case 'float':
+                    case 'numeric': case 'bigint': case 'littleint':
+                    case 'tinyint':
                         if ($token == '(') {
                             $tables[$tableName][$fieldName]['size'] =
                                                     DBA_Sql::getToken();
@@ -98,7 +101,7 @@ function parseCreate($rawquery) {
                             }
                             if ($token != ')') {
                                 return PEAR::raiseError(
-                                "Parse error at $token on $rawquery");
+                                "Parse error $token on $rawquery");
                             }
                             $token = DBA_Sql::getToken();
                         }

@@ -29,6 +29,8 @@ require_once 'PEAR.php';
 require_once '../DBA_Sql.php';
 
 $queries = array(
+"create table nodefinitions",
+"create dogfood",
 "CREATE TABLE albums (
   name varchar(60),
   directory varchar(60),
@@ -43,7 +45,7 @@ $queries = array(
   name varchar(60) default \"no name\",
   album int,
   price float (4,2),
-  description text,
+  description text default 'hello',
   id int
 )"
 
@@ -51,12 +53,13 @@ $queries = array(
 
 foreach ($queries as $query) {
     $results = DBA_Sql::parseCreate($query);
-    echo $query;
+    echo $query."\n";
     if (PEAR::isError($results)) {
         echo $results->getMessage()."\n";
     } else {
         print_r($results);
     }
+    echo "\n***********************************\n\n";
 }
 
 ?>
