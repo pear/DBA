@@ -299,6 +299,11 @@ class DBA_Table extends PEAR
     }
     // }}}
 
+    function exists($key)
+    {
+        return $this->dba->exists($key);
+    }
+
     // {{{ isOpen()
     /**
      * Returns the current open status for the database
