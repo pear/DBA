@@ -23,16 +23,16 @@
 require_once 'DBA.php';
 
 /**
- * DBA_Driver_Builtin uses the builtin dba functions of PHP as the underlying driver
- * for a DBA class. Depending on the driver, this can be faster or slower than
- * the DBA_Simple class.
+ * DBA_Driver_Builtin uses the builtin dba functions of PHP as the underlying
+ * driver for a DBA class. Depending on the driver, this can be faster or
+ * slower than the DBA_Driver_File class.
  *
  * This class has been tested with DB3 and GDBM. Other drivers may have quirks
  * that this class does not address yet. CDB is known to be unsuitable as a
- * driver due to its lack of writes. DB2 apparently segfaults PHP?
+ * driver due to its lack of writes. DB2 currently segfaults with PHP-CVS.
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.9
+ * @version 0.9.1
  * @access  public
  * @package DBA
  */

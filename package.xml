@@ -21,7 +21,7 @@ and provides a uniform, object-based interface for the gdbm and db3 database sys
 
     <release>
         <license>LGPL</license>
-        <version>0.9</version>
+        <version>0.9.1</version>
         <date>2002-09-24</date>
         <state>beta</state>
         <notes>

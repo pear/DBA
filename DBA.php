@@ -30,7 +30,7 @@ require_once('PEAR.php');
  * dbm engine for installations where dba support is not included in PHP.
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 0.9
+ * @version 0.9.1
  * @access  public
  * @package DBA
  */

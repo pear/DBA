@@ -29,7 +29,7 @@
  * work.
  *
  * @author Brent Cook <busterb@mail.utexas.edu>
- * @version 0.9
+ * @version 0.9.1
  * @access public
  * @package DBA
  * @see PHP dba Documentation
@@ -38,7 +38,7 @@
 if (!function_exists('dba_open')) {
 
     require_once 'PEAR.php';
-    require_once 'DBA/Driver/Simple.php';
+    require_once 'DBA/Driver/File.php';
 
     function dba_close(&$dba)
     {
@@ -79,7 +79,7 @@ if (!function_exists('dba_open')) {
 
     function dba_open($filename, $mode, $handler)
     {
-        $dba = new DBA_Simple();
+        $dba = new DBA_Driver_File();
         $dba->open($filename, $mode);
         if (PEAR::isError($dba)) {
             return false;
