@@ -20,15 +20,13 @@ DBA is a wrapper for the php DBA functions. It includes a file-based emulator an
 
     <release>
         <license>LGPL</license>
-        <version>1.0-rc1</version>
-        <date>2002-11-29</date>
+        <version>1.0</version>
+        <date>2002-12-17</date>
         <state>stable</state>
         <notes>
-This is the first stable release-candidate.
+This is the first stable release.
 
- * DBA::getDriverList() returns all supported drivers by the currently running
-   PHP interpreter. DBA works fine with PHP's new DB4 support.
- * Documentation updates
+ * Updated db_exists() to handle more driver types
         </notes>
         <filelist>
             <dir name="/" baseinstalldir="/">

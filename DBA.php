@@ -51,7 +51,7 @@ define('DBA_ERROR_ALREADY_EXISTS',    -15);     // key
  * dbm engine for installations where dba support is not included in PHP.
  *
  * @author  Brent Cook <busterb@mail.utexas.edu>
- * @version 1.0-rc1
+ * @version 1.0
  * @access  public
  * @package DBA
  */
