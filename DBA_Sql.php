@@ -22,6 +22,7 @@
 //
 
 require_once "PEAR.php";
+require_once "Sql_lex.php";
 
 class Sql
 {
@@ -29,20 +30,17 @@ class Sql
 // adds spaces around special characters
 function cookQuery($query)
 {
-    foreach (array(',','(',')',"\'") as $symbol) {
-        $query = str_replace($symbol, " $symbol ", $query);
-    }
-    return $query;
+    return str_replace (
+        array(',','(',')',"\'","\\\""),
+        array(' , ',' ( ',' ) '," \' "," \\\" "),
+        $query);
 }
 
 function getToken()
 {
-    return strtok(" \n\t");
-}
-
-function getTokenL()
-{
-    return strtolower(strtok(" \n\t"));
+    $this->lexer->lex;
+    return $this->lexer->currTok;
+//    return strtok(" \n\t");
 }
 
 function getString() {
@@ -60,7 +58,7 @@ function getString() {
         // corner case of a single quoted word
         return substr($string, 1, -1);
     } else {
-        // strip the first quote
+        // strip the first quote, add missing character
         $string = substr($string, 1).' ';
         // read until the next quote
         $string .= strtok($endquote);
@@ -75,17 +73,17 @@ function getString() {
 
 function parseCreate($rawquery)
 {
-    $query = Sql::cookQuery($rawquery);
-    $command = strtolower(strtok($query, " \n\t"));
+//    $query = $this->cookQuery($rawquery);
+    $command = ;
 
     if ($command != 'create') {
         return PEAR::raiseError('DBA: not a "create" query');
     }
     
-    $thing = Sql::getTokenL();
+    $thing = $this->getToken();
     if ($thing == 'table') {
-        $tableName = Sql::getToken();
-        $tableDefn =& Sql::parseTableDefinition();
+        $tableName = $this->getToken();
+        $tableDefn =& $this->parseTableDefinition();
         return array($tableName, $tableDefn);
     } else {
         return PEAR::raiseError("Do not know how to create $thing");
@@ -94,7 +92,7 @@ function parseCreate($rawquery)
 
 function &parseTableDefinition()
 {
-    $token = Sql::getToken();
+    $token = $this->getToken();
     if ($token != '(') {
         return PEAR::raiseError('No field definitions');
     } else {
@@ -107,15 +105,15 @@ function &parseTableDefinition()
             }
             $fieldName = $token;
 
-            $table[$fieldName]['type'] = $fieldType = Sql::getTokenL();
+            $table[$fieldName]['type'] = $fieldType = $this->getToken();
 
             // parse field-specific parameters
-            $token = Sql::getTokenL();
+            $token = $this->getToken();
             if ($token == '(') {
                 $element = 0;
                 while ($token && ($token != ')')) {
-                    $table[$fieldName]['opts'][$element] = Sql::getString();
-                    $token = Sql::getToken();
+                    $table[$fieldName]['opts'][$element] = $this->getString();
+                    $token = $this->getToken();
                     if ($token == ',') {
                         ++$element;
                     } else
@@ -123,51 +121,85 @@ function &parseTableDefinition()
                         return PEAR::raiseError("Expected ')', got '$token' on '$fieldName'");
                     }
                 }
-                $token = Sql::getTokenL();
+                $token = $this->getToken();
             }
 
             // parse extra options
             while ($token && !(($token == ',') || ($token == ')'))){
                 switch ($token) {
+                    case 'constraint':
+                        $table[$fieldName]['constraint']['name'] = SQL::getToken();
+                        $nextConstraint = true;
+                        $haveValue = false;
+                        $token = $this->getToken();
+                        break;
                     case 'default':
-                        $table[$fieldName]['default'] = Sql::getString();
+                        $option = $token;
+                        $value = $this->getString();
+                        $haveValue = true;
+                        $token = $this->getToken();
+                        if ($token == '(') {
+                            $token = strtok(')');
+                            $value = $value.'('.$token.')';
+                        }
                         break;
                     case 'primary':
-                        $token = Sql::getTokenL();
+                        $token = $this->getToken();
                         if ($token != 'key') {
                             return PEAR::raiseError(
-                                "Expected 'key', got $token on '$fieldName'");
+                                "Expected 'key', got '$token' on '$fieldName'");
                         } else {
-                            $table[$fieldName]['primarykey'] = true;
+                            $option = 'primary key';
+                            $value = true;
+                            $haveValue = true;
                         }
+                        $token = $this->getToken();
                         break;
                     case 'not':
-                        $token = Sql::getTokenL();
+                        $token = $this->getToken();
                         if ($token != 'null') {
                             return PEAR::raiseError(
-                                "Parse error at $token on $rawquery");
+                                "Expected 'null', got '$token' on '$fieldName'");
                         } else {
-                            $table[$fieldName]['notnull'] = true;
+                            $option = 'not null';
+                            $value = true;
+                            $haveValue = true;
                         }
+                        $token = $this->getToken();
                         break;
-                    case 'check': case 'varying':
-                        $table[$fieldName][$token] = Sql::getString();
+                    case 'check': case 'varying': case 'unique':
+                        $option = $token;
+                        $value = $this->getString();
+                        $haveValue = true;
+                        $token = $this->getToken();
                         break;
                     case 'year':case'month':case 'day':case 'hour':case 'minute':case 'second':
+                        $option = 'duration';
                         $table[$fieldName]['from'] = $token;
-                        $token = Sql::getTokenL();
+                        $token = $this->getToken();
                         if ($token != 'to') {
                             return PEAR::raiseError(
                                 "Expected 'to', got $token on '$fieldName'");
                         }
-                        $table[$fieldName]['to'] = Sql::getTokenL();
+                        $table[$fieldName]['to'] = $this->getToken();
+                        $haveValue = false;
+                        $token = $this->getToken();
                         break;
                     default:
-                        $table[$fieldName][$token] = true;
+                        $option = $token;
+                        $value = true;
+                        $haveValue = true;
+                        $token = $this->getToken();
                         break;
                 }
-                // grab the next option
-                $token = Sql::getTokenL();
+                if ($haveValue) {
+                    if ($nextConstraint) {
+                        $table[$fieldName]['constraint'][$option] = $value;
+                        $nextConstraint = false;
+                    } else {
+                        $table[$fieldName][$option] = $value;
+                    }
+                }
             }
         }
         if ($token != ')') {

@@ -37,7 +37,6 @@ $queries = array(
   description text NULL,
   id int default 200 PRIMARY KEY
 );",
-/*
 "CREATE TABLE photos (
   filename varchar(60) not NULL,
   name varchar(60) default \"no name\",
@@ -46,12 +45,10 @@ $queries = array(
   description text default 'hello',
   id int default 0 primary key autoincrement not null,
 );",
-*/
 "create table brent (
     filename varchar(10),
     description varchar(20),
 );",
-/*
 "create table nodefinitions",
 "create dogfood",
 "create table dunce (name varchar",
@@ -76,7 +73,6 @@ $queries = array(
             did      DECIMAL(3) PRIMARY KEY, 
             name     VARCHAR(40) 
 )",
-*/
 );
 
 $lexer = new Lexer();

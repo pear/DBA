@@ -142,6 +142,7 @@ class Lexer
         'max'=>      SQL_SET_FUNCT,
         'min'=>      SQL_SET_FUNCT,
         'sum'=>      SQL_SET_FUNCT,
+        'nextval'=>  SQL_SET_FUNCT,
         'limit'=>    SQL_LIMIT,
         'time'=>     SQL_TIME,
         'tinyint'=>  SQL_INT,
@@ -297,13 +298,13 @@ function lex()
             /* {{{ State 2 : Complete keyword or ident */
             CASE(2):
                 $this->unget();
-                $tokval = $this->symtab[strtolower(
-                    substr($this->string,$this->tokStart,$this->tokLen))];
+                $this->tokText = substr($this->string, $this->tokStart, 
+                                        $this->tokLen);
+                $tokval = $this->symtab[strtolower($this->tokText)];
                 if ($tokval) {
                     $this->tokStart = $this->tokPtr;
                     return ($tokval);
                 } else {
-                    $this->tokText = substr($this->string, $this->tokStart, $this->tokLen);
                     $this->tokStart = $this->tokPtr;
                     return (SQL_IDENT);
                 }
@@ -424,8 +425,6 @@ function lex()
 
             // {{{ State 12: Incomplete text string
             CASE(12):
-//                $this->tokText = $this->readTextLiteral;
-
                 $bail = false;
                 while (!$bail) {
                     switch ($this->get()) {
@@ -441,7 +440,8 @@ function lex()
                                 //$bail = true;
                             break;
                         case $quote:
-                            $this->tokText = substr($this->string, $this->tokStart, $this->tokLen);
+                            $this->tokText = stripslashes(substr($this->string,
+                                       ($this->tokStart+1), ($this->tokLen-2)));
                             $bail = true;
                             break;
                     }
