@@ -83,7 +83,7 @@ class DBA_Relational extends PEAR
 
             $this->_tables[$tableName] = new DBA_Table($this->_driver);
 
-            if (!$this->_tables[$tableName]->tableExists($tableName)) {
+            if (!$this->_tables[$tableName]->tableExists($this->_home.$tableName)) {
                 unset($this->_tables[$tableName]);
                 return $this->raiseError("Table: '$tableName' does not exist");
             }
@@ -98,6 +98,17 @@ class DBA_Relational extends PEAR
             }
         }
         return $this->_tables[$tableName]->open($this->_home.$tableName, $mode);
+    }
+
+    /**
+     * Returns whether the specified table exists in the db home
+     *
+     * @param string $tableName table to check existence of
+     * @returns boolean
+     */
+    function tableExists($tableName)
+    {
+        return (!PEAR::isError($this->_openTable($tableName)));
     }
 
     /**

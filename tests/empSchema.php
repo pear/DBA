@@ -24,17 +24,17 @@ $empSchema = array (
                     'deptno'   => array('type' => 'integer')
              ),
 
-'dept'     => array('deptno'    => array('type' => 'integer'),
-                    'deptname'  => array('type' => 'varchar'),
-                    'manager'   => array('type' => 'integer')
+'dept'     => array('deptno'   => array('type' => 'integer'),
+                    'deptname' => array('type' => 'varchar'),
+                    'manager'  => array('type' => 'integer')
              ),
 
-'location' => array('locno'     => array('type' => 'integer'),
-                    'locname'   => array('type' => 'varchar')
+'location' => array('locno'    => array('type' => 'integer'),
+                    'locname'  => array('type' => 'varchar')
              ),
 
-'deptloc'  => array('deptno'    => array ('type' => 'integer'),
-                    'locno'     => array ('type' => 'integer')
+'deptloc'  => array('deptno'   => array ('type' => 'integer'),
+                    'locno'    => array ('type' => 'integer')
              ),
 );
 
