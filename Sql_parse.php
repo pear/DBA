@@ -255,7 +255,8 @@ class Sql_Parser
             ($this->lexer->lineNo+1)."\n";
         $message .= substr($this->lexer->string, $this->lexer->lineBegin, $end)."\n";
         $message .= str_repeat(' ', ($this->lexer->tokPtr - 
-                          $this->lexer->lineBegin))."^\n";
+                               $this->lexer->lineBegin -
+                               strlen($this->lexer->tokText)))."^\n";
 
         return PEAR::raiseError($message);
     }
