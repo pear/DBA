@@ -1,34 +1,105 @@
 <?php
+require_once 'PEAR.php';
 require_once 'Sql_lex.php';
+
+define('SQL_COMMAND',0);
+define('SQL_NAME',1);
+define('SQL_TYPE',2);
+define('SQL_FIELDS',3);
+define('SQL_SIZE', 4);
+
+define('SQL_CREATE_TABLE',10);
+define('SQL_CREATE_INDEX',11);
+define('SQL_CREATE_SEQUENCE',12);
+define('SQL_DROP_TABLE',13);
+define('SQL_DROP_INDEX',14);
+define('SQL_DROP_SEQUENCE',15);
 
 class Parser
 {
     var $lexer;
+    var $token;
 
-function isType($token) {
-    return (($token >= SQL_NUM) && ($token <= SQL_IPV4));
+function error($message) {
+    $message = 'Syntax error: '.$message.' on line '.
+        ($this->lexer->lineno+1);
+    return PEAR::raiseError($message);
 }
 
-function parseFieldList()
+function isType() {
+    return (($this->token >= SQL_NUM) && ($this->token <= SQL_ENUM));
+}
+
+function parseFieldOption()
 {
+}
+
+function &parseFieldList()
+{
+    if ($this->lexer->lex() != '(') {
+        return $this->error('Expected (');
+    }
+
     $fields = array();
-    $token = $this->lexer->lex();
-    while ($token == SQL_IDENT) {
-        $fieldName = $this->lexer->text;
-        $token = $this->lexer->lex();
-        if ($this->isType($token)) {
-            $fieldType = $token;
-        } else {
+    $i = 0;
+    while (1) {
+        // parse field identifier
+        $this->token = $this->lexer->lex();
+        if ($this->token == ')') {
             return $fields;
         }
-        $fields[] = array('name'=>$fieldName, 'type'=>$fieldType);
-        while (($token != ',') && ($token != ')') &&
-               ($token != SQL_END_OF_INPUT)) {
-            $token = $this->lexer->lex();
+        if ($this->token == SQL_IDENT) {
+            $fields[$i][SQL_NAME] = $this->lexer->tokText;
+        } else {
+            return $this->error('Expected SQL_IDENT');
         }
-        $token = $this->lexer->lex();
+
+        // parse field type
+        $this->token = $this->lexer->lex();
+        if ($this->isType($this->token)) {
+            $fields[$i][SQL_TYPE] = $this->token;
+        } else {
+            return $this->error('Expected a valid type');
+        }
+
+        // parse type parameters
+        $this->token = $this->lexer->lex();
+        if (($fields[$i][SQL_TYPE] >= SQL_INT) &&
+            ($fields[$i][SQL_TYPE] <= SQL_VARCHAR)) {
+            if ($this->token == '(') {
+                $this->token = $this->lexer->lex();
+                if ($this->token == SQL_INT_VAL) {
+                    $fields[$i][SQL_SIZE] = $this->lexer->tokText;
+                } else {
+                    return $this->error('Expected SQL_INT_VAL');
+                }
+
+                $this->token = $this->lexer->lex();
+                if ($this->token != ')') {
+                    return $this->error('Expected )');
+                }
+                $this->token = $this->lexer->lex();
+            }
+        } elseif (($fields[$i][SQL_TYPE] == SQL_ENUM) ||
+                  ($fields[$i][SQL_TYPE] == SQL_SET)) {
+            if ($this->token != '(') {
+                return $this->error('Expected (');
+            }
+        }
+
+        // parse field options
+        while (($this->token != ',') && ($this->token != ')') &&
+               ($this->token != SQL_END_OF_INPUT)) {
+            $this->token = $this->lexer->lex();
+        }
+
+        if ($this->token == ')') { 
+            return $fields;
+        } elseif ($this->token == SQL_END_OF_INPUT) {
+            return $this->error('Expected )');
+        }
+        ++$i;
     }
-    return $fields;
 }
     
 function parse($string)
@@ -36,31 +107,27 @@ function parse($string)
     $this->lexer = new Lexer();
     $this->lexer->string = $string;
     $tree = array();
-
     $state = 0;
 
     // query
-    $token = $this->lexer->lex();
-    switch ($token) {
+    $this->token = $this->lexer->lex();
+    switch ($this->token) {
         case (SQL_END_OF_INPUT):
             return $tree;
         case (SQL_CREATE):
             switch ($this->lexer->lex()) {
                 case (SQL_TABLE):
+                    $tree[SQL_COMMAND] = SQL_CREATE_TABLE;
+
                     if ($this->lexer->lex() == SQL_IDENT) {
-                        $name = $this->lexer->text;
-                    }
-                    if ($this->lexer->lex() == '(') {
-                        $fields = $this->parseFieldList();
-                        while (($this->lexer->text != ')') && 
-                               ($token != SQL_END_OF_INPUT)) {
-                            $token = $this->lexer->lex();
+                        $tree[SQL_NAME] = $this->lexer->tokText;
+                        $fields =& $this->parseFieldList();
+                        if (PEAR::isError($fields)) {
+                            return $fields;
                         }
-                        $tree['command'] = SQL_CREATE_TABLE;
-                        $tree['name'] = $name;
-                        $tree['fields'] = $fields;
+                        $tree[SQL_FIELDS] = $fields;
                     } else {
-                        return $tree;
+                        return $this->error('Expected SQL_IDENT');
                     }
                     break;
             }
@@ -70,9 +137,5 @@ function parse($string)
 }
 
 }
-
-$parser = new Parser();
-$expression = "create table brent(dogfood int wala bing bang, cats char)";
-print_r($parser->parse($expression));
 
 ?>
