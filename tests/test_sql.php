@@ -33,7 +33,7 @@ $queries = array(
   name varchar(60),
   directory varchar(60),
   rating enum (1,2,3,4,5,6,7,8,9,10) NOT NULL,
-  category set(sexy,family,outdoors,generic,'very weird') NULL,
+  category set(sexy,'\'family time\'',outdoors,generic,'very weird') NULL,
   description text NULL,
   id int auto_increment default 200
 )",
@@ -51,6 +51,7 @@ $queries = array(
 
 foreach ($queries as $query) {
     $results = DBA_Sql::parseCreate($query);
+    echo $query;
     if (PEAR::isError($results)) {
         echo $results->getMessage()."\n";
     } else {

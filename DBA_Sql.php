@@ -29,7 +29,7 @@ class DBA_Sql
 // adds spaces around special characters
 function cookQuery($query)
 {
-    foreach (array(',','(',')','"',"'") as $symbol) {
+    foreach (array(',','(',')',"\'") as $symbol) {
         $query = str_replace($symbol, " $symbol ", $query);
     }
     return $query;
@@ -40,11 +40,22 @@ function getToken() {
 }
 
 function getString() {
-    $token = strtok(" \n\t");
-    if (($token != '"') && ($token != "'")) {
-        return $token;
+    $string = strtok(" \n\t");
+    $quote = substr($string, 0, 1);
+    if (($quote != '"') && ($quote != "'")) {
+        // this was not quoted, just return the token
+        return $string;
     } else {
-        return strtok($token);
+        // strip the first quote
+        $string = substr($string, 1).' ';
+        // read until the next quote
+        $string .= strtok($quote);
+        // was this an escaped quote?
+        while (substr($string, -1) == "\\") {
+            // insert the quote, keep reading
+            $string = substr($string,0,-2).$quote.substr(strtok($quote), 1);
+        }
+        return $string;
     }
 }
 
