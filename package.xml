@@ -24,13 +24,12 @@
         <date>2002-09-08</date>
         <state>devel</state>
         <notes>
-            <![CDATA[
 This is a fairly stable release as far as the core DBA package is concerned
 (DBA_Relational and its dependencies). The rest of the package, i.e. the SQL
 stuff, is going to change quite a bit after this release. Many of the
 C-ism's such as token constants will go away and the routines will be similar
 in functionality, though different in implementation, to perl's SQL-Statement
-<http://www.cpan.org/authors/id/J/JZ/JZUCKER/>. Thanks to Jacob for pointing
+http://www.cpan.org/authors/id/J/JZ/JZUCKER/. Thanks to Jacob for pointing
 this out.
   Changes to this release include:
     * select() and join() return null rather than array() on an empty result
@@ -47,7 +46,6 @@ this out.
       about tables created by DBA_Relational.
     * added sanity checks for schemas when creating a new table
     * maintenance fixes to the SQL parser; lots of tokens are now defined
-            ]]>
         </notes>
         <filelist>
             <dir name="/" baseinstalldir="DB/DBA">
@@ -61,7 +59,7 @@ this out.
                 <file role="php">DBA_Sql.php</file>
                 <file role="php">Sql_lex.php</file>
                 <file role="php">Sql_parse.php</file>
-                <file role="php">phptype.php</file>
+                <file role="php">ctype.php</file>
                 <dir name="tests" role="test">
                     <file role="test">benchmark_drivers.php</file>
                     <file role="test">test_simple.php</file>
