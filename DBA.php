@@ -179,10 +179,13 @@ class DBA extends PEAR
     function db_exists($name, $driver = 'file')
     {
         if (!function_exists('dba_open') || ($driver=='file')) {
+            // the file driver stores data in two files
             return (file_exists($name.'.dat') && file_exists($name.'.idx'));
-        } elseif (($driver == 'db3') || ($driver == 'gdbm')){
+        } elseif (in_array($driver, array('db2', 'db3', 'db4', 'gdbm'))) {
+            // these drivers store data in one file
             return file_exists($name);
         } else {
+            // do not know how other drivers store data
             return DBA::raiseError(DBA_ERROR_NO_DRIVER, NULL, NULL, 'driver: '.$driver);
         }
     }
