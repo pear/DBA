@@ -34,12 +34,13 @@ define('DBA_SCHEMA_KEY', '__schema__');
 define('DBA_FIELD_SEPARATOR', '|');
 define('DBA_OPTION_SEPARATOR', ';');
 define('DBA_DOMAIN_SEPARATOR', ',');
+define('DBA_KEY_SEPARATOR', '.');
 
 /**
  * Available types
  */
 define('DBA_INTEGER', 10);
-define('DBA_NUMERIC', 11);
+define('DBA_FIXED', 11);
 define('DBA_FLOAT', 12);
 define('DBA_CHAR', 13);
 define('DBA_VARCHAR', 14);
@@ -48,6 +49,7 @@ define('DBA_BOOLEAN', 16);
 define('DBA_ENUM', 17);
 define('DBA_SET', 18);
 define('DBA_TIMESTAMP', 19);
+define('DBA_FUNCTION', 20);
 
 /**
  * Key tokens
@@ -58,7 +60,8 @@ define('DBA_SIZE', 3);
 define('DBA_PRIMARYKEY', 4);
 define('DBA_AUTOINCREMENT', 5);
 define('DBA_DEFAULT', 6);
-define('DBA_NOTNULL', 7);
+define('DBA_DEFAULTTYPE', 7);
+define('DBA_NOTNULL', 8);
 
 /**
  * DBA Table
@@ -108,12 +111,21 @@ class DBA_Table extends PEAR
     var $_maxKey=null;
 
     /**
-     * Field name to use as a primary key. Null indicates that there is no
-     * primary key
+     * Field names to use as the primary key. An empty array indicates that
+     * the _rowid is to be used as the primary key
      * @var    int
      * @access private
      */
-    var $_primaryKey=null;
+    var $_primaryKey=array();
+
+    var $_systemVariables=array(
+        '_rowid'=>array(DBA_TYPE => DBA_INTEGER,
+                        DBA_DEFAULT => 0,
+                        DBA_AUTOINCREMENT => true),
+        '_timestamp'=>array(DBA_TYPE => DBA_TIMESTAMP,
+                            DBA_DEFAULT => 'time()',
+                            DBA_DEFAULTTYPE => DBA_FUNCTION)
+        );
 
     /**
      * Constructor
@@ -205,8 +217,8 @@ class DBA_Table extends PEAR
     function create($tableName, $schema)
     {
         // pack the schema
-        $packedSchema = $this->_packSchema($schema);
-
+        $packedSchema = $this->_packSchema($this->_systemVariables + $schema);
+        
         if (PEAR::isError($packedSchema)) {
             return $packedSchema;
         }
@@ -373,7 +385,6 @@ class DBA_Table extends PEAR
                 if (is_string($value)) {
                     $value = explode(DBA_DOMAIN_SEPARATOR, $value);
                 }
-
                 if (is_array($value)) {
                     $c_value = array();
                     foreach ($value as $element) {
@@ -386,65 +397,61 @@ class DBA_Table extends PEAR
                         }
                     }
                     $c_value = implode(DBA_DOMAIN_SEPARATOR,$c_value);
+                    break;
                 }
-                break;
             case DBA_ENUM:
                 if (is_string ($value)) {
                     $c_value = array_search($value,
                                       $this->_schema[$field][DBA_DOMAIN]);
                     if (!is_null($c_value)) {
                         $c_value = strval($c_value);
+                        break;
                     }
                 }
-                break;
             case DBA_TIMESTAMP:
                 if (is_numeric($value)) {
                     $c_value = strval($value);
-                } else {
-                    if (is_string($value)) {
-                        $c_value = strtotime ($value);
-                        if ($c_value != -1) {
-                            $c_value = strval ($c_value);
-                        } else {
-                            $c_value = 0;
-                        }
+                    break;
+                } elseif (is_string($value)) {
+                    $c_value = strtotime($value);
+                    if ($c_value != -1) {
+                        $c_value = strval($c_value);
+                        break;
                     }
                 }
-                break;
             case DBA_BOOLEAN:
                 if (is_bool ($value)) {
                     $c_value = strval ($value);
-                } else {
-                    if (is_string ($value)) {
-                        // convert a 'boolean' string into a string 1 or 0
-                        $c_value = in_array(strtolower($value),
-                                     array('t','true','y','yes','1')) ? '1':'0';
-                    }
+                    break;
+                } elseif (is_string ($value)) {
+                    // convert a 'boolean' string into a string 1 or 0
+                    $c_value = in_array(strtolower($value),
+                                array('t','true','y','yes','1')) ? '1':'0';
+                    break;
                 }
-                break;
             case DBA_TEXT:
                 if (is_scalar($value)) {
                     $c_value = str_replace(DBA_FIELD_SEPARATOR,'', $value);
+                    break;
                 }
-                break;
             case DBA_CHAR:
                 if (is_scalar($value)) {
                     $c_value = str_replace(DBA_FIELD_SEPARATOR, '', substr(
                                str_pad($value, $this->_schema[$field][DBA_SIZE])
                                        ,0, $this->_schema[$field][DBA_SIZE]));
+                    break;
                 }
-                break;
             case DBA_VARCHAR:
                 if (is_scalar($value)) {
                     $c_value = str_replace(DBA_FIELD_SEPARATOR,'', str_pad(
                                $value, $this->_schema[$field][DBA_SIZE]));
+                    break;
                 }
-                break;
-            case DBA_INTEGER: case DBA_FLOAT: case DBA_NUMERIC:
+            case DBA_INTEGER: case DBA_FLOAT: case DBA_FIXED:
                 if (is_numeric($value)) {
                     $c_value = strval($value);
+                    break;
                 }
-                break;
         }
         return $c_value;
     }
@@ -476,7 +483,7 @@ class DBA_Table extends PEAR
             case DBA_INTEGER:
                 return intval($value);
             case DBA_FLOAT:
-            case DBA_NUMERIC:
+            case DBA_FIXED:
                 return floatval($value);
             case DBA_CHAR:
             case DBA_VARCHAR:
@@ -504,29 +511,15 @@ class DBA_Table extends PEAR
      */
     function _packSchema($schema)
     {
-        $primaryKey = false;
         foreach ($schema as $fieldName => $fieldMeta) {
             $buffer = $fieldName;
 
             foreach ($fieldMeta as $attribute => $value) {
                 $buffer .= DBA_OPTION_SEPARATOR.$attribute.'=';
-
-                switch ($attribute) {
-                    case DBA_PRIMARYKEY:
-                        if ($primarykey) {
-                            return $this->raiseError('cannot have two '.
-                                                     'primary keys in schema');
-                        } else {
-                            $buffer .= $value;
-                            $primarykey = true;
-                        }
-                        break;
-                    default:
-                        if (is_array($value)) {
-                            $buffer .= implode(DBA_DOMAIN_SEPARATOR,$value);
-                        } else {
-                            $buffer .= $value;
-                        }
+                if (is_array($value)) {
+                    $buffer .= implode(DBA_DOMAIN_SEPARATOR,$value);
+                } else {
+                    $buffer .= $value;
                 }
             }
             $fields[] = $buffer;
@@ -545,7 +538,7 @@ class DBA_Table extends PEAR
     function _unpackSchema($rawFieldString)
     {
         $rawFields = explode(DBA_FIELD_SEPARATOR, $rawFieldString);
-        $this->_primaryKey = false;
+        $primaryKey = array();
         foreach ($rawFields as $rawField) {
             $rawMeta = explode(DBA_OPTION_SEPARATOR, $rawField);
             $name = array_shift($rawMeta);
@@ -556,12 +549,19 @@ class DBA_Table extends PEAR
                         $value = explode(DBA_DOMAIN_SEPARATOR,$rawValue);
                         break;
                     case DBA_PRIMARYKEY:
-                        $this->_primaryKey = true;
+                        // we can have more than one primary key; they are
+                        // concatenated into one
+                        $primaryKey[$name] = true;
                     default:
                         $value = $rawValue;
                 }
                 $fields[$name][$attribute] = $value;
             }
+        }
+        if (sizeof($primaryKey)) {
+            $this->_primaryKey =& $primaryKey;
+        } else {
+            $this->_primaryKey = array('_rowid'=>true);
         }
         return $fields;
     }
@@ -575,9 +575,10 @@ class DBA_Table extends PEAR
      * @param   array   $data row data to pack, key=>field pairs
      * @return  string
      */
-    function _packRow($data, &$primaryKey)
+    function _packRow($data, &$key)
     {
         $buffer = array();
+        $key = array();
         $i = 0;
         foreach ($this->_schema as $fieldName => $fieldMeta) {
 
@@ -599,8 +600,14 @@ class DBA_Table extends PEAR
                                     $this->_schema[$fieldName][DBA_DEFAULT]++);
                 } else {
                     // use the default value
-                    $c_value = $this->_packField($fieldName,
+                    if ($fieldMeta[DBA_DEFAULTTYPE] == DBA_FUNCTION) {
+                        $c_value = $this->_packField($fieldName,
+                           eval('return $this->'.
+                                  $this->_schema[$fieldName][DBA_DEFAULT].';'));
+                    } else {
+                        $c_value = $this->_packField($fieldName,
                                     $this->_schema[$fieldName][DBA_DEFAULT]);
+                    }
                 }
 
             } elseif ($fieldMeta[DBA_NOTNULL]) {
@@ -608,19 +615,19 @@ class DBA_Table extends PEAR
                 return $this->raiseError("$fieldName cannot be null");
 
             } else {
-
                 // when all else fails
                 $c_value = null;
             }
 
-            // if this field is the primary key, set $primaryKey
-            if (isset($fieldMeta[DBA_PRIMARYKEY])) {
-                $primaryKey = $c_value;
+            if ($this->_primaryKey[$fieldName]) {
+                echo $fieldName;
+                $key[] = $c_value;
             }
 
             $buffer[] = $c_value;
             ++$i;
         }
+        $key = implode(DBA_KEY_SEPARATOR, $key);
         return implode(DBA_FIELD_SEPARATOR, $buffer);
     }
 
@@ -653,21 +660,9 @@ class DBA_Table extends PEAR
     function insert($data)
     {
         if ($this->isWritable()) {
-            $primaryKey = null;
-
-            $packedRow = $this->_packRow($data, $primaryKey);
+            $packedRow = $this->_packRow($data, $key);
             if (PEAR::isError($packedRow)) {
                 return $packedRow;
-            }
-
-            if (!isset($this->_primaryKey)) {
-                if (!is_null($primaryKey)) {
-                    $key = $primaryKey;
-                } else {
-                    return $this->raiseError('no primary key specified');
-                }
-            } else {
-                $key = $this->_getUniqueKey();
             }
 
             $result = $this->_dba->insert($key, $packedRow);
@@ -1157,5 +1152,9 @@ class DBA_Table extends PEAR
         } else {
             return $this->raiseError('no rows to sort specified');
         }
+    }
+
+    function time() {
+        return time();
     }
 }

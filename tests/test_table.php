@@ -32,6 +32,8 @@ require_once 'hatSchema.php';
 
 $table =& new DBA_Table();
 
+$table->_dateFormat = "M j, Y";
+
 $result = $table->create('hats', $hatTableStruct);
 if (PEAR::isError($result)) {
     echo $result->getMessage()."\n";
@@ -81,7 +83,6 @@ foreach ($queries as $query) {
     }
     echo "------------------------------------------------\n\n";
 }
-
 $table->close();
 }
 

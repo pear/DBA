@@ -6,6 +6,7 @@
 	                                                       'top hat',
 	                                                       'bowler',
 														   'beanie'),
+	                                    DBA_PRIMARYKEY => True,
 	                                    DBA_DEFAULT => 'fedora'),
 
 	                   'quantity' => array (DBA_TYPE => DBA_INTEGER,
