@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.5.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+http://pear.php.net/dtd/tasks-1.0.xsd
+http://pear.php.net/dtd/package-2.0
+http://pear.php.net/dtd/package-2.0.xsd">
+ <name>DBA</name>
+ <channel>pear.php.net</channel>
+ <summary>Berkely-style database abstraction class</summary>
+ <description>DBA is a wrapper for the php DBA functions. It includes a file-based emulator and provides a uniform, object-based interface for the Berkeley-style database systems.
+    
+ </description>
+ <lead>
+  <name>Brent Cook</name>
+  <user>busterb</user>
+  <email>busterb@mail.utexas.edu</email>
+  <active>no</active>
+ </lead>
+ <lead>
+  <name>David Coallier</name>
+  <user>davidc</user>
+  <email>davidc@agoraproduction.com</email>
+  <active>yes</active>
+ </lead>
+ 
+ <date>2007-04-16</date>
+ <time>03:54:34</time>
+ <version>
+  <release>1.1.1</release>
+  <api>1.2</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.gnu.org/copyleft/lesser.html">LGPL</license>
+ <notes> * Added bugfix #44664 so that way we do not get errors on dba_*open
+* Added static DBA:drop()
+* Fixed error handling to work with PHP 5&apos;s change in get_class()
+        
+ </notes>
+ <contents>
+  <dir name="/">
+   <dir name="DBA">
+    <dir name="Driver">
+     <file baseinstalldir="/" name="Builtin.php" role="php" />
+     <file baseinstalldir="/" name="File.php" role="php" />
+    </dir> <!-- /DBA/Driver -->
+    <file baseinstalldir="/" name="Compatibility.php" role="php" />
+   </dir> <!-- /DBA -->
+   <dir name="docs">
+    <file baseinstalldir="/" name="README.txt" role="doc" />
+   </dir> <!-- /docs -->
+   <dir name="tests">
+    <file baseinstalldir="/" name="benchmark_drivers.php" role="test" />
+    <file baseinstalldir="/" name="test_compatibility.php" role="test" />
+    <file baseinstalldir="/" name="test_drivers.php" role="test" />
+   </dir> <!-- /tests -->
+   <file baseinstalldir="/" name="DBA.php" role="php" />
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>4.0.0</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0b1</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <phprelease />
+</package>
