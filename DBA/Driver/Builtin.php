@@ -137,17 +137,26 @@ class DBA_Driver_Builtin extends DBA
         }
 
         // open the index file
-        if ($persistent) {
-            $this->_dba = dba_popen($dbName, $mode, $this->_driver);
-        } else {
-            $this->_dba = dba_open($dbName, $mode, $this->_driver);
+        $params = array($dbname, $mode, $this->_driver);
+        
+        $connect_function = !is_null($persistent) ? 'dba_popen' : 'dba_open';
+        $connector        = @call_user_func($connect_function, $params); 
+        
+        if (PEAR::isError($connector)) {
+            $this->_writable = false;
+            $this->_readable = false;
+            return $this->raiseError(DBA_ERROR_CANNOT_OPEN, null, null,
+                                     'DB Name: ' . $dbName . ' filemode: ' . $mode);
         }
-        if ($this->_dba === false) {
+        
+        if ($connector === false) {
             $this->_writable = false;
             $this->_readable = false;
             return $this->raiseError(DBA_ERROR_CANNOT_OPEN, NULL, NULL,
                 'dbname: '.$dbName.' filemode: '.$mode);
         }
+
+        $this->_dba = $connector;
     }
     // }}}
 
@@ -433,6 +442,12 @@ class DBA_Driver_Builtin extends DBA
     function create($dbName, $driver='gdbm')
     {
         $db = dba_open($dbName, 'n', $driver);
+
+        if (PEAR::isError($db)) {
+            return $this->raiseError(DBA_ERROR_CANNOT_CREATE, NULL, NULL,
+                                     'dbname: '.$dbname);
+        }
+
         if (!(($db !== false) && dba_close($db))) {
             return $this->raiseError(DBA_ERROR_CANNOT_CREATE, NULL, NULL,
                 'dbname: '.$dbname);
