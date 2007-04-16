@@ -16,6 +16,12 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
  <lead>
+  <name>Erich Enke</name>
+  <user>epte</user>
+  <email>erich.enke@gmail.com</email>
+  <active>no</active>
+ </lead>
+ <lead>
   <name>David Coallier</name>
   <user>davidc</user>
   <email>davidc@agoraproduction.com</email>
