@@ -1,0 +1,28 @@
+{
+    "authors": [
+        {
+            "email": "busterb@mail.utexas.edu",
+            "name": "Brent Cook",
+            "role": "Lead"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "DBA": "./"
+        }
+    },
+    "description": "More info available on: http://pear.php.net/package/DBA",
+    "include-path": [
+        "./"
+    ],
+    "license": "LGPL",
+    "name": "pear/dba",
+    "support": {
+        "issues": "http:///bugs/search.php?cmd=display&package_name[]=DBA",
+        "source": "https://github.com/pear/DBA"
+    },
+    "type": "library",
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    }
+}
